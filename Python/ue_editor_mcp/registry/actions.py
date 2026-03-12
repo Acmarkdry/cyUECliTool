@@ -2104,6 +2104,58 @@ _GRAPH_ACTIONS = [
             },
         ),
     ),
+    # P4 — Cross-Graph Node Transfer (Export / Import)
+    ActionDef(
+        id="graph.export_nodes",
+        command="export_nodes_to_text",
+        tags=("graph", "export", "nodes", "text", "serialize", "copy", "transfer", "cross-graph"),
+        description="Serialize a set of Blueprint graph nodes to text using UE's native ExportNodesToText. The exported text can later be imported into any compatible graph via graph.import_nodes, enabling cross-graph node transfer workflows.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "blueprint_name": {"type": "string", "description": "Name of the Blueprint containing the source graph"},
+                "graph_name": {"type": "string", "description": "Source graph name (default: EventGraph)"},
+                "node_ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Array of node GUID strings to export"
+                }
+            },
+            "required": ["blueprint_name", "node_ids"]
+        },
+        capabilities=("read",),
+        examples=(
+            {
+                "blueprint_name": "BP_MyActor",
+                "node_ids": ["A1B2C3D4-E5F6-7890-ABCD-EF1234567890"]
+            },
+        ),
+    ),
+    ActionDef(
+        id="graph.import_nodes",
+        command="import_nodes_from_text",
+        tags=("graph", "import", "nodes", "text", "deserialize", "paste", "transfer", "cross-graph"),
+        description="Import (paste) nodes from previously exported text into a target Blueprint graph. Supports importing into a different graph than the export source, enabling cross-graph node migration. Optionally apply a position offset to avoid overlapping.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "blueprint_name": {"type": "string", "description": "Name of the target Blueprint"},
+                "graph_name": {"type": "string", "description": "Target graph name (default: EventGraph)"},
+                "exported_text": {"type": "string", "description": "Node text obtained from graph.export_nodes"},
+                "offset_x": {"type": "number", "description": "X position offset for pasted nodes (default: 0)"},
+                "offset_y": {"type": "number", "description": "Y position offset for pasted nodes (default: 0)"}
+            },
+            "required": ["blueprint_name", "exported_text"]
+        },
+        examples=(
+            {
+                "blueprint_name": "BP_TargetActor",
+                "exported_text": "<exported text from graph.export_nodes>",
+                "offset_x": 200,
+                "offset_y": 0
+            },
+        ),
+    ),
 ]
 
 
@@ -2604,6 +2656,20 @@ _MATERIAL_ACTIONS = [
             },
             "required": ["material_name"]
         },
+    ),
+    ActionDef(
+        id="material.get_selected_nodes",
+        command="get_material_selected_nodes",
+        tags=("material", "selected", "nodes", "selection", "editor", "get", "read"),
+        description="Returns the currently selected material expression nodes in the open material editor. Automatically detects the active material editor — no material_name required. Useful for inspecting which nodes the user has selected before performing operations on them.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "material_name": {"type": "string", "description": "Name of the Material (auto-detected if omitted)"}
+            },
+            "required": []
+        },
+        capabilities=("read",),
     ),
 ]
 
