@@ -190,6 +190,13 @@ SKILL_DEFS: list[SkillDef] = [
         workflows_file="layout.md",
     ),
     SkillDef(
+        id="archive",
+        name="Spec 归档",
+        description="将已完成的 Kiro spec 从 .kiro/specs/ 归档到 .kiro/specs/_archived/，并维护归档索引。",
+        action_ids=(),
+        workflows_file="archive.md",
+    ),
+    SkillDef(
         id="animgraph",
         name="AnimGraph 动画图",
         description="Animation Blueprint 完整操作：读取 AnimGraph 结构、状态机、转换规则；创建动画蓝图；添加/删除状态和转换；添加动画节点；连接/断开节点；设置节点属性；编译动画蓝图。",
@@ -235,6 +242,11 @@ def get_skill_list() -> list[dict[str, Any]]:
     for skill in SKILL_DEFS:
         # Count only actions that actually exist in registry
         valid_count = sum(1 for aid in skill.action_ids if registry.get(aid) is not None)
+        # For doc-only skills (no action_ids), count as 1 if workflow file exists
+        if valid_count == 0 and skill.workflows_file:
+            wf_path = _WORKFLOWS_DIR / skill.workflows_file
+            if wf_path.exists():
+                valid_count = 1
         result.append({
             "skill_id": skill.id,
             "name": skill.name,
@@ -270,7 +282,7 @@ def load_skill(skill_id: str) -> dict[str, Any] | None:
         "skill_id": skill.id,
         "name": skill.name,
         "description": skill.description,
-        "action_count": len(actions),
+        "action_count": len(actions) if actions else (1 if workflows else 0),
         "actions": actions,
         "workflows": workflows,
     }
