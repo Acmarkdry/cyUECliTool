@@ -414,7 +414,9 @@ FString FDiffAgainstDepotAction::DiffTypeToString(int32 DiffType)
 	case EDiffType::NODE_COMMENT:              return TEXT("NODE_COMMENT");
 	case EDiffType::NODE_PROPERTY:             return TEXT("NODE_PROPERTY");
 	case EDiffType::INFO_MESSAGE:              return TEXT("INFO_MESSAGE");
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 7
 	case EDiffType::CUSTOM_OBJECT:             return TEXT("CUSTOM_OBJECT");
+#endif
 	default:                                    return TEXT("UNKNOWN");
 	}
 }
