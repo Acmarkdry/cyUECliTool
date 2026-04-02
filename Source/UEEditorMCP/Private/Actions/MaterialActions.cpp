@@ -1300,7 +1300,11 @@ TSharedPtr<FJsonObject> FCompileMaterialAction::ExecuteInternal(const TSharedPtr
 	Material->ForceRecompileForRendering();
 
 	// P5.1: Wait for this material's shader compilation to finish, then read real errors
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 7
 	FMaterialResource* MatResource = Material->GetMaterialResource(GMaxRHIShaderPlatform);
+#else
+	FMaterialResource* MatResource = Material->GetMaterialResource(GMaxRHIFeatureLevel);
+#endif
 	if (MatResource)
 	{
 		MatResource->FinishCompilation();
