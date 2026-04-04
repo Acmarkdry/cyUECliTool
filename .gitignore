@@ -43,6 +43,9 @@ DerivedDataCache/
 *.user
 *.log
 
+# Context Layer (MCP session state)
+.context/
+
 # OS
 .DS_Store
 Thumbs.db
