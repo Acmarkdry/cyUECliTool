@@ -10,7 +10,7 @@ import socket
 import threading
 import time
 import logging
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -81,6 +81,8 @@ class PersistentUnrealConnection:
         self._stop_heartbeat = threading.Event()
         self._last_activity = time.time()
         self._reconnect_attempts = 0
+        # Optional callback: (new_state: str, old_state: str, timestamp: str) -> None
+        self.on_state_change: Optional[Callable[[str, str, str], None]] = None
 
     @property
     def state(self) -> ConnectionState:
@@ -110,6 +112,7 @@ class PersistentUnrealConnection:
                 self._socket.settimeout(self.config.timeout)
                 self._socket.connect((self.config.host, self.config.port))
 
+                old_state = self._state
                 self._state = ConnectionState.CONNECTED
                 self._reconnect_attempts = 0
                 self._last_activity = time.time()
@@ -118,6 +121,7 @@ class PersistentUnrealConnection:
                 self._start_heartbeat()
 
                 logger.info(f"Connected to Unreal at {self.config.host}:{self.config.port}")
+                self._fire_state_change("alive", old_state.value)
                 return True
 
             except (socket.error, socket.timeout, ConnectionRefusedError) as e:
@@ -133,6 +137,8 @@ class PersistentUnrealConnection:
             if self._heartbeat_thread:
                 self._heartbeat_thread.join(timeout=2.0)
 
+            old_state = self._state
+
             # Send close command if connected
             if self._socket and self._state == ConnectionState.CONNECTED:
                 try:
@@ -143,6 +149,7 @@ class PersistentUnrealConnection:
             self._cleanup_socket()
             self._state = ConnectionState.DISCONNECTED
             logger.info("Disconnected from Unreal")
+            self._fire_state_change("disconnected", old_state.value)
 
     def send_command(self, command_type: str, params: Optional[dict] = None) -> CommandResult:
         """
@@ -188,7 +195,9 @@ class PersistentUnrealConnection:
 
                 if response is None:
                     # Connection died, try reconnect
+                    old_state = self._state
                     self._state = ConnectionState.ERROR
+                    self._fire_state_change("crashed", old_state.value)
                     if self._try_reconnect():
                         # Retry the command once
                         return self.send_command(command_type, params)
@@ -290,8 +299,10 @@ class PersistentUnrealConnection:
                 )
             except (socket.error, BrokenPipeError, ConnectionResetError) as e:
                 logger.error(f"Socket error during command '{command_type}': {e}")
+                old_state = self._state
                 self._state = ConnectionState.ERROR
                 self._cleanup_socket()
+                self._fire_state_change("crashed", old_state.value)
                 return CommandResult(
                     success=False,
                     error=str(e),
@@ -440,14 +451,29 @@ class PersistentUnrealConnection:
                         # send_command handle reconnection to avoid blocking
                         with self._lock:
                             if self._state == ConnectionState.CONNECTED:
+                                old_state = self._state
                                 self._state = ConnectionState.ERROR
                                 self._cleanup_socket()
+                                self._fire_state_change("crashed", old_state.value)
                 except Exception as e:
                     logger.error(f"Heartbeat error: {e}")
                     with self._lock:
                         if self._state == ConnectionState.CONNECTED:
+                            old_state = self._state
                             self._state = ConnectionState.ERROR
                             self._cleanup_socket()
+                            self._fire_state_change("crashed", old_state.value)
+
+    def _fire_state_change(self, new_state: str, old_state: str) -> None:
+        """Invoke the on_state_change callback if registered."""
+        cb = self.on_state_change
+        if cb is not None:
+            try:
+                import datetime as _dt
+                ts = _dt.datetime.now(_dt.timezone.utc).isoformat()
+                cb(new_state, old_state, ts)
+            except Exception:
+                logger.warning("on_state_change callback failed", exc_info=True)
 
     def __enter__(self):
         """Context manager entry - connect."""

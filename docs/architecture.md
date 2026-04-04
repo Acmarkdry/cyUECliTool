@@ -5,9 +5,14 @@
 ```
 VS Code / MCP 客户端（GitHub Copilot 等）
         │
-        │  10 个 MCP 工具（stdio）
+        │  11 个 MCP 工具（stdio）
         ▼
   server_unified.py（动作注册表 + 分发器）
+        │
+        ├── ContextStore（.context/ 持久化）
+        │     ├── session.json    — 会话元数据 + UE 连接状态
+        │     ├── history.jsonl   — 操作历史（摘要级）
+        │     └── workset.json    — 当前工作集（资产路径）
         │
         ├── TCP/JSON（端口 55558，持久连接，长度前缀帧）
         │         │
@@ -66,10 +71,21 @@ UnrealEditor-Cmd.exe Project.uproject -run=UEEditorMCP -help
 UnrealEditor-Cmd.exe Project.uproject -run=UEEditorMCP -format=json
 ```
 
+## Context Layer（`context.py`）
+
+- `ContextStore` 类嵌入 `server_unified.py` 进程，与 MCP 服务器同生命周期
+- 会话管理：启动时检测上次 session 状态（正常退出/异常终止），创建新 session UUID
+- 操作历史：每次工具调用自动追加摘要到 `history.jsonl`（JSONL 格式，上限 500 条）
+- 工作集追踪：自动从参数中提取资产路径（`blueprint_name`、`material_name` 等），维护 `workset.json`
+- UE 连接监控：通过 `PersistentUnrealConnection.on_state_change` 回调感知连接/崩溃/重连
+- 崩溃时立即持久化当前状态到 `session.json` 的 `crash_context` 字段
+- 文件持久化：原子写入（temp + rename）防损坏，读取时 try/except 容错
+- `ue_context` 工具：resume（恢复上下文）、status、history、workset、clear 五种动作
+
 ## Python 服务器（`server_unified.py`）
 
-- 10 个固定工具的单一 MCP 服务器
-- 新增工具：`ue_python_exec`（Python 代码执行）、`ue_async_run`（异步 submit/poll）
+- 11 个固定工具的单一 MCP 服务器
+- 新增工具：`ue_python_exec`（Python 代码执行）、`ue_async_run`（异步 submit/poll）、`ue_context`（上下文管理）
 - 动作注册表含 ~95+ 个 ActionDef，支持关键字搜索和模式自省
 - `ue_batch` 批量执行（每次最多 50 个动作，单次 TCP 往返）
 - 命令日志环形缓冲区，供 `ue_logs_tail` 使用
@@ -106,7 +122,8 @@ UnrealEditor-Cmd.exe Project.uproject -run=UEEditorMCP -format=json
 | `Python/ue_editor_mcp/registry/__init__.py` | ActionRegistry 类，关键字搜索引擎 |
 | `Python/ue_editor_mcp/registry/actions.py` | ~95+ ActionDef 条目 + python.exec |
 | `Python/ue_editor_mcp/skills/python-api.md` | Python API 工作流、迁移对照表 |
-| `Python/ue_editor_mcp/connection.py` | `PersistentUnrealConnection`（TCP、心跳、自动重连） |
+| `Python/ue_editor_mcp/context.py` | `ContextStore`（会话、历史、工作集、UE 连接监控） |
+| `Python/ue_editor_mcp/connection.py` | `PersistentUnrealConnection`（TCP、心跳、自动重连、状态回调） |
 | `Source/Private/MCPServer.cpp` | TCP Accept + 快速路径 + 游戏线程分发 |
 | `Source/Private/MCPBridge.cpp` | 动作处理器注册表 + 异步任务管理 |
 | `Source/Private/Actions/PythonActions.cpp` | FExecPythonAction（Python 执行引擎） |

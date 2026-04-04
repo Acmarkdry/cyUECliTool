@@ -4,13 +4,13 @@
 
 面向 AI 辅助开发的 MCP 插件，用于 Unreal Engine 5.6+ 编辑器操作。
 
-**10 个 MCP 工具 · ~95 个 C++ 动作 + Python exec · 异步执行 · Commandlet CLI · 持久 TCP 连接 · 仅限编辑器**
+**11 个 MCP 工具 · ~95 个 C++ 动作 + Python exec · 异步执行 · Commandlet CLI · 持久 TCP 连接 · 上下文记忆 · 仅限编辑器**
 
 ---
 
 ## 功能特性
 
-- **10 个工具** — 包括新增的 `ue_python_exec`（任意 Python 代码执行）和 `ue_async_run`（异步提交/轮询）
+- **11 个工具** — 包括 `ue_python_exec`（任意 Python 代码执行）、`ue_async_run`（异步提交/轮询）和 `ue_context`（跨会话上下文记忆）
 - **~95 个 C++ 动作** — 图节点、材质分析、UMG/MVVM、AnimGraph、增强输入等复杂操作
 - **ue_python_exec** — 通过 `import unreal` 直接调用 UE Python API，替代 45+ 原有 C++ 动作（Actor 管理、蓝图创建/编译、材质操作、视口控制、PIE 等）
 - **异步执行** — `ue_async_run` 支持 submit/poll 模式，适合长时间运行的操作
@@ -19,6 +19,7 @@
 - **Skill 系统** — 按领域分组加载 action schema，减少 AI 上下文消耗
 - **崩溃保护** — SEH + C++ 异常双重防护
 - **自动保存** — 每次成功操作后自动保存脏包
+- **上下文记忆** — `ue_context` 工具自动记录操作历史和工作集，AI 新开对话一次 resume 即可恢复上次工作状态
 
 ## 动作域
 

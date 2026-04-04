@@ -1,5 +1,5 @@
 """
-Unified MCP Server — single server with exactly 10 fixed tools.
+Unified MCP Server — single server with exactly 11 fixed tools.
 
 Replaces 6 separate servers (ue-editor, ue-blueprint, ue-bp-nodes,
 ue-bp-graph, ue-materials, ue-umg) with one ``ue-editor-mcp`` server that
@@ -14,6 +14,7 @@ exposes:
      8. ue_skills         — on-demand skill catalog (list / load)
      9. ue_python_exec    — execute Python code in UE embedded Python
     10. ue_async_run      — submit/poll async commands
+    11. ue_context         — persistent context (resume/status/history/workset/clear)
 
 AI workflow (skill-based, preferred):
     ue_skills(list) → ue_skills(load, skill_id) → ue_actions_run / ue_batch
@@ -28,6 +29,7 @@ AI workflow (Python exec):
 from __future__ import annotations
 
 import asyncio
+import atexit
 import json
 import logging
 import time
@@ -40,6 +42,7 @@ from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent, ImageContent
 
 from .connection import get_connection, CommandResult
+from .context import ContextStore
 from .registry import get_registry
 from .skills import get_skill_list, load_skill
 
@@ -60,6 +63,10 @@ logger = logging.getLogger(__name__)
 
 _MAX_BATCH = 50
 _LOG_BUFFER_SIZE = 200
+
+# ── context store (initialised lazily in _run) ──────────────────────────
+
+_context_store: ContextStore | None = None
 
 # ── command log ring buffer ─────────────────────────────────────────────
 
@@ -391,6 +398,32 @@ TOOLS = [
         },
     ),
     Tool(
+        name="ue_context",
+        description=(
+            "Manage persistent cross-session context. "
+            "action='resume': recover context from last session (previous session, UE connection, workset, recent ops). "
+            "action='status': current session real-time status. "
+            "action='history': recent operation history (limit param). "
+            "action='workset': currently tracked assets. "
+            "action='clear': reset history and workset."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["resume", "status", "history", "workset", "clear"],
+                    "description": "Context action to perform",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Number of history entries to return (default 20, max 100). Only used with action='history'.",
+                },
+            },
+            "required": ["action"],
+        },
+    ),
+    Tool(
         name="ue_async_run",
         description=(
             "Submit a command for async execution or poll for its result. "
@@ -439,11 +472,24 @@ async def list_tools() -> list[Tool]:
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | ImageContent]:
     """Route tool calls to the appropriate handler."""
+    args = arguments or {}
+    t0 = time.perf_counter()
     try:
-        result = _handle_tool(name, arguments or {})
+        result = _handle_tool(name, args)
     except Exception as e:
         logger.exception("Tool %s failed", name)
         result = {"success": False, "error": str(e)}
+
+    # ── context recording hook ──────────────────────────────────────
+    if _context_store is not None and name != "ue_context":
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        success = isinstance(result, dict) and result.get("success", False)
+        action_id = args.get("action_id") or args.get("action") or None
+        try:
+            _context_store.record_operation(name, action_id, args, success, result, elapsed_ms)
+            _context_store.track_assets(args, action_id)
+        except Exception:
+            logger.warning("Context recording failed", exc_info=True)
 
     contents: list[TextContent | ImageContent] = []
     image_blocks_count = 0
@@ -722,15 +768,55 @@ def _handle_tool(name: str, args: dict) -> Any:
 
         return {"success": False, "error": f"Unknown action: '{action}'. Use 'submit' or 'poll'."}
 
+    # ── 11. ue_context ──────────────────────────────────────────────
+    if name == "ue_context":
+        if _context_store is None:
+            return {"success": False, "error": "Context store not initialised"}
+        action = args.get("action", "")
+
+        if action == "resume":
+            payload = _context_store.get_resume_payload()
+            return {"success": True, **payload}
+
+        if action == "status":
+            status = _context_store.get_status()
+            return {"success": True, **status}
+
+        if action == "history":
+            limit = args.get("limit", 20)
+            entries = _context_store.get_history(limit)
+            return {"success": True, "entries": entries, "count": len(entries)}
+
+        if action == "workset":
+            workset = _context_store.get_workset()
+            return {"success": True, "assets": list(workset.values()), "count": len(workset)}
+
+        if action == "clear":
+            _context_store.clear()
+            return {"success": True, "message": "Context cleared (workset, history, op_count reset)"}
+
+        return {"success": False, "error": f"Unknown action: '{action}'. Use 'resume', 'status', 'history', 'workset', or 'clear'."}
+
     return {"success": False, "error": f"Unknown tool: {name}"}
 
 
 # ── entry point ─────────────────────────────────────────────────────────
 
 async def _run():
+    global _context_store
+
     logger.info("Starting ue-editor-mcp unified server (%d actions registered)", get_registry().count)
+
+    # Initialise context store
+    ctx_dir = Path(__file__).parent.parent.parent / ".context"
+    _context_store = ContextStore(ctx_dir)
+    atexit.register(_context_store.shutdown)
+
+    # Connect to Unreal and register context callback
     conn = get_connection()
+    conn.on_state_change = _context_store._on_ue_state_change
     conn.connect()
+
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
@@ -749,6 +835,8 @@ def main():
     except KeyboardInterrupt:
         logger.info("ue-editor-mcp stopped by user")
     finally:
+        if _context_store is not None:
+            _context_store.shutdown()
         conn = get_connection()
         conn.disconnect()
 
