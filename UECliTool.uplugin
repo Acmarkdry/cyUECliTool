@@ -1,0 +1,55 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.2.0",
+	"FriendlyName": "UECliTool",
+	"Description": "CLI-native AI tool for controlling Unreal Engine Editor. Based on lilklon/UEBlueprintMCP (MIT).",
+	"Category": "Editor",
+	"CreatedBy": "yangskin (based on lilklon/UEBlueprintMCP)",
+	"CreatedByURL": "https://github.com/lilklon/UEBlueprintMCP",
+	"DocsURL": "https://github.com/lilklon/UEBlueprintMCP",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/lilklon/UEBlueprintMCP/issues",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UECliTool",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Linux"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
+		},
+		{
+			"Name": "PythonScriptPlugin",
+			"Enabled": true
+		},
+		{
+			"Name": "Niagara",
+			"Enabled": true
+		},
+		{
+			"Name": "LevelSequenceEditor",
+			"Enabled": true
+		}
+	]
+}

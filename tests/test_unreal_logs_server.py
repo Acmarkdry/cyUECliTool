@@ -1,8 +1,8 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
-from ue_editor_mcp.server_unreal_logs import (
+from ue_cli_tool.server_unreal_logs import (
     LogFilter,
     _read_saved_logs,
 )

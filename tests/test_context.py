@@ -1,5 +1,5 @@
-"""
-Tests for ContextStore — session management, history, workset, persistence.
+﻿"""
+Tests for ContextStore 鈥?session management, history, workset, persistence.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Python"))
 
-from ue_editor_mcp.context import ContextStore, ASSET_PARAM_KEYS
+from ue_cli_tool.context import ContextStore, ASSET_PARAM_KEYS
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def store(ctx_dir: Path) -> ContextStore:
     return ContextStore(ctx_dir)
 
 
-# ── Session lifecycle ───────────────────────────────────────────────────
+# 鈹€鈹€ Session lifecycle 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestSessionLifecycle:
@@ -86,7 +86,7 @@ class TestSessionLifecycle:
         assert session["previous_session"]["status"] == "ended"
 
 
-# ── Operation history ───────────────────────────────────────────────────
+# 鈹€鈹€ Operation history 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestHistory:
@@ -142,7 +142,7 @@ class TestHistory:
         assert "Connection lost" in summary
 
 
-# ── Working set ─────────────────────────────────────────────────────────
+# 鈹€鈹€ Working set 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestWorkset:
@@ -183,14 +183,14 @@ class TestWorkset:
         assert len(ws) == len(ASSET_PARAM_KEYS)
 
 
-# ── File persistence resilience ─────────────────────────────────────────
+# 鈹€鈹€ File persistence resilience 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestPersistence:
     def test_corrupted_session_json(self, ctx_dir: Path):
         (ctx_dir / "session.json").write_text("NOT JSON", encoding="utf-8")
         store = ContextStore(ctx_dir)
-        # Should recover gracefully — no previous session detected
+        # Should recover gracefully 鈥?no previous session detected
         session = json.loads((ctx_dir / "session.json").read_text("utf-8"))
         assert session["status"] == "active"
 
@@ -214,7 +214,7 @@ class TestPersistence:
         assert len(store._history) == 2
 
 
-# ── UE connection state ────────────────────────────────────────────────
+# 鈹€鈹€ UE connection state 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestUEConnectionState:
@@ -248,7 +248,7 @@ class TestUEConnectionState:
         assert session.get("recovered_from_crash") is True
 
 
-# ── Resume payload ──────────────────────────────────────────────────────
+# 鈹€鈹€ Resume payload 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestResumePayload:
@@ -299,7 +299,7 @@ class TestResumePayload:
         assert "recovery_hint" in payload["previous_session"]
 
 
-# ── Status ──────────────────────────────────────────────────────────────
+# 鈹€鈹€ Status 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestStatus:

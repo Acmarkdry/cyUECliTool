@@ -29,7 +29,7 @@ from typing import Dict, List, Optional, Set, Tuple
 # Paths
 # ---------------------------------------------------------------------------
 PLUGIN_ROOT = Path(__file__).resolve().parent.parent
-PYTHON_PKG = PLUGIN_ROOT / "Python" / "ue_editor_mcp"
+PYTHON_PKG = PLUGIN_ROOT / "Python" / "ue_cli_tool"
 CPP_ACTIONS_DIR = PLUGIN_ROOT / "Source" / "UEEditorMCP" / "Private" / "Actions"
 CPP_BRIDGE = PLUGIN_ROOT / "Source" / "UEEditorMCP" / "Private" / "MCPBridge.cpp"
 

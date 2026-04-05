@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ue-editor-mcp"
-version = "0.1.0"
-description = "MCP server for Unreal Engine Blueprint manipulation with persistent connections and crash protection"
+name = "ue-cli-tool"
+version = "0.2.0"
+description = "CLI-native AI tool for controlling Unreal Engine Editor via MCP"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -24,7 +24,7 @@ dev = [
 ]
 
 [project.scripts]
-ue-editor-mcp = "ue_editor_mcp.server:main"
+ue-cli-tool = "ue_cli_tool.server:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

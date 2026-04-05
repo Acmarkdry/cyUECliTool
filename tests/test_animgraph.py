@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for AnimGraph MCP action definitions.
 
 Feature: animation-graph-read
@@ -47,8 +47,8 @@ for attr in ("Tool", "TextContent", "ImageContent"):
         type(attr, (), {"__init__": lambda self, **kw: None}),
     )
 
-from ue_editor_mcp.registry import get_registry
-from ue_editor_mcp.skills import load_skill, _WORKFLOWS_DIR
+from ue_cli_tool.registry import get_registry
+from ue_cli_tool.skills import load_skill, _WORKFLOWS_DIR
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -101,8 +101,8 @@ def _get_animgraph_actions():
 
 
 # ---------------------------------------------------------------------------
-# Property 1: ActionDef 结构正确性
-# Feature: animation-graph-read, Property 1: ActionDef 结构正确性
+# Property 1: ActionDef 缁撴瀯姝ｇ‘鎬?
+# Feature: animation-graph-read, Property 1: ActionDef 缁撴瀯姝ｇ‘鎬?
 # ---------------------------------------------------------------------------
 
 
@@ -143,8 +143,8 @@ def test_property1_actiondef_structure():
 
 
 # ---------------------------------------------------------------------------
-# Property 2: Capabilities 分类正确性
-# Feature: animation-graph-read, Property 2: Capabilities 分类正确性
+# Property 2: Capabilities 鍒嗙被姝ｇ‘鎬?
+# Feature: animation-graph-read, Property 2: Capabilities 鍒嗙被姝ｇ‘鎬?
 # ---------------------------------------------------------------------------
 
 
@@ -172,8 +172,8 @@ def test_property2_capabilities_classification():
 
 
 # ---------------------------------------------------------------------------
-# Property 3: input_schema JSON 序列化 round-trip
-# Feature: animation-graph-read, Property 3: input_schema JSON 序列化 round-trip
+# Property 3: input_schema JSON 搴忓垪鍖?round-trip
+# Feature: animation-graph-read, Property 3: input_schema JSON 搴忓垪鍖?round-trip
 # ---------------------------------------------------------------------------
 
 
