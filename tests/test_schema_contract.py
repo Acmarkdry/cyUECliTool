@@ -37,26 +37,31 @@ CPP_BRIDGE = PLUGIN_ROOT / "Source" / "UEEditorMCP" / "Private" / "MCPBridge.cpp
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class PythonTool:
     name: str
     properties: Dict[str, dict] = field(default_factory=dict)
     required: List[str] = field(default_factory=list)
-    handler_command: Optional[str] = None   # TOOL_HANDLERS 映射的 C++ command
+    handler_command: Optional[str] = None  # TOOL_HANDLERS 映射的 C++ command
 
 
 @dataclass
 class CppAction:
-    name: str                              # RegisterActions 中的 key
-    class_name: str = ""                   # C++ 类名
-    required_params: Set[str] = field(default_factory=set)   # Validate 中 GetRequiredString 的参数
-    checked_params: Set[str] = field(default_factory=set)    # Validate 中 TryGetStringField 的参数
+    name: str  # RegisterActions 中的 key
+    class_name: str = ""  # C++ 类名
+    required_params: Set[str] = field(
+        default_factory=set
+    )  # Validate 中 GetRequiredString 的参数
+    checked_params: Set[str] = field(
+        default_factory=set
+    )  # Validate 中 TryGetStringField 的参数
     source_file: str = ""
 
 
 @dataclass
 class Issue:
-    severity: str   # ERROR | WARN | INFO
+    severity: str  # ERROR | WARN | INFO
     category: str
     message: str
 
@@ -65,16 +70,17 @@ class Issue:
 # 1. Extract Python tool schemas
 # ---------------------------------------------------------------------------
 
-def _extract_tools_from_module(module_path: Path) -> Tuple[List[PythonTool], Dict[str, str]]:
+
+def _extract_tools_from_module(
+    module_path: Path,
+) -> Tuple[List[PythonTool], Dict[str, str]]:
     """从单个 Python tool 模块中提取 Tool 列表和 TOOL_HANDLERS 映射。"""
     source = module_path.read_text(encoding="utf-8")
     tools: List[PythonTool] = []
     handlers: Dict[str, str] = {}
 
     # 提取 TOOL_HANDLERS 字典
-    handler_match = re.search(
-        r'TOOL_HANDLERS\s*=\s*\{([^}]+)\}', source, re.DOTALL
-    )
+    handler_match = re.search(r"TOOL_HANDLERS\s*=\s*\{([^}]+)\}", source, re.DOTALL)
     if handler_match:
         for m in re.finditer(r'"([^"]+)"\s*:\s*"([^"]+)"', handler_match.group(1)):
             handlers[m.group(1)] = m.group(2)
@@ -82,8 +88,7 @@ def _extract_tools_from_module(module_path: Path) -> Tuple[List[PythonTool], Dic
     # 提取 Tool(...) 定义
     # 使用分步解析：找 name= 和 inputSchema=
     tool_pattern = re.compile(
-        r'Tool\s*\(\s*name\s*=\s*"([^"]+)".*?inputSchema\s*=\s*(\{)',
-        re.DOTALL
+        r'Tool\s*\(\s*name\s*=\s*"([^"]+)".*?inputSchema\s*=\s*(\{)', re.DOTALL
     )
 
     for m in tool_pattern.finditer(source):
@@ -97,23 +102,34 @@ def _extract_tools_from_module(module_path: Path) -> Tuple[List[PythonTool], Dic
                 properties = schema.get("properties", {})
                 required = schema.get("required", [])
                 handler_cmd = handlers.get(tool_name, tool_name)
-                tools.append(PythonTool(
-                    name=tool_name,
-                    properties=properties,
-                    required=required,
-                    handler_command=handler_cmd,
-                ))
+                tools.append(
+                    PythonTool(
+                        name=tool_name,
+                        properties=properties,
+                        required=required,
+                        handler_command=handler_cmd,
+                    )
+                )
             except json.JSONDecodeError:
-                tools.append(PythonTool(name=tool_name, handler_command=handlers.get(tool_name, tool_name)))
+                tools.append(
+                    PythonTool(
+                        name=tool_name,
+                        handler_command=handlers.get(tool_name, tool_name),
+                    )
+                )
         else:
-            tools.append(PythonTool(name=tool_name, handler_command=handlers.get(tool_name, tool_name)))
+            tools.append(
+                PythonTool(
+                    name=tool_name, handler_command=handlers.get(tool_name, tool_name)
+                )
+            )
 
     return tools, handlers
 
 
 def _extract_balanced_braces(text: str, start: int) -> Optional[str]:
     """提取从 start 位置起的完整花括号对。"""
-    if start >= len(text) or text[start] != '{':
+    if start >= len(text) or text[start] != "{":
         return None
     depth = 0
     in_string = False
@@ -123,7 +139,7 @@ def _extract_balanced_braces(text: str, start: int) -> Optional[str]:
         if escape_next:
             escape_next = False
             continue
-        if ch == '\\':
+        if ch == "\\":
             escape_next = True
             continue
         if ch == '"' and not escape_next:
@@ -131,12 +147,12 @@ def _extract_balanced_braces(text: str, start: int) -> Optional[str]:
             continue
         if in_string:
             continue
-        if ch == '{':
+        if ch == "{":
             depth += 1
-        elif ch == '}':
+        elif ch == "}":
             depth -= 1
             if depth == 0:
-                return text[start:i + 1]
+                return text[start : i + 1]
     return None
 
 
@@ -161,6 +177,7 @@ def collect_python_tools() -> Dict[str, PythonTool]:
 # ---------------------------------------------------------------------------
 # 2. Extract C++ action registrations & Validate params
 # ---------------------------------------------------------------------------
+
 
 def collect_cpp_registrations() -> Dict[str, str]:
     """从 MCPBridge.cpp 提取 action_name → class_name 映射。"""
@@ -191,8 +208,7 @@ def _extract_validate_params(source: str, class_name: str) -> Tuple[Set[str], Se
 
     # 查找 ClassName::Validate 的方法体
     validate_pattern = re.compile(
-        rf'{class_name}\s*::\s*Validate\s*\(.*?\)\s*\{{',
-        re.DOTALL
+        rf"{class_name}\s*::\s*Validate\s*\(.*?\)\s*\{{", re.DOTALL
     )
     match = validate_pattern.search(source)
     if not match:
@@ -205,7 +221,9 @@ def _extract_validate_params(source: str, class_name: str) -> Tuple[Set[str], Se
         return required, checked
 
     # GetRequiredString(Params, TEXT("param_name"), ...)
-    for m in re.finditer(r'GetRequiredString\s*\([^,]*,\s*TEXT\s*\(\s*"([^"]+)"\s*\)', body):
+    for m in re.finditer(
+        r'GetRequiredString\s*\([^,]*,\s*TEXT\s*\(\s*"([^"]+)"\s*\)', body
+    ):
         required.add(m.group(1))
 
     # TryGetStringField(TEXT("param_name"), ...)
@@ -268,39 +286,65 @@ UMG_INTERNAL_ACTIONS = {
 
 # 已知的 Python 聚合 tool（映射到多个 C++ action）
 PYTHON_AGGREGATE_TOOLS = {
-    "add_widget_component",   # UMG 聚合 tool
+    "add_widget_component",  # UMG 聚合 tool
 }
 
 # 已知的 C++ 内部 action（不需要 Python 暴露 via tools/*.py）
 KNOWN_CPP_ONLY_ACTIONS: Set[str] = {
     "add_blueprint_get_subsystem_node",  # 内部使用
-    "exec_python",                       # exposed via server_unified.py, not tools/*.py
-    "async_execute",                     # fast-path in MCPServer, not a tool
-    "get_task_result",                   # fast-path in MCPServer, not a tool
+    "exec_python",  # exposed via server_unified.py, not tools/*.py
+    "async_execute",  # fast-path in MCPServer, not a tool
+    "get_task_result",  # fast-path in MCPServer, not a tool
 }
 
 # Actions removed from C++ MCPBridge (replaced by ue_python_exec).
 # Python tool modules in tools/*.py may still reference them — that's expected
 # since the tool modules haven't been updated yet; these are soft errors.
 _REMOVED_CPP_ACTIONS: Set[str] = {
-    "get_actors", "find_actors", "spawn_actor", "delete_actor",
-    "set_actor_transform", "get_actor_properties", "set_actor_property",
-    "focus_viewport", "get_viewport_info", "set_viewport_transform",
-    "save_all", "list_assets", "rename_assets", "get_selected_assets",
-    "rename_actor_label", "set_actor_folder", "select_actors",
-    "get_outliner_tree", "open_asset_editor",
-    "start_pie", "stop_pie", "get_pie_state",
-    "create_blueprint", "compile_blueprint", "set_blueprint_property",
-    "spawn_blueprint_actor", "set_parent_class",
-    "add_interface", "remove_interface", "add_component",
+    "get_actors",
+    "find_actors",
+    "spawn_actor",
+    "delete_actor",
+    "set_actor_transform",
+    "get_actor_properties",
+    "set_actor_property",
+    "focus_viewport",
+    "get_viewport_info",
+    "set_viewport_transform",
+    "save_all",
+    "list_assets",
+    "rename_assets",
+    "get_selected_assets",
+    "rename_actor_label",
+    "set_actor_folder",
+    "select_actors",
+    "get_outliner_tree",
+    "open_asset_editor",
+    "start_pie",
+    "stop_pie",
+    "get_pie_state",
+    "create_blueprint",
+    "compile_blueprint",
+    "set_blueprint_property",
+    "spawn_blueprint_actor",
+    "set_parent_class",
+    "add_interface",
+    "remove_interface",
+    "add_component",
     "create_colored_material",
-    "set_component_property", "set_static_mesh", "set_physics",
-    "create_material", "add_material_expression",
-    "connect_material_expressions", "connect_material_to_output",
-    "set_material_expression_property", "compile_material",
+    "set_component_property",
+    "set_static_mesh",
+    "set_physics",
+    "create_material",
+    "add_material_expression",
+    "connect_material_expressions",
+    "connect_material_to_output",
+    "set_material_expression_property",
+    "compile_material",
     "create_material_instance",
     "create_post_process_volume",
-    "apply_material_to_component", "apply_material_to_actor",
+    "apply_material_to_component",
+    "apply_material_to_actor",
     "batch_execute",
 }
 
@@ -326,17 +370,21 @@ def run_checks(
         if cmd not in cpp_action_names:
             # Downgrade to WARN if the action was intentionally removed
             if cmd in _REMOVED_CPP_ACTIONS:
-                issues.append(Issue(
-                    "WARN",
-                    "REMOVED_CPP_ACTION",
-                    f"Python tool '{tool_name}' maps to removed C++ action '{cmd}' (use ue_python_exec instead)",
-                ))
+                issues.append(
+                    Issue(
+                        "WARN",
+                        "REMOVED_CPP_ACTION",
+                        f"Python tool '{tool_name}' maps to removed C++ action '{cmd}' (use ue_python_exec instead)",
+                    )
+                )
             else:
-                issues.append(Issue(
-                    "ERROR",
-                    "MISSING_CPP_ACTION",
-                    f"Python tool '{tool_name}' maps to C++ action '{cmd}' which is not registered in MCPBridge",
-                ))
+                issues.append(
+                    Issue(
+                        "ERROR",
+                        "MISSING_CPP_ACTION",
+                        f"Python tool '{tool_name}' maps to C++ action '{cmd}' which is not registered in MCPBridge",
+                    )
+                )
 
     # --- Check 2: C++ action → Python tool 覆盖 ---
     for action_name in cpp_action_names:
@@ -346,16 +394,17 @@ def run_checks(
             continue
         # 检查是否有任何 Python tool 通过 handler_command 映射到此 action
         mapped = any(
-            (t.handler_command or t.name) == action_name
-            for t in py_tools.values()
+            (t.handler_command or t.name) == action_name for t in py_tools.values()
         )
         if not mapped:
-            issues.append(Issue(
-                "WARN",
-                "CPP_NOT_EXPOSED",
-                f"C++ action '{action_name}' ({cpp_actions[action_name].class_name}) "
-                f"is registered but has no Python tool exposing it",
-            ))
+            issues.append(
+                Issue(
+                    "WARN",
+                    "CPP_NOT_EXPOSED",
+                    f"C++ action '{action_name}' ({cpp_actions[action_name].class_name}) "
+                    f"is registered but has no Python tool exposing it",
+                )
+            )
 
     # --- Check 3: Required 参数一致性 ---
     for tool_name, tool in py_tools.items():
@@ -372,24 +421,28 @@ def run_checks(
         # Python 标记 required 但 C++ 未用 GetRequiredString 验证
         for param in py_required:
             if param not in cpp_required and param not in action.checked_params:
-                issues.append(Issue(
-                    "WARN",
-                    "REQUIRED_MISMATCH",
-                    f"'{tool_name}': Python marks '{param}' as required, "
-                    f"but C++ Validate ({action.class_name}) does not check it with GetRequiredString "
-                    f"(C++ required: {sorted(cpp_required)}, checked: {sorted(action.checked_params)})",
-                ))
+                issues.append(
+                    Issue(
+                        "WARN",
+                        "REQUIRED_MISMATCH",
+                        f"'{tool_name}': Python marks '{param}' as required, "
+                        f"but C++ Validate ({action.class_name}) does not check it with GetRequiredString "
+                        f"(C++ required: {sorted(cpp_required)}, checked: {sorted(action.checked_params)})",
+                    )
+                )
 
         # C++ GetRequiredString 但 Python 未标记 required
         for param in cpp_required:
             if param not in set(tool.required):
-                issues.append(Issue(
-                    "ERROR",
-                    "REQUIRED_MISMATCH",
-                    f"'{tool_name}': C++ GetRequiredString checks '{param}' "
-                    f"but Python schema does not list it in required "
-                    f"(Python required: {sorted(tool.required)})",
-                ))
+                issues.append(
+                    Issue(
+                        "ERROR",
+                        "REQUIRED_MISMATCH",
+                        f"'{tool_name}': C++ GetRequiredString checks '{param}' "
+                        f"but Python schema does not list it in required "
+                        f"(Python required: {sorted(tool.required)})",
+                    )
+                )
 
     # --- Check 4: Property 名称存在性 ---
     for tool_name, tool in py_tools.items():
@@ -404,11 +457,13 @@ def run_checks(
         py_props = set(tool.properties.keys())
         for param in tool.required:
             if param not in py_props:
-                issues.append(Issue(
-                    "ERROR",
-                    "SCHEMA_INTEGRITY",
-                    f"'{tool_name}': required param '{param}' not declared in properties",
-                ))
+                issues.append(
+                    Issue(
+                        "ERROR",
+                        "SCHEMA_INTEGRITY",
+                        f"'{tool_name}': required param '{param}' not declared in properties",
+                    )
+                )
 
     return issues
 
@@ -416,6 +471,7 @@ def run_checks(
 # ---------------------------------------------------------------------------
 # 4. Report
 # ---------------------------------------------------------------------------
+
 
 def print_report(
     py_tools: Dict[str, PythonTool],
@@ -431,7 +487,9 @@ def print_report(
     # 概览
     print(f"  Python tools:      {len(py_tools)}")
     print(f"  C++ actions:       {len(cpp_actions)}")
-    print(f"  UMG internal:      {len(UMG_INTERNAL_ACTIONS)} (excluded from coverage check)")
+    print(
+        f"  UMG internal:      {len(UMG_INTERNAL_ACTIONS)} (excluded from coverage check)"
+    )
     print()
 
     errors = [i for i in issues if i.severity == "ERROR"]
@@ -450,7 +508,11 @@ def print_report(
     print()
 
     # 按严重度和类别分组输出
-    for severity, label in [("ERROR", "ERRORS"), ("WARN", "WARNINGS"), ("INFO", "INFO")]:
+    for severity, label in [
+        ("ERROR", "ERRORS"),
+        ("WARN", "WARNINGS"),
+        ("INFO", "INFO"),
+    ]:
         group = [i for i in issues if i.severity == severity]
         if not group:
             continue
@@ -465,16 +527,21 @@ def print_report(
         print()
 
     # 工具覆盖率
-    total_cpp = len(cpp_actions) - len(UMG_INTERNAL_ACTIONS) - len(KNOWN_CPP_ONLY_ACTIONS)
+    total_cpp = (
+        len(cpp_actions) - len(UMG_INTERNAL_ACTIONS) - len(KNOWN_CPP_ONLY_ACTIONS)
+    )
     covered = sum(
-        1 for a in cpp_actions
+        1
+        for a in cpp_actions
         if a not in UMG_INTERNAL_ACTIONS
         and a not in KNOWN_CPP_ONLY_ACTIONS
         and any((t.handler_command or t.name) == a for t in py_tools.values())
     )
     if total_cpp > 0:
         pct = covered / total_cpp * 100
-        print(f"  Coverage: {covered}/{total_cpp} C++ actions exposed via Python ({pct:.1f}%)")
+        print(
+            f"  Coverage: {covered}/{total_cpp} C++ actions exposed via Python ({pct:.1f}%)"
+        )
     print()
     print("=" * 72)
 
@@ -484,6 +551,7 @@ def print_report(
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> int:
     # Validate paths

@@ -82,11 +82,13 @@ def test_saved_filters_apply_min_verbosity(tmp_path: Path) -> None:
     log_file = workspace / "Saved" / "Logs" / "p110_2.log"
 
     log_file.write_text(
-        "\n".join([
-            "[x]LogMCP: Log: normal",
-            "[x]LogMCP: Warning: warn",
-            "[x]LogMCP: Error: err",
-        ]),
+        "\n".join(
+            [
+                "[x]LogMCP: Log: normal",
+                "[x]LogMCP: Warning: warn",
+                "[x]LogMCP: Error: err",
+            ]
+        ),
         encoding="utf-8",
     )
 

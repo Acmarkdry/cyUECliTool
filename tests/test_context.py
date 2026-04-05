@@ -53,7 +53,14 @@ class TestSessionLifecycle:
     def test_abnormal_previous_session(self, ctx_dir: Path):
         # Simulate a session that was never properly ended
         (ctx_dir / "session.json").write_text(
-            json.dumps({"session_id": "old-id", "status": "active", "started_at": "2024-01-01T00:00:00+00:00", "op_count": 5}),
+            json.dumps(
+                {
+                    "session_id": "old-id",
+                    "status": "active",
+                    "started_at": "2024-01-01T00:00:00+00:00",
+                    "op_count": 5,
+                }
+            ),
             encoding="utf-8",
         )
         store = ContextStore(ctx_dir)
@@ -64,7 +71,14 @@ class TestSessionLifecycle:
 
     def test_normal_previous_session(self, ctx_dir: Path):
         (ctx_dir / "session.json").write_text(
-            json.dumps({"session_id": "old-id", "status": "ended", "started_at": "2024-01-01T00:00:00+00:00", "op_count": 3}),
+            json.dumps(
+                {
+                    "session_id": "old-id",
+                    "status": "ended",
+                    "started_at": "2024-01-01T00:00:00+00:00",
+                    "op_count": 3,
+                }
+            ),
             encoding="utf-8",
         )
         store = ContextStore(ctx_dir)
@@ -77,7 +91,14 @@ class TestSessionLifecycle:
 
 class TestHistory:
     def test_record_and_query(self, store: ContextStore):
-        store.record_operation("ue_actions_run", "graph.describe", {"blueprint_name": "BP_Player"}, True, {"success": True, "message": "ok"}, 42.5)
+        store.record_operation(
+            "ue_actions_run",
+            "graph.describe",
+            {"blueprint_name": "BP_Player"},
+            True,
+            {"success": True, "message": "ok"},
+            42.5,
+        )
         history = store.get_history(10)
         assert len(history) == 1
         entry = history[0]
@@ -96,7 +117,9 @@ class TestHistory:
         for i in range(30):
             store.record_operation("ue_ping", None, {}, True, {}, 1.0)
         assert len(store.get_history(20)) == 20
-        assert len(store.get_history(200)) == 30  # capped at 100 by method, but only 30 exist
+        assert (
+            len(store.get_history(200)) == 30
+        )  # capped at 100 by method, but only 30 exist
 
     def test_history_truncation_on_boot(self, ctx_dir: Path):
         # Write 510 entries
@@ -124,7 +147,9 @@ class TestHistory:
 
 class TestWorkset:
     def test_track_assets(self, store: ContextStore):
-        store.track_assets({"blueprint_name": "BP_Player", "foo": "bar"}, "graph.describe")
+        store.track_assets(
+            {"blueprint_name": "BP_Player", "foo": "bar"}, "graph.describe"
+        )
         ws = store.get_workset()
         assert "BP_Player" in ws
         assert ws["BP_Player"]["op_count"] == 1
@@ -200,7 +225,14 @@ class TestUEConnectionState:
 
     def test_crash_persists_context(self, store: ContextStore, ctx_dir: Path):
         store.track_assets({"blueprint_name": "BP_Player"}, "graph.describe")
-        store.record_operation("ue_actions_run", "graph.describe", {"blueprint_name": "BP_Player"}, True, {}, 10.0)
+        store.record_operation(
+            "ue_actions_run",
+            "graph.describe",
+            {"blueprint_name": "BP_Player"},
+            True,
+            {},
+            10.0,
+        )
         store._on_ue_state_change("crashed", "alive")
         session = json.loads((ctx_dir / "session.json").read_text("utf-8"))
         assert session["ue_connection"] == "crashed"
@@ -230,7 +262,16 @@ class TestResumePayload:
     def test_resume_with_previous_session(self, ctx_dir: Path):
         # Set up a "previous" ended session
         (ctx_dir / "session.json").write_text(
-            json.dumps({"session_id": "old", "status": "ended", "started_at": "2024-01-01T00:00:00+00:00", "ended_at": "2024-01-01T01:00:00+00:00", "ue_connection": "alive", "op_count": 10}),
+            json.dumps(
+                {
+                    "session_id": "old",
+                    "status": "ended",
+                    "started_at": "2024-01-01T00:00:00+00:00",
+                    "ended_at": "2024-01-01T01:00:00+00:00",
+                    "ue_connection": "alive",
+                    "op_count": 10,
+                }
+            ),
             encoding="utf-8",
         )
         store = ContextStore(ctx_dir)
@@ -240,7 +281,16 @@ class TestResumePayload:
 
     def test_resume_after_crash(self, ctx_dir: Path):
         (ctx_dir / "session.json").write_text(
-            json.dumps({"session_id": "old", "status": "active", "started_at": "2024-01-01T00:00:00+00:00", "ue_connection": "crashed", "op_count": 5, "crash_context": {"crash_time": "2024-01-01T00:30:00+00:00"}}),
+            json.dumps(
+                {
+                    "session_id": "old",
+                    "status": "active",
+                    "started_at": "2024-01-01T00:00:00+00:00",
+                    "ue_connection": "crashed",
+                    "op_count": 5,
+                    "crash_context": {"crash_time": "2024-01-01T00:30:00+00:00"},
+                }
+            ),
             encoding="utf-8",
         )
         store = ContextStore(ctx_dir)

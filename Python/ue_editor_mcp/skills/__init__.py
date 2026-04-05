@@ -23,10 +23,11 @@ from ..registry import get_registry, ActionDef
 @dataclass(frozen=True)
 class SkillDef:
     """Definition of a skill (domain-grouped action catalog)."""
-    id: str                          # e.g. "blueprint-core"
-    name: str                        # human-readable name
-    description: str                 # one-line summary
-    action_ids: tuple[str, ...]      # ordered list of action IDs in this skill
+
+    id: str  # e.g. "blueprint-core"
+    name: str  # human-readable name
+    description: str  # one-line summary
+    action_ids: tuple[str, ...]  # ordered list of action IDs in this skill
     workflows_file: str | None = None  # optional markdown filename for workflow tips
 
 
@@ -50,44 +51,65 @@ SKILL_DEFS: list[SkillDef] = [
         description="Event/function/variable/flow-control nodes, graph connections, comments, selection, collapse, patch system, and cross-graph transfer",
         action_ids=(
             # Events
-            "node.add_event", "node.add_custom_event",
+            "node.add_event",
+            "node.add_custom_event",
             "node.add_custom_event_for_delegate",
-            "node.add_input_action", "node.add_enhanced_input_action",
+            "node.add_input_action",
+            "node.add_enhanced_input_action",
             # Dispatchers
-            "dispatcher.create", "dispatcher.call",
-            "dispatcher.bind", "dispatcher.create_event",
+            "dispatcher.create",
+            "dispatcher.call",
+            "dispatcher.bind",
+            "dispatcher.create_event",
             # Functions
-            "node.add_function_call", "node.add_spawn_actor",
-            "node.set_pin_default", "node.set_object_property",
+            "node.add_function_call",
+            "node.add_spawn_actor",
+            "node.set_pin_default",
+            "node.set_object_property",
             "node.add_get_subsystem",
             # Variables
-            "variable.create", "variable.add_getter",
-            "variable.add_setter", "variable.add_local",
+            "variable.create",
+            "variable.add_getter",
+            "variable.add_setter",
+            "variable.add_local",
             # References
-            "node.add_self_reference", "node.add_component_reference",
+            "node.add_self_reference",
+            "node.add_component_reference",
             "node.add_cast",
             # Flow control
-            "node.add_branch", "node.add_macro", "node.add_sequence",
+            "node.add_branch",
+            "node.add_macro",
+            "node.add_sequence",
             # Structs & switches
-            "node.add_make_struct", "node.add_break_struct",
-            "node.add_switch_string", "node.add_switch_int",
+            "node.add_make_struct",
+            "node.add_break_struct",
+            "node.add_switch_string",
+            "node.add_switch_int",
             # Graph operations
-            "graph.connect_nodes", "graph.find_nodes",
-            "graph.delete_node", "graph.get_node_pins",
-            "graph.disconnect_pin", "graph.move_node",
-            "graph.add_reroute", "graph.add_comment",
+            "graph.connect_nodes",
+            "graph.find_nodes",
+            "graph.delete_node",
+            "graph.get_node_pins",
+            "graph.disconnect_pin",
+            "graph.move_node",
+            "graph.add_reroute",
+            "graph.add_comment",
             "graph.auto_comment",
             # Describe & selection
-            "graph.describe", "graph.describe_enhanced",
-            "graph.get_selected_nodes", "graph.set_selected_nodes",
+            "graph.describe",
+            "graph.describe_enhanced",
+            "graph.get_selected_nodes",
+            "graph.set_selected_nodes",
             "graph.batch_select_and_act",
             # Collapse / refactor
             "graph.collapse_selection_to_function",
             "graph.collapse_selection_to_macro",
             # Patch system
-            "graph.apply_patch", "graph.validate_patch",
+            "graph.apply_patch",
+            "graph.validate_patch",
             # Cross-graph transfer
-            "graph.export_nodes", "graph.import_nodes",
+            "graph.export_nodes",
+            "graph.import_nodes",
         ),
         workflows_file="graph-nodes.md",
     ),
@@ -96,10 +118,14 @@ SKILL_DEFS: list[SkillDef] = [
         name="Variable & Function Management",
         description="Variable CRUD/metadata, function create/delete/rename, macro rename",
         action_ids=(
-            "variable.set_default", "variable.delete",
-            "variable.rename", "variable.set_metadata",
-            "function.create", "function.call",
-            "function.delete", "function.rename",
+            "variable.set_default",
+            "variable.delete",
+            "variable.rename",
+            "variable.set_metadata",
+            "function.create",
+            "function.call",
+            "function.delete",
+            "function.rename",
             "macro.rename",
         ),
         workflows_file="variables-functions.md",
@@ -110,13 +136,19 @@ SKILL_DEFS: list[SkillDef] = [
         description="Material analysis, diagnostics, layout, comments (create/compile/apply via ue_python_exec)",
         action_ids=(
             "material.set_property",
-            "material.get_summary", "material.remove_expression",
-            "material.auto_layout", "material.auto_comment",
-            "material.refresh_editor", "material.get_selected_nodes",
-            "material.analyze_complexity", "material.analyze_dependencies",
-            "material.diagnose", "material.diff",
+            "material.get_summary",
+            "material.remove_expression",
+            "material.auto_layout",
+            "material.auto_comment",
+            "material.refresh_editor",
+            "material.get_selected_nodes",
+            "material.analyze_complexity",
+            "material.analyze_dependencies",
+            "material.diagnose",
+            "material.diff",
             "material.extract_parameters",
-            "material.batch_create_instances", "material.replace_node",
+            "material.batch_create_instances",
+            "material.replace_node",
             "python.exec",
         ),
         workflows_file="materials.md",
@@ -126,21 +158,33 @@ SKILL_DEFS: list[SkillDef] = [
         name="UMG Widgets & MVVM",
         description="Widget Blueprint CRUD, 24 component types, hierarchy, properties, MVVM bindings, and input system",
         action_ids=(
-            "widget.create", "widget.delete",
-            "widget.add_component", "widget.bind_event",
-            "widget.add_to_viewport", "widget.set_text_binding",
-            "widget.list_components", "widget.get_tree",
-            "widget.set_properties", "widget.set_text",
-            "widget.set_combo_options", "widget.set_slider",
-            "widget.reparent", "widget.add_child",
-            "widget.delete_component", "widget.rename_component",
+            "widget.create",
+            "widget.delete",
+            "widget.add_component",
+            "widget.bind_event",
+            "widget.add_to_viewport",
+            "widget.set_text_binding",
+            "widget.list_components",
+            "widget.get_tree",
+            "widget.set_properties",
+            "widget.set_text",
+            "widget.set_combo_options",
+            "widget.set_slider",
+            "widget.reparent",
+            "widget.add_child",
+            "widget.delete_component",
+            "widget.rename_component",
             # MVVM
-            "widget.mvvm_add_viewmodel", "widget.mvvm_add_binding",
-            "widget.mvvm_get_bindings", "widget.mvvm_remove_binding",
+            "widget.mvvm_add_viewmodel",
+            "widget.mvvm_add_binding",
+            "widget.mvvm_get_bindings",
+            "widget.mvvm_remove_binding",
             "widget.mvvm_remove_viewmodel",
             # Input
-            "input.create_mapping", "input.create_action",
-            "input.create_mapping_context", "input.add_key_mapping",
+            "input.create_mapping",
+            "input.create_action",
+            "input.create_mapping_context",
+            "input.add_key_mapping",
         ),
         workflows_file="umg-widgets.md",
     ),
@@ -150,10 +194,13 @@ SKILL_DEFS: list[SkillDef] = [
         description="Editor diagnostics, logs, thumbnails, source control diff (actors/viewport/PIE via ue_python_exec)",
         action_ids=(
             "editor.get_selected_asset_thumbnail",
-            "editor.diff_against_depot", "editor.get_asset_history",
+            "editor.diff_against_depot",
+            "editor.get_asset_history",
             "editor.get_logs",
-            "editor.is_ready", "editor.request_shutdown",
-            "editor.clear_logs", "editor.assert_log",
+            "editor.is_ready",
+            "editor.request_shutdown",
+            "editor.clear_logs",
+            "editor.assert_log",
             "python.exec",
         ),
         workflows_file="editor-level.md",
@@ -163,22 +210,20 @@ SKILL_DEFS: list[SkillDef] = [
         name="Auto Layout",
         description="Blueprint graph and material graph auto-layout with Sugiyama algorithm",
         action_ids=(
-            "layout.auto_selected", "layout.auto_subtree",
-            "layout.auto_blueprint", "layout.layout_and_comment",
+            "layout.auto_selected",
+            "layout.auto_subtree",
+            "layout.auto_blueprint",
+            "layout.layout_and_comment",
         ),
         workflows_file="layout.md",
     ),
-
     SkillDef(
         id="python-api",
         name="Python API (ue_python_exec)",
         description="Execute arbitrary Python in Unreal's embedded interpreter — replaces 45+ former C++ actions for actors, blueprints, materials, viewport, PIE, assets",
-        action_ids=(
-            "python.exec",
-        ),
+        action_ids=("python.exec",),
         workflows_file="python-api.md",
     ),
-
     SkillDef(
         id="animgraph",
         name="AnimGraph 动画图",
@@ -224,13 +269,17 @@ def get_skill_list() -> list[dict[str, Any]]:
     result = []
     for skill in SKILL_DEFS:
         # Count only actions that actually exist in registry
-        valid_count = sum(1 for aid in skill.action_ids if registry.get(aid) is not None)
-        result.append({
-            "skill_id": skill.id,
-            "name": skill.name,
-            "description": skill.description,
-            "action_count": valid_count,
-        })
+        valid_count = sum(
+            1 for aid in skill.action_ids if registry.get(aid) is not None
+        )
+        result.append(
+            {
+                "skill_id": skill.id,
+                "name": skill.name,
+                "description": skill.description,
+                "action_count": valid_count,
+            }
+        )
     return result
 
 

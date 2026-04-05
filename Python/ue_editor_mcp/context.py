@@ -40,12 +40,14 @@ _CODE_TRUNCATE_LEN = 80
 
 # ── helpers ─────────────────────────────────────────────────────────────
 
+
 def _now_iso() -> str:
     """Return current UTC time as ISO-8601 string."""
     return datetime.now(timezone.utc).isoformat()
 
 
 # ── ContextStore ────────────────────────────────────────────────────────
+
 
 class ContextStore:
     """
@@ -103,7 +105,9 @@ class ContextStore:
         except FileNotFoundError:
             return default
         except Exception:
-            logger.warning("Corrupted or unreadable file %s — using default", path, exc_info=True)
+            logger.warning(
+                "Corrupted or unreadable file %s — using default", path, exc_info=True
+            )
             return default
 
     # ── session lifecycle ───────────────────────────────────────────
@@ -157,7 +161,9 @@ class ContextStore:
             self._session["status"] = "ended"
             self._session["ended_at"] = _now_iso()
             self._save_session()
-            logger.info("ContextStore session %s ended", self._session.get("session_id"))
+            logger.info(
+                "ContextStore session %s ended", self._session.get("session_id")
+            )
 
     # ── operation history ───────────────────────────────────────────
 
@@ -208,14 +214,30 @@ class ContextStore:
             return {}
         summary: dict[str, Any] = {}
         for key, value in params.items():
-            if key == "code" and isinstance(value, str) and len(value) > _CODE_TRUNCATE_LEN:
+            if (
+                key == "code"
+                and isinstance(value, str)
+                and len(value) > _CODE_TRUNCATE_LEN
+            ):
                 summary[key] = value[:_CODE_TRUNCATE_LEN] + "..."
             elif key in ASSET_PARAM_KEYS:
                 summary[key] = value
-            elif key in ("action_id", "action", "query", "name", "skill_id",
-                         "task_id", "component_type", "component_name",
-                         "variable_name", "function_name", "event_name",
-                         "node_id", "source_pin", "target_pin"):
+            elif key in (
+                "action_id",
+                "action",
+                "query",
+                "name",
+                "skill_id",
+                "task_id",
+                "component_type",
+                "component_name",
+                "variable_name",
+                "function_name",
+                "event_name",
+                "node_id",
+                "source_pin",
+                "target_pin",
+            ):
                 summary[key] = value
         return summary
 
@@ -226,8 +248,16 @@ class ContextStore:
             return str(result)[:200] if result else ""
         if success:
             # Pull out the most informative fields
-            for key in ("message", "return_value", "description", "name", "status",
-                        "total", "results_count", "stdout"):
+            for key in (
+                "message",
+                "return_value",
+                "description",
+                "name",
+                "status",
+                "total",
+                "results_count",
+                "stdout",
+            ):
                 if key in result:
                     val = result[key]
                     s = str(val)
@@ -339,7 +369,9 @@ class ContextStore:
 
     # ── UE connection state callback ────────────────────────────────
 
-    def _on_ue_state_change(self, new_state: str, old_state: str, ts: str | None = None) -> None:
+    def _on_ue_state_change(
+        self, new_state: str, old_state: str, ts: str | None = None
+    ) -> None:
         """Callback invoked by PersistentUnrealConnection on state transitions."""
         ts = ts or _now_iso()
         with self._lock:

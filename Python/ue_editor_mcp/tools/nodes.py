@@ -30,12 +30,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "event_name": {"type": "string", "description": "Event name (ReceiveBeginPlay, ReceiveTick, etc.)"},
-                    "node_position": {"type": "string", "description": "[X, Y] position in graph (as JSON string)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "event_name": {
+                        "type": "string",
+                        "description": "Event name (ReceiveBeginPlay, ReceiveTick, etc.)",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position in graph (as JSON string)",
+                    },
                 },
-                "required": ["blueprint_name", "event_name"]
-            }
+                "required": ["blueprint_name", "event_name"],
+            },
         ),
         Tool(
             name="add_blueprint_custom_event",
@@ -43,17 +52,26 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "event_name": {"type": "string", "description": "Name for the custom event"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "event_name": {
+                        "type": "string",
+                        "description": "Name for the custom event",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
                     "parameters": {
                         "type": "array",
                         "items": {"type": "object"},
-                        "description": "Parameters with 'name' and 'type' keys (Float, Boolean, Integer, Vector, String)"
-                    }
+                        "description": "Parameters with 'name' and 'type' keys (Float, Boolean, Integer, Vector, String)",
+                    },
                 },
-                "required": ["blueprint_name", "event_name"]
-            }
+                "required": ["blueprint_name", "event_name"],
+            },
         ),
         Tool(
             name="add_blueprint_input_action_node",
@@ -61,12 +79,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "action_name": {"type": "string", "description": "Name of the input action"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "action_name": {
+                        "type": "string",
+                        "description": "Name of the input action",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
                 },
-                "required": ["blueprint_name", "action_name"]
-            }
+                "required": ["blueprint_name", "action_name"],
+            },
         ),
         Tool(
             name="add_enhanced_input_action_node",
@@ -74,15 +101,26 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "action_name": {"type": "string", "description": "Name of the Input Action asset (e.g., IA_Move)"},
-                    "action_path": {"type": "string", "description": "Content path to the asset (default: /Game/Input)"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "action_name": {
+                        "type": "string",
+                        "description": "Name of the Input Action asset (e.g., IA_Move)",
+                    },
+                    "action_path": {
+                        "type": "string",
+                        "description": "Content path to the asset (default: /Game/Input)",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
                 },
-                "required": ["blueprint_name", "action_name"]
-            }
+                "required": ["blueprint_name", "action_name"],
+            },
         ),
-
         # =====================================================================
         # Event Dispatchers
         # =====================================================================
@@ -92,16 +130,22 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "dispatcher_name": {"type": "string", "description": "Name for the dispatcher"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "dispatcher_name": {
+                        "type": "string",
+                        "description": "Name for the dispatcher",
+                    },
                     "parameters": {
                         "type": "array",
                         "items": {"type": "object"},
-                        "description": "Parameters with 'name' and 'type' keys"
-                    }
+                        "description": "Parameters with 'name' and 'type' keys",
+                    },
                 },
-                "required": ["blueprint_name", "dispatcher_name"]
-            }
+                "required": ["blueprint_name", "dispatcher_name"],
+            },
         ),
         Tool(
             name="call_event_dispatcher",
@@ -109,13 +153,26 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "dispatcher_name": {"type": "string", "description": "Name of the dispatcher to call"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "dispatcher_name": {
+                        "type": "string",
+                        "description": "Name of the dispatcher to call",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "dispatcher_name"]
-            }
+                "required": ["blueprint_name", "dispatcher_name"],
+            },
         ),
         Tool(
             name="bind_event_dispatcher",
@@ -123,14 +180,30 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Blueprint where to add the bind node"},
-                    "dispatcher_name": {"type": "string", "description": "Name of the dispatcher to bind to"},
-                    "target_blueprint": {"type": "string", "description": "Blueprint that owns the dispatcher"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Blueprint where to add the bind node",
+                    },
+                    "dispatcher_name": {
+                        "type": "string",
+                        "description": "Name of the dispatcher to bind to",
+                    },
+                    "target_blueprint": {
+                        "type": "string",
+                        "description": "Blueprint that owns the dispatcher",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "dispatcher_name"]
-            }
+                "required": ["blueprint_name", "dispatcher_name"],
+            },
         ),
         Tool(
             name="create_event_delegate",
@@ -138,17 +211,35 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "function_name": {"type": "string", "description": "Name of the function to bind as delegate"},
-                    "connect_to_node_id": {"type": "string", "description": "Node GUID to auto-connect delegate output to"},
-                    "connect_to_pin": {"type": "string", "description": "Target delegate pin name (default: 'Event')"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function to bind as delegate",
+                    },
+                    "connect_to_node_id": {
+                        "type": "string",
+                        "description": "Node GUID to auto-connect delegate output to",
+                    },
+                    "connect_to_pin": {
+                        "type": "string",
+                        "description": "Target delegate pin name (default: 'Event')",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "function_name"]
-            }
+                "required": ["blueprint_name", "function_name"],
+            },
         ),
-
         # =====================================================================
         # Function Nodes
         # =====================================================================
@@ -158,15 +249,33 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "target": {"type": "string", "description": "Target object (component name or self)"},
-                    "function_name": {"type": "string", "description": "Name of the function to call"},
-                    "params": {"type": "string", "description": "Parameters as JSON string"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Target object (component name or self)",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function to call",
+                    },
+                    "params": {
+                        "type": "string",
+                        "description": "Parameters as JSON string",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "target", "function_name"]
-            }
+                "required": ["blueprint_name", "target", "function_name"],
+            },
         ),
         Tool(
             name="create_blueprint_function",
@@ -174,22 +283,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "function_name": {"type": "string", "description": "Name of the function"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function",
+                    },
                     "inputs": {
                         "type": "array",
                         "items": {"type": "object"},
-                        "description": "Input parameters with 'name' and 'type' keys"
+                        "description": "Input parameters with 'name' and 'type' keys",
                     },
                     "outputs": {
                         "type": "array",
                         "items": {"type": "object"},
-                        "description": "Output parameters with 'name' and 'type' keys"
+                        "description": "Output parameters with 'name' and 'type' keys",
                     },
-                    "is_pure": {"type": "boolean", "description": "Create as pure function (no exec pins)"}
+                    "is_pure": {
+                        "type": "boolean",
+                        "description": "Create as pure function (no exec pins)",
+                    },
                 },
-                "required": ["blueprint_name", "function_name"]
-            }
+                "required": ["blueprint_name", "function_name"],
+            },
         ),
         Tool(
             name="call_blueprint_function",
@@ -197,16 +315,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Blueprint where to add the node"},
-                    "target_blueprint": {"type": "string", "description": "Blueprint containing the function"},
-                    "function_name": {"type": "string", "description": "Name of the function to call"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Blueprint where to add the node",
+                    },
+                    "target_blueprint": {
+                        "type": "string",
+                        "description": "Blueprint containing the function",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function to call",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "target_blueprint", "function_name"]
-            }
+                "required": ["blueprint_name", "target_blueprint", "function_name"],
+            },
         ),
-
         # =====================================================================
         # Variable Nodes
         # =====================================================================
@@ -216,13 +349,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable"},
-                    "variable_type": {"type": "string", "description": "Type (Boolean, Integer, Float, Vector, etc.)"},
-                    "is_exposed": {"type": "boolean", "description": "Expose to editor"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable",
+                    },
+                    "variable_type": {
+                        "type": "string",
+                        "description": "Type (Boolean, Integer, Float, Vector, etc.)",
+                    },
+                    "is_exposed": {
+                        "type": "boolean",
+                        "description": "Expose to editor",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name", "variable_type"]
-            }
+                "required": ["blueprint_name", "variable_name", "variable_type"],
+            },
         ),
         Tool(
             name="add_blueprint_variable_get",
@@ -230,13 +375,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name"]
-            }
+                "required": ["blueprint_name", "variable_name"],
+            },
         ),
         Tool(
             name="add_blueprint_variable_set",
@@ -244,13 +401,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name"]
-            }
+                "required": ["blueprint_name", "variable_name"],
+            },
         ),
         Tool(
             name="set_node_pin_default",
@@ -258,14 +427,23 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "node_id": {"type": "string", "description": "GUID of the node"},
                     "pin_name": {"type": "string", "description": "Name of the pin"},
-                    "default_value": {"type": "string", "description": "Default value as string"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "default_value": {
+                        "type": "string",
+                        "description": "Default value as string",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "node_id", "pin_name", "default_value"]
-            }
+                "required": ["blueprint_name", "node_id", "pin_name", "default_value"],
+            },
         ),
         Tool(
             name="set_object_property",
@@ -273,16 +451,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "owner_class": {"type": "string", "description": "Class that owns the property (e.g., PlayerController)"},
-                    "property_name": {"type": "string", "description": "Property to set (e.g., bShowMouseCursor)"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "owner_class": {
+                        "type": "string",
+                        "description": "Class that owns the property (e.g., PlayerController)",
+                    },
+                    "property_name": {
+                        "type": "string",
+                        "description": "Property to set (e.g., bShowMouseCursor)",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "owner_class", "property_name"]
-            }
+                "required": ["blueprint_name", "owner_class", "property_name"],
+            },
         ),
-
         # =====================================================================
         # Reference Nodes
         # =====================================================================
@@ -292,13 +485,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "component_name": {"type": "string", "description": "Name of the component"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name of the component",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "component_name"]
-            }
+                "required": ["blueprint_name", "component_name"],
+            },
         ),
         Tool(
             name="add_blueprint_self_reference",
@@ -306,12 +511,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
         Tool(
             name="add_blueprint_cast_node",
@@ -319,15 +533,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "target_class": {"type": "string", "description": "Class to cast to"},
-                    "pure_cast": {"type": "boolean", "description": "Create as pure cast (no exec pins)"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "target_class": {
+                        "type": "string",
+                        "description": "Class to cast to",
+                    },
+                    "pure_cast": {
+                        "type": "boolean",
+                        "description": "Create as pure cast (no exec pins)",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
                 },
-                "required": ["blueprint_name", "target_class"]
-            }
+                "required": ["blueprint_name", "target_class"],
+            },
         ),
-
         # =====================================================================
         # Flow Control
         # =====================================================================
@@ -337,12 +563,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"},
-                    "node_position": {"type": "string", "description": "[X, Y] position"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
+                    "node_position": {
+                        "type": "string",
+                        "description": "[X, Y] position",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
         Tool(
             name="add_macro_instance_node",
@@ -350,15 +585,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "macro_name": {"type": "string", "description": "Name of the macro (ForEachLoop, ForLoop, WhileLoop, DoOnce, Gate, etc.)"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position in graph"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "macro_name": {
+                        "type": "string",
+                        "description": "Name of the macro (ForEachLoop, ForLoop, WhileLoop, DoOnce, Gate, etc.)",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position in graph",
+                    },
                 },
-                "required": ["blueprint_name", "macro_name"]
-            }
+                "required": ["blueprint_name", "macro_name"],
+            },
         ),
-
         # =====================================================================
         # Spawning
         # =====================================================================
@@ -368,15 +615,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "class_to_spawn": {"type": "string", "description": "Class to spawn (e.g., BP_Enemy)"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "class_to_spawn": {
+                        "type": "string",
+                        "description": "Class to spawn (e.g., BP_Enemy)",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "class_to_spawn"]
-            }
+                "required": ["blueprint_name", "class_to_spawn"],
+            },
         ),
-
         # =====================================================================
         # Graph Operations
         # =====================================================================
@@ -386,15 +645,39 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "source_node_id": {"type": "string", "description": "GUID of the source node"},
-                    "source_pin": {"type": "string", "description": "Name of the output pin"},
-                    "target_node_id": {"type": "string", "description": "GUID of the target node"},
-                    "target_pin": {"type": "string", "description": "Name of the input pin"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "source_node_id": {
+                        "type": "string",
+                        "description": "GUID of the source node",
+                    },
+                    "source_pin": {
+                        "type": "string",
+                        "description": "Name of the output pin",
+                    },
+                    "target_node_id": {
+                        "type": "string",
+                        "description": "GUID of the target node",
+                    },
+                    "target_pin": {
+                        "type": "string",
+                        "description": "Name of the input pin",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name",
+                    },
                 },
-                "required": ["blueprint_name", "source_node_id", "source_pin", "target_node_id", "target_pin"]
-            }
+                "required": [
+                    "blueprint_name",
+                    "source_node_id",
+                    "source_pin",
+                    "target_node_id",
+                    "target_pin",
+                ],
+            },
         ),
         Tool(
             name="find_blueprint_nodes",
@@ -402,13 +685,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"},
-                    "node_type": {"type": "string", "description": "Type of node (Event, Function, Variable, etc.)"},
-                    "event_type": {"type": "string", "description": "Specific event type (BeginPlay, Tick, etc.)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
+                    "node_type": {
+                        "type": "string",
+                        "description": "Type of node (Event, Function, Variable, etc.)",
+                    },
+                    "event_type": {
+                        "type": "string",
+                        "description": "Specific event type (BeginPlay, Tick, etc.)",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
         Tool(
             name="delete_blueprint_node",
@@ -416,12 +711,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "node_id": {"type": "string", "description": "GUID of the node to delete"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "node_id": {
+                        "type": "string",
+                        "description": "GUID of the node to delete",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "node_id"]
-            }
+                "required": ["blueprint_name", "node_id"],
+            },
         ),
         Tool(
             name="get_node_pins",
@@ -429,14 +733,19 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "node_id": {"type": "string", "description": "GUID of the node"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "node_id"]
-            }
+                "required": ["blueprint_name", "node_id"],
+            },
         ),
-
         # =====================================================================
         # Local Variables
         # =====================================================================
@@ -446,16 +755,35 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "function_name": {"type": "string", "description": "Name of the function to add the local variable to"},
-                    "variable_name": {"type": "string", "description": "Name for the local variable"},
-                    "variable_type": {"type": "string", "description": "Type (Boolean, Integer, Float, Double, String, Vector, Rotator, Transform, Name, Text)"},
-                    "default_value": {"type": "string", "description": "Optional default value as string"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function to add the local variable to",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name for the local variable",
+                    },
+                    "variable_type": {
+                        "type": "string",
+                        "description": "Type (Boolean, Integer, Float, Double, String, Vector, Rotator, Transform, Name, Text)",
+                    },
+                    "default_value": {
+                        "type": "string",
+                        "description": "Optional default value as string",
+                    },
                 },
-                "required": ["blueprint_name", "function_name", "variable_name", "variable_type"]
-            }
+                "required": [
+                    "blueprint_name",
+                    "function_name",
+                    "variable_name",
+                    "variable_type",
+                ],
+            },
         ),
-
         # =====================================================================
         # Variable Defaults
         # =====================================================================
@@ -465,14 +793,22 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable"},
-                    "default_value": {"type": "string", "description": "Default value as string"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable",
+                    },
+                    "default_value": {
+                        "type": "string",
+                        "description": "Default value as string",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name", "default_value"]
-            }
+                "required": ["blueprint_name", "variable_name", "default_value"],
+            },
         ),
-
         # =====================================================================
         # Comment Nodes
         # =====================================================================
@@ -482,17 +818,37 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "comment_text": {"type": "string", "description": "Comment text to display"},
-                    "graph_name": {"type": "string", "description": "Optional graph name (defaults to EventGraph)"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "size": {"type": "array", "items": {"type": "number"}, "description": "[Width, Height] of the comment box (default: [400, 200])"},
-                    "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] color values 0.0-1.0"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "comment_text": {
+                        "type": "string",
+                        "description": "Comment text to display",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional graph name (defaults to EventGraph)",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "size": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[Width, Height] of the comment box (default: [400, 200])",
+                    },
+                    "color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] color values 0.0-1.0",
+                    },
                 },
-                "required": ["blueprint_name", "comment_text"]
-            }
+                "required": ["blueprint_name", "comment_text"],
+            },
         ),
-
         # =====================================================================
         # P1 — Variable & Function Management
         # =====================================================================
@@ -502,11 +858,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable to delete"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable to delete",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name"]
-            }
+                "required": ["blueprint_name", "variable_name"],
+            },
         ),
         Tool(
             name="rename_blueprint_variable",
@@ -514,12 +876,18 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "old_name": {"type": "string", "description": "Current variable name"},
-                    "new_name": {"type": "string", "description": "New variable name"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "old_name": {
+                        "type": "string",
+                        "description": "Current variable name",
+                    },
+                    "new_name": {"type": "string", "description": "New variable name"},
                 },
-                "required": ["blueprint_name", "old_name", "new_name"]
-            }
+                "required": ["blueprint_name", "old_name", "new_name"],
+            },
         ),
         Tool(
             name="set_variable_metadata",
@@ -527,18 +895,42 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "variable_name": {"type": "string", "description": "Name of the variable"},
-                    "category": {"type": "string", "description": "Variable category for grouping in details panel"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "variable_name": {
+                        "type": "string",
+                        "description": "Name of the variable",
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Variable category for grouping in details panel",
+                    },
                     "tooltip": {"type": "string", "description": "Tooltip description"},
-                    "instance_editable": {"type": "boolean", "description": "Expose to instance details panel"},
-                    "blueprint_read_only": {"type": "boolean", "description": "Make read-only in Blueprint graph"},
-                    "expose_on_spawn": {"type": "boolean", "description": "Expose as pin on SpawnActor node"},
-                    "replicated": {"type": "boolean", "description": "Enable network replication"},
-                    "private": {"type": "boolean", "description": "Accessible only within this Blueprint"}
+                    "instance_editable": {
+                        "type": "boolean",
+                        "description": "Expose to instance details panel",
+                    },
+                    "blueprint_read_only": {
+                        "type": "boolean",
+                        "description": "Make read-only in Blueprint graph",
+                    },
+                    "expose_on_spawn": {
+                        "type": "boolean",
+                        "description": "Expose as pin on SpawnActor node",
+                    },
+                    "replicated": {
+                        "type": "boolean",
+                        "description": "Enable network replication",
+                    },
+                    "private": {
+                        "type": "boolean",
+                        "description": "Accessible only within this Blueprint",
+                    },
                 },
-                "required": ["blueprint_name", "variable_name"]
-            }
+                "required": ["blueprint_name", "variable_name"],
+            },
         ),
         Tool(
             name="delete_blueprint_function",
@@ -546,13 +938,18 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "function_name": {"type": "string", "description": "Name of the function to delete"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "function_name": {
+                        "type": "string",
+                        "description": "Name of the function to delete",
+                    },
                 },
-                "required": ["blueprint_name", "function_name"]
-            }
+                "required": ["blueprint_name", "function_name"],
+            },
         ),
-
         # =====================================================================
         # P2 — Graph Operation Enhancements
         # =====================================================================
@@ -562,13 +959,22 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "node_id": {"type": "string", "description": "GUID of the node"},
-                    "pin_name": {"type": "string", "description": "Name of the pin to disconnect"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "pin_name": {
+                        "type": "string",
+                        "description": "Name of the pin to disconnect",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "node_id", "pin_name"]
-            }
+                "required": ["blueprint_name", "node_id", "pin_name"],
+            },
         ),
         Tool(
             name="move_node",
@@ -576,13 +982,26 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "node_id": {"type": "string", "description": "GUID of the node to move"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] new position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "node_id": {
+                        "type": "string",
+                        "description": "GUID of the node to move",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] new position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "node_id", "node_position"]
-            }
+                "required": ["blueprint_name", "node_id", "node_position"],
+            },
         ),
         Tool(
             name="add_reroute_node",
@@ -590,12 +1009,22 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "node_position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
     ]
 
@@ -657,6 +1086,11 @@ async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]
     """Handle a node tool call."""
     command_type = TOOL_HANDLERS.get(name)
     if not command_type:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     return _send_command(command_type, arguments if arguments else None)

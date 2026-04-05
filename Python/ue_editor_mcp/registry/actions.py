@@ -16,7 +16,6 @@ functionality is now provided by ue_python_exec via unreal.* Python API.
 from __future__ import annotations
 from . import ActionDef, ActionRegistry
 
-
 # =========================================================================
 # Python Execution
 # =========================================================================
@@ -47,9 +46,15 @@ _PYTHON_ACTIONS = [
             "required": ["code"],
         },
         examples=(
-            {"code": "import unreal\n_result = [a.get_name() for a in unreal.EditorLevelLibrary.get_all_level_actors()]"},
-            {"code": "import unreal\nunreal.EditorLevelLibrary.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(0,0,0))"},
-            {"code": "import unreal\n_result = unreal.SystemLibrary.get_engine_version()"},
+            {
+                "code": "import unreal\n_result = [a.get_name() for a in unreal.EditorLevelLibrary.get_all_level_actors()]"
+            },
+            {
+                "code": "import unreal\nunreal.EditorLevelLibrary.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(0,0,0))"
+            },
+            {
+                "code": "import unreal\n_result = unreal.SystemLibrary.get_engine_version()"
+            },
         ),
     ),
 ]
@@ -94,10 +99,16 @@ _BLUEPRINT_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name of the Blueprint"},
-                "parent_class": {"type": "string", "description": "Parent class (Actor, Pawn, Character, GameModeBase, etc.)"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Blueprints)"}
+                "parent_class": {
+                    "type": "string",
+                    "description": "Parent class (Actor, Pawn, Character, GameModeBase, etc.)",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Blueprints)",
+                },
             },
-            "required": ["name", "parent_class"]
+            "required": ["name", "parent_class"],
         },
         examples=(
             {"name": "BP_Player", "parent_class": "Character"},
@@ -112,9 +123,12 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint to compile"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint to compile",
+                }
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
         examples=({"blueprint_name": "BP_Player"},),
     ),
@@ -126,13 +140,25 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "property_name": {"type": "string", "description": "Name of the property"},
-                "property_value": {"type": "string", "description": "Value to set"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "property_name": {
+                    "type": "string",
+                    "description": "Name of the property",
+                },
+                "property_value": {"type": "string", "description": "Value to set"},
             },
-            "required": ["blueprint_name", "property_name", "property_value"]
+            "required": ["blueprint_name", "property_name", "property_value"],
         },
-        examples=({"blueprint_name": "BP_Player", "property_name": "MaxHealth", "property_value": "100.0"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "property_name": "MaxHealth",
+                "property_value": "100.0",
+            },
+        ),
     ),
     ActionDef(
         id="blueprint.spawn_actor",
@@ -142,14 +168,34 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint to spawn"},
-                "actor_name": {"type": "string", "description": "Name for the spawned actor"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint to spawn",
+                },
+                "actor_name": {
+                    "type": "string",
+                    "description": "Name for the spawned actor",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
             },
-            "required": ["blueprint_name", "actor_name"]
+            "required": ["blueprint_name", "actor_name"],
         },
-        examples=({"blueprint_name": "BP_Enemy", "actor_name": "Enemy1", "location": [100, 0, 50]},),
+        examples=(
+            {
+                "blueprint_name": "BP_Enemy",
+                "actor_name": "Enemy1",
+                "location": [100, 0, 50],
+            },
+        ),
     ),
     ActionDef(
         id="blueprint.set_parent_class",
@@ -159,10 +205,16 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "parent_class": {"type": "string", "description": "New parent class name or full path"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "parent_class": {
+                    "type": "string",
+                    "description": "New parent class name or full path",
+                },
             },
-            "required": ["blueprint_name", "parent_class"]
+            "required": ["blueprint_name", "parent_class"],
         },
         examples=({"blueprint_name": "BP_Player", "parent_class": "Character"},),
     ),
@@ -174,12 +226,20 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "interface_name": {"type": "string", "description": "Interface class name or full path"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "interface_name": {
+                    "type": "string",
+                    "description": "Interface class name or full path",
+                },
             },
-            "required": ["blueprint_name", "interface_name"]
+            "required": ["blueprint_name", "interface_name"],
         },
-        examples=({"blueprint_name": "BP_Chest", "interface_name": "BPI_Interactable"},),
+        examples=(
+            {"blueprint_name": "BP_Chest", "interface_name": "BPI_Interactable"},
+        ),
     ),
     ActionDef(
         id="blueprint.remove_interface",
@@ -189,14 +249,22 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "interface_name": {"type": "string", "description": "Interface class name or path to remove"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "interface_name": {
+                    "type": "string",
+                    "description": "Interface class name or path to remove",
+                },
             },
-            "required": ["blueprint_name", "interface_name"]
+            "required": ["blueprint_name", "interface_name"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
-        examples=({"blueprint_name": "BP_Chest", "interface_name": "BPI_Interactable"},),
+        examples=(
+            {"blueprint_name": "BP_Chest", "interface_name": "BPI_Interactable"},
+        ),
     ),
     ActionDef(
         id="blueprint.add_component",
@@ -206,19 +274,52 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_type": {"type": "string", "description": "Type of component (StaticMeshComponent, BoxComponent, etc.)"},
-                "component_name": {"type": "string", "description": "Name for the component"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"},
-                "scale": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "component_properties": {"type": "object", "description": "Additional properties to set"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_type": {
+                    "type": "string",
+                    "description": "Type of component (StaticMeshComponent, BoxComponent, etc.)",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name for the component",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
+                "scale": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "component_properties": {
+                    "type": "object",
+                    "description": "Additional properties to set",
+                },
             },
-            "required": ["blueprint_name", "component_type", "component_name"]
+            "required": ["blueprint_name", "component_type", "component_name"],
         },
         examples=(
-            {"blueprint_name": "BP_Player", "component_type": "CapsuleComponent", "component_name": "Capsule"},
-            {"blueprint_name": "BP_Lamp", "component_type": "PointLightComponent", "component_name": "Light", "location": [0, 0, 100]},
+            {
+                "blueprint_name": "BP_Player",
+                "component_type": "CapsuleComponent",
+                "component_name": "Capsule",
+            },
+            {
+                "blueprint_name": "BP_Lamp",
+                "component_type": "PointLightComponent",
+                "component_name": "Light",
+                "location": [0, 0, 100],
+            },
         ),
     ),
     ActionDef(
@@ -229,9 +330,15 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint (e.g. BP_Player)"},
-                "asset_path": {"type": "string", "description": "Full asset path if name is ambiguous"}
-            }
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint (e.g. BP_Player)",
+                },
+                "asset_path": {
+                    "type": "string",
+                    "description": "Full asset path if name is ambiguous",
+                },
+            },
         },
         capabilities=("read",),
         examples=({"blueprint_name": "BP_Player"},),
@@ -239,7 +346,18 @@ _BLUEPRINT_ACTIONS = [
     ActionDef(
         id="blueprint.describe_full",
         command="describe_blueprint_full",
-        tags=("blueprint", "describe", "full", "snapshot", "introspect", "topology", "graphs", "variables", "components", "read"),
+        tags=(
+            "blueprint",
+            "describe",
+            "full",
+            "snapshot",
+            "introspect",
+            "topology",
+            "graphs",
+            "variables",
+            "components",
+            "read",
+        ),
         description=(
             "Single-call comprehensive Blueprint snapshot: summary (variables, components, interfaces, compile status) "
             "+ ALL graph topologies (EventGraph, function graphs, macro graphs) with nodes, pins, edges. "
@@ -249,24 +367,34 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint (e.g. BP_Player)"},
-                "asset_path": {"type": "string", "description": "Full asset path if name is ambiguous"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint (e.g. BP_Player)",
+                },
+                "asset_path": {
+                    "type": "string",
+                    "description": "Full asset path if name is ambiguous",
+                },
                 "include_pin_details": {
                     "type": "boolean",
                     "description": "If true, serialize full PinType details (sub_category_object, is_array, etc.). Default: false (compact mode).",
-                    "default": False
+                    "default": False,
                 },
                 "include_function_signatures": {
                     "type": "boolean",
                     "description": "If true, inline function signatures for CallFunction nodes. Default: false.",
-                    "default": False
-                }
-            }
+                    "default": False,
+                },
+            },
         },
         capabilities=("read",),
         examples=(
             {"blueprint_name": "BP_Player"},
-            {"blueprint_name": "BP_Enemy", "include_pin_details": True, "include_function_signatures": True},
+            {
+                "blueprint_name": "BP_Enemy",
+                "include_pin_details": True,
+                "include_function_signatures": True,
+            },
         ),
     ),
     ActionDef(
@@ -277,11 +405,21 @@ _BLUEPRINT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name for the material"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B] values 0.0-1.0"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Materials)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name for the material",
+                },
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B] values 0.0-1.0",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Materials)",
+                },
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         examples=({"material_name": "M_Red", "color": [1.0, 0.0, 0.0]},),
     ),
@@ -300,14 +438,35 @@ _COMPONENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_name": {"type": "string", "description": "Name of the component"},
-                "property_name": {"type": "string", "description": "Name of the property"},
-                "property_value": {"type": "string", "description": "Value to set"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name of the component",
+                },
+                "property_name": {
+                    "type": "string",
+                    "description": "Name of the property",
+                },
+                "property_value": {"type": "string", "description": "Value to set"},
             },
-            "required": ["blueprint_name", "component_name", "property_name", "property_value"]
+            "required": [
+                "blueprint_name",
+                "component_name",
+                "property_name",
+                "property_value",
+            ],
         },
-        examples=({"blueprint_name": "BP_Lamp", "component_name": "Light", "property_name": "Intensity", "property_value": "5000"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Lamp",
+                "component_name": "Light",
+                "property_name": "Intensity",
+                "property_value": "5000",
+            },
+        ),
     ),
     ActionDef(
         id="component.set_static_mesh",
@@ -317,15 +476,33 @@ _COMPONENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_name": {"type": "string", "description": "Name of the component"},
-                "static_mesh": {"type": "string", "description": "Path to static mesh asset"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name of the component",
+                },
+                "static_mesh": {
+                    "type": "string",
+                    "description": "Path to static mesh asset",
+                },
                 "material": {"type": "string", "description": "Path to material asset"},
-                "overlay_material": {"type": "string", "description": "Path to overlay material"}
+                "overlay_material": {
+                    "type": "string",
+                    "description": "Path to overlay material",
+                },
             },
-            "required": ["blueprint_name", "component_name"]
+            "required": ["blueprint_name", "component_name"],
         },
-        examples=({"blueprint_name": "BP_Cube", "component_name": "Mesh", "static_mesh": "/Engine/BasicShapes/Cube"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Cube",
+                "component_name": "Mesh",
+                "static_mesh": "/Engine/BasicShapes/Cube",
+            },
+        ),
     ),
     ActionDef(
         id="component.set_physics",
@@ -335,17 +512,33 @@ _COMPONENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_name": {"type": "string", "description": "Name of the component"},
-                "simulate_physics": {"type": "boolean", "description": "Enable physics simulation"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name of the component",
+                },
+                "simulate_physics": {
+                    "type": "boolean",
+                    "description": "Enable physics simulation",
+                },
                 "gravity_enabled": {"type": "boolean", "description": "Enable gravity"},
                 "mass": {"type": "number", "description": "Mass in kg"},
                 "linear_damping": {"type": "number", "description": "Linear damping"},
-                "angular_damping": {"type": "number", "description": "Angular damping"}
+                "angular_damping": {"type": "number", "description": "Angular damping"},
             },
-            "required": ["blueprint_name", "component_name"]
+            "required": ["blueprint_name", "component_name"],
         },
-        examples=({"blueprint_name": "BP_Ball", "component_name": "Sphere", "simulate_physics": True, "mass": 10.0},),
+        examples=(
+            {
+                "blueprint_name": "BP_Ball",
+                "component_name": "Sphere",
+                "simulate_physics": True,
+                "mass": 10.0,
+            },
+        ),
     ),
 ]
 
@@ -370,9 +563,12 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "pattern": {"type": "string", "description": "Name pattern to search for"}
+                "pattern": {
+                    "type": "string",
+                    "description": "Name pattern to search for",
+                }
             },
-            "required": ["pattern"]
+            "required": ["pattern"],
         },
         capabilities=("read",),
         examples=({"pattern": "Player"},),
@@ -386,11 +582,22 @@ _EDITOR_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name for the actor"},
-                "type": {"type": "string", "description": "Type (StaticMeshActor, PointLight, etc.)"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
+                "type": {
+                    "type": "string",
+                    "description": "Type (StaticMeshActor, PointLight, etc.)",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
             },
-            "required": ["name", "type"]
+            "required": ["name", "type"],
         },
         examples=({"name": "MyLight", "type": "PointLight", "location": [0, 0, 200]},),
     ),
@@ -404,7 +611,7 @@ _EDITOR_ACTIONS = [
             "properties": {
                 "name": {"type": "string", "description": "Name of the actor to delete"}
             },
-            "required": ["name"]
+            "required": ["name"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
@@ -418,11 +625,23 @@ _EDITOR_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name of the actor"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"},
-                "scale": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"}
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
+                "scale": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
             },
-            "required": ["name"]
+            "required": ["name"],
         },
         examples=({"name": "MyActor", "location": [100, 0, 50]},),
     ),
@@ -436,7 +655,7 @@ _EDITOR_ACTIONS = [
             "properties": {
                 "name": {"type": "string", "description": "Name of the actor"}
             },
-            "required": ["name"]
+            "required": ["name"],
         },
         capabilities=("read",),
     ),
@@ -450,9 +669,9 @@ _EDITOR_ACTIONS = [
             "properties": {
                 "name": {"type": "string", "description": "Name of the actor"},
                 "property_name": {"type": "string", "description": "Property name"},
-                "property_value": {"type": "string", "description": "Value to set"}
+                "property_value": {"type": "string", "description": "Value to set"},
             },
-            "required": ["name", "property_name", "property_value"]
+            "required": ["name", "property_name", "property_value"],
         },
     ),
     ActionDef(
@@ -463,11 +682,22 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "target": {"type": "string", "description": "Name of actor to focus on"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
+                "target": {
+                    "type": "string",
+                    "description": "Name of actor to focus on",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
                 "distance": {"type": "number", "description": "Distance from target"},
-                "orientation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
-            }
+                "orientation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
+            },
         },
     ),
     ActionDef(
@@ -486,9 +716,17 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
-            }
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[x, y, z]",
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[pitch, yaw, roll]",
+                },
+            },
         },
     ),
     ActionDef(
@@ -506,13 +744,28 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "path": {"type": "string", "description": "Content path (e.g. /Game/Blueprints)"},
-                "recursive": {"type": "boolean", "description": "Search sub-folders (default: true)"},
-                "class_filter": {"type": "string", "description": "Filter by class (Blueprint, Material, Texture2D, etc.)"},
-                "name_contains": {"type": "string", "description": "Filter by name substring"},
-                "max_results": {"type": "integer", "description": "Max results (default: 500)"}
+                "path": {
+                    "type": "string",
+                    "description": "Content path (e.g. /Game/Blueprints)",
+                },
+                "recursive": {
+                    "type": "boolean",
+                    "description": "Search sub-folders (default: true)",
+                },
+                "class_filter": {
+                    "type": "string",
+                    "description": "Filter by class (Blueprint, Material, Texture2D, etc.)",
+                },
+                "name_contains": {
+                    "type": "string",
+                    "description": "Filter by name substring",
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "Max results (default: 500)",
+                },
             },
-            "required": ["path"]
+            "required": ["path"],
         },
         capabilities=("read",),
         examples=({"path": "/Game/Blueprints", "class_filter": "Blueprint"},),
@@ -529,9 +782,18 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "old_asset_path": {"type": "string", "description": "Single mode: source object path to rename (e.g. /Game/UI/WBP_Menu.WBP_Menu)"},
-                "new_package_path": {"type": "string", "description": "Single mode: destination package path (e.g. /Game/UI/New)"},
-                "new_name": {"type": "string", "description": "Single mode: destination asset name (without path)"},
+                "old_asset_path": {
+                    "type": "string",
+                    "description": "Single mode: source object path to rename (e.g. /Game/UI/WBP_Menu.WBP_Menu)",
+                },
+                "new_package_path": {
+                    "type": "string",
+                    "description": "Single mode: destination package path (e.g. /Game/UI/New)",
+                },
+                "new_name": {
+                    "type": "string",
+                    "description": "Single mode: destination asset name (without path)",
+                },
                 "items": {
                     "type": "array",
                     "description": "Batch mode: list of rename operations",
@@ -545,7 +807,10 @@ _EDITOR_ACTIONS = [
                         "required": ["old_asset_path", "new_package_path", "new_name"],
                     },
                 },
-                "auto_fixup_redirectors": {"type": "boolean", "description": "Fix redirectors after rename (default: true)"},
+                "auto_fixup_redirectors": {
+                    "type": "boolean",
+                    "description": "Fix redirectors after rename (default: true)",
+                },
                 "allow_ui_prompts": {
                     "type": "boolean",
                     "description": "Allow UI dialogs during fixup (default: false). Keep false for unattended automation and batch runs.",
@@ -628,7 +893,12 @@ _EDITOR_ACTIONS = [
         examples=(
             {},
             {"size": 256},
-            {"asset_paths": ["/Game/P110_2/Art/T_IconA.T_IconA", "/Game/P110_2/Art/T_IconB.T_IconB"]},
+            {
+                "asset_paths": [
+                    "/Game/P110_2/Art/T_IconA.T_IconA",
+                    "/Game/P110_2/Art/T_IconB.T_IconB",
+                ]
+            },
             {"asset_ids": ["/Game/P110_2/Art/T_Icon.T_Icon"], "size": 256},
         ),
     ),
@@ -646,14 +916,21 @@ _EDITOR_ACTIONS = [
             "properties": {},
         },
         capabilities=("read",),
-        examples=(
-            {},
-        ),
+        examples=({},),
     ),
     ActionDef(
         id="editor.diff_against_depot",
         command="diff_against_depot",
-        tags=("editor", "diff", "source-control", "svn", "revision", "compare", "debug", "read"),
+        tags=(
+            "editor",
+            "diff",
+            "source-control",
+            "svn",
+            "revision",
+            "compare",
+            "debug",
+            "read",
+        ),
         description=(
             "Diff an asset against its latest source-control (SVN/Perforce/Git) depot revision. "
             "For Blueprints: returns per-graph node-level changes (added/removed/modified/moved nodes, pin changes). "
@@ -677,8 +954,13 @@ _EDITOR_ACTIONS = [
         capabilities=("read",),
         risk="safe",
         examples=(
-            {"asset_path": "/Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"},
-            {"asset_path": "/Game/P110_2/Blueprints/BP_SideScrollingGameMode", "revision": 42},
+            {
+                "asset_path": "/Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"
+            },
+            {
+                "asset_path": "/Game/P110_2/Blueprints/BP_SideScrollingGameMode",
+                "revision": 42,
+            },
         ),
     ),
     ActionDef(
@@ -708,7 +990,9 @@ _EDITOR_ACTIONS = [
         capabilities=("read",),
         risk="safe",
         examples=(
-            {"asset_path": "/Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"},
+            {
+                "asset_path": "/Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"
+            },
             {"asset_path": "/Game/P110_2/Blueprints/BP_Foo", "max_count": 10},
         ),
     ),
@@ -720,10 +1004,19 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "count": {"type": "integer", "description": "Number of entries to return (default: 50, max: 500)"},
-                "category": {"type": "string", "description": "Filter by log category (e.g. LogMCP, LogBlueprint)"},
-                "min_verbosity": {"type": "string", "description": "Minimum verbosity: Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose"}
-            }
+                "count": {
+                    "type": "integer",
+                    "description": "Number of entries to return (default: 50, max: 500)",
+                },
+                "category": {
+                    "type": "string",
+                    "description": "Filter by log category (e.g. LogMCP, LogBlueprint)",
+                },
+                "min_verbosity": {
+                    "type": "string",
+                    "description": "Minimum verbosity: Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose",
+                },
+            },
         },
         capabilities=("read",),
         examples=(
@@ -750,8 +1043,11 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "force": {"type": "boolean", "description": "Force immediate exit without save prompts (default: false)"}
-            }
+                "force": {
+                    "type": "boolean",
+                    "description": "Force immediate exit without save prompts (default: false)",
+                }
+            },
         },
         risk="destructive",
         examples=(
@@ -855,14 +1151,23 @@ _EDITOR_ACTIONS = [
                     "items": {
                         "type": "object",
                         "properties": {
-                            "keyword": {"type": "string", "description": "Substring to search for in log messages"},
-                            "expected_count": {"type": "integer", "description": "Expected number of occurrences"},
+                            "keyword": {
+                                "type": "string",
+                                "description": "Substring to search for in log messages",
+                            },
+                            "expected_count": {
+                                "type": "integer",
+                                "description": "Expected number of occurrences",
+                            },
                             "comparison": {
                                 "type": "string",
                                 "enum": ["==", ">=", "<=", ">", "<"],
                                 "description": "Comparison operator (default: >=)",
                             },
-                            "category": {"type": "string", "description": "Optional log category filter"},
+                            "category": {
+                                "type": "string",
+                                "description": "Optional log category filter",
+                            },
                         },
                         "required": ["keyword", "expected_count"],
                     },
@@ -884,7 +1189,9 @@ _EDITOR_ACTIONS = [
                 ]
             },
             {
-                "assertions": [{"keyword": "Error", "expected_count": 0, "comparison": "=="}],
+                "assertions": [
+                    {"keyword": "Error", "expected_count": 0, "comparison": "=="}
+                ],
                 "since_cursor": "live:100",
             },
         ),
@@ -903,7 +1210,10 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "actor_name": {"type": "string", "description": "Current actor name or label"},
+                "actor_name": {
+                    "type": "string",
+                    "description": "Current actor name or label",
+                },
                 "new_label": {"type": "string", "description": "New display label"},
                 "items": {
                     "type": "array",
@@ -941,7 +1251,10 @@ _EDITOR_ACTIONS = [
             "type": "object",
             "properties": {
                 "actor_name": {"type": "string", "description": "Actor name or label"},
-                "folder_path": {"type": "string", "description": "Target folder path (e.g. 'Enemies/Flying')"},
+                "folder_path": {
+                    "type": "string",
+                    "description": "Target folder path (e.g. 'Enemies/Flying')",
+                },
                 "items": {
                     "type": "array",
                     "description": "Batch folder operations",
@@ -961,7 +1274,10 @@ _EDITOR_ACTIONS = [
             {
                 "items": [
                     {"actor_name": "BP_Fly_C_0", "folder_path": "Enemies/Flying"},
-                    {"actor_name": "BP_SideScrolling_NPC_C_0", "folder_path": "Enemies/Ground"},
+                    {
+                        "actor_name": "BP_SideScrolling_NPC_C_0",
+                        "folder_path": "Enemies/Ground",
+                    },
                 ]
             },
         ),
@@ -1009,8 +1325,14 @@ _EDITOR_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "class_filter": {"type": "string", "description": "Filter actors by class name substring"},
-                "folder_filter": {"type": "string", "description": "Filter by folder path prefix"},
+                "class_filter": {
+                    "type": "string",
+                    "description": "Filter actors by class name substring",
+                },
+                "folder_filter": {
+                    "type": "string",
+                    "description": "Filter by folder path prefix",
+                },
             },
         },
         capabilities=("read",),
@@ -1066,24 +1388,49 @@ _EDITOR_ACTIONS = [
                     "items": {
                         "type": "object",
                         "properties": {
-                            "type": {"type": "string", "description": "Action command name"},
-                            "params": {"type": "object", "description": "Action parameters"}
+                            "type": {
+                                "type": "string",
+                                "description": "Action command name",
+                            },
+                            "params": {
+                                "type": "object",
+                                "description": "Action parameters",
+                            },
                         },
-                        "required": ["type"]
+                        "required": ["type"],
                     },
-                    "description": "Array of commands to execute sequentially"
+                    "description": "Array of commands to execute sequentially",
                 },
-                "stop_on_error": {"type": "boolean", "description": "Stop on first error (default: true)"}
+                "stop_on_error": {
+                    "type": "boolean",
+                    "description": "Stop on first error (default: true)",
+                },
             },
-            "required": ["commands"]
+            "required": ["commands"],
         },
         risk="moderate",
         examples=(
-            {"commands": [{"type": "compile_blueprint", "params": {"blueprint_name": "BP_Player"}}]},
-            {"commands": [
-                {"type": "create_blueprint", "params": {"name": "BP_Test", "parent_class": "Actor"}},
-                {"type": "compile_blueprint", "params": {"blueprint_name": "BP_Test"}},
-            ], "stop_on_error": True},
+            {
+                "commands": [
+                    {
+                        "type": "compile_blueprint",
+                        "params": {"blueprint_name": "BP_Player"},
+                    }
+                ]
+            },
+            {
+                "commands": [
+                    {
+                        "type": "create_blueprint",
+                        "params": {"name": "BP_Test", "parent_class": "Actor"},
+                    },
+                    {
+                        "type": "compile_blueprint",
+                        "params": {"blueprint_name": "BP_Test"},
+                    },
+                ],
+                "stop_on_error": True,
+            },
         ),
     ),
 ]
@@ -1101,21 +1448,65 @@ _LAYOUT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "mode": {"type": "string", "enum": ["selected", "graph", "all"], "description": "Layout granularity"},
-                "blueprint_name": {"type": "string", "description": "Blueprint name (optional)"},
-                "graph_name": {"type": "string", "description": "Graph name (optional)"},
-                "node_ids": {"type": "array", "items": {"type": "string"}, "description": "Node GUIDs for 'selected' mode"},
-                "layer_spacing": {"type": "number", "description": "Horizontal spacing (>0 fixed px, <=0 auto width-aware; default: 0)"},
-                "row_spacing": {"type": "number", "description": "Vertical spacing (>0 fixed px, <=0 auto height-aware; default: 0)"},
-                "horizontal_gap": {"type": "number", "description": "Gap between layers in auto mode (default: 250)"},
-                "vertical_gap": {"type": "number", "description": "Gap between rows in auto mode (default: 100)"},
-                "crossing_passes": {"type": "integer", "description": "Barycenter optimization passes (default: 4)"},
-                "pin_align_pure": {"type": "boolean", "description": "Align pure nodes to consumer input pin Y (default: true)"},
-                "avoid_surrounding": {"type": "boolean", "description": "Avoid non-participating nodes in the same graph (default: false)"},
-                "include_pure_deps": {"type": "boolean", "description": "Auto-include pure dependency nodes in selected mode (default: false)"},
-                "surrounding_margin": {"type": "number", "description": "Obstacle margin when avoid_surrounding is enabled (default: 60)"},
-                "preserve_comments": {"type": "boolean", "description": "Resize comment boxes to fit moved child nodes (default: true)"}
-            }
+                "mode": {
+                    "type": "string",
+                    "enum": ["selected", "graph", "all"],
+                    "description": "Layout granularity",
+                },
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint name (optional)",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph name (optional)",
+                },
+                "node_ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Node GUIDs for 'selected' mode",
+                },
+                "layer_spacing": {
+                    "type": "number",
+                    "description": "Horizontal spacing (>0 fixed px, <=0 auto width-aware; default: 0)",
+                },
+                "row_spacing": {
+                    "type": "number",
+                    "description": "Vertical spacing (>0 fixed px, <=0 auto height-aware; default: 0)",
+                },
+                "horizontal_gap": {
+                    "type": "number",
+                    "description": "Gap between layers in auto mode (default: 250)",
+                },
+                "vertical_gap": {
+                    "type": "number",
+                    "description": "Gap between rows in auto mode (default: 100)",
+                },
+                "crossing_passes": {
+                    "type": "integer",
+                    "description": "Barycenter optimization passes (default: 4)",
+                },
+                "pin_align_pure": {
+                    "type": "boolean",
+                    "description": "Align pure nodes to consumer input pin Y (default: true)",
+                },
+                "avoid_surrounding": {
+                    "type": "boolean",
+                    "description": "Avoid non-participating nodes in the same graph (default: false)",
+                },
+                "include_pure_deps": {
+                    "type": "boolean",
+                    "description": "Auto-include pure dependency nodes in selected mode (default: false)",
+                },
+                "surrounding_margin": {
+                    "type": "number",
+                    "description": "Obstacle margin when avoid_surrounding is enabled (default: 60)",
+                },
+                "preserve_comments": {
+                    "type": "boolean",
+                    "description": "Resize comment boxes to fit moved child nodes (default: true)",
+                },
+            },
         },
         examples=({"mode": "graph", "blueprint_name": "BP_Player"},),
     ),
@@ -1127,20 +1518,59 @@ _LAYOUT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "root_node_id": {"type": "string", "description": "GUID of the root node"},
-                "blueprint_name": {"type": "string", "description": "Blueprint name (optional)"},
-                "graph_name": {"type": "string", "description": "Graph name (optional)"},
-                "max_pure_depth": {"type": "integer", "description": "Max pure dependency depth (default: 3)"},
-                "layer_spacing": {"type": "number", "description": "Horizontal spacing (>0 fixed px, <=0 auto width-aware; default: 0)"},
-                "row_spacing": {"type": "number", "description": "Vertical spacing (>0 fixed px, <=0 auto height-aware; default: 0)"},
-                "horizontal_gap": {"type": "number", "description": "Gap between layers in auto mode (default: 250)"},
-                "vertical_gap": {"type": "number", "description": "Gap between rows in auto mode (default: 100)"},
-                "crossing_passes": {"type": "integer", "description": "Barycenter optimization passes (default: 4)"},
-                "pin_align_pure": {"type": "boolean", "description": "Align pure nodes to consumer input pin Y (default: true)"},
-                "avoid_surrounding": {"type": "boolean", "description": "Avoid non-participating nodes in the same graph (default: false)"},
-                "surrounding_margin": {"type": "number", "description": "Obstacle margin when avoid_surrounding is enabled (default: 60)"},
-                "preserve_comments": {"type": "boolean", "description": "Resize comment boxes to fit moved child nodes (default: true)"}
-            }
+                "root_node_id": {
+                    "type": "string",
+                    "description": "GUID of the root node",
+                },
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint name (optional)",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph name (optional)",
+                },
+                "max_pure_depth": {
+                    "type": "integer",
+                    "description": "Max pure dependency depth (default: 3)",
+                },
+                "layer_spacing": {
+                    "type": "number",
+                    "description": "Horizontal spacing (>0 fixed px, <=0 auto width-aware; default: 0)",
+                },
+                "row_spacing": {
+                    "type": "number",
+                    "description": "Vertical spacing (>0 fixed px, <=0 auto height-aware; default: 0)",
+                },
+                "horizontal_gap": {
+                    "type": "number",
+                    "description": "Gap between layers in auto mode (default: 250)",
+                },
+                "vertical_gap": {
+                    "type": "number",
+                    "description": "Gap between rows in auto mode (default: 100)",
+                },
+                "crossing_passes": {
+                    "type": "integer",
+                    "description": "Barycenter optimization passes (default: 4)",
+                },
+                "pin_align_pure": {
+                    "type": "boolean",
+                    "description": "Align pure nodes to consumer input pin Y (default: true)",
+                },
+                "avoid_surrounding": {
+                    "type": "boolean",
+                    "description": "Avoid non-participating nodes in the same graph (default: false)",
+                },
+                "surrounding_margin": {
+                    "type": "number",
+                    "description": "Obstacle margin when avoid_surrounding is enabled (default: 60)",
+                },
+                "preserve_comments": {
+                    "type": "boolean",
+                    "description": "Resize comment boxes to fit moved child nodes (default: true)",
+                },
+            },
         },
     ),
     ActionDef(
@@ -1151,15 +1581,39 @@ _LAYOUT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint name (optional, defaults to focused editor)"},
-                "layer_spacing": {"type": "number", "description": "Horizontal spacing (0=auto, default: auto)"},
-                "row_spacing": {"type": "number", "description": "Vertical spacing (0=auto, default: auto)"},
-                "horizontal_gap": {"type": "number", "description": "Gap between layers in auto mode (default: 250)"},
-                "vertical_gap": {"type": "number", "description": "Gap between rows in auto mode (default: 100)"},
-                "crossing_passes": {"type": "integer", "description": "Barycenter optimization passes (default: 4)"},
-                "pin_align_pure": {"type": "boolean", "description": "Align pure nodes with consumer pin Y (default: true)"},
-                "preserve_comments": {"type": "boolean", "description": "Resize comment boxes to fit children (default: true)"}
-            }
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint name (optional, defaults to focused editor)",
+                },
+                "layer_spacing": {
+                    "type": "number",
+                    "description": "Horizontal spacing (0=auto, default: auto)",
+                },
+                "row_spacing": {
+                    "type": "number",
+                    "description": "Vertical spacing (0=auto, default: auto)",
+                },
+                "horizontal_gap": {
+                    "type": "number",
+                    "description": "Gap between layers in auto mode (default: 250)",
+                },
+                "vertical_gap": {
+                    "type": "number",
+                    "description": "Gap between rows in auto mode (default: 100)",
+                },
+                "crossing_passes": {
+                    "type": "integer",
+                    "description": "Barycenter optimization passes (default: 4)",
+                },
+                "pin_align_pure": {
+                    "type": "boolean",
+                    "description": "Align pure nodes with consumer pin Y (default: true)",
+                },
+                "preserve_comments": {
+                    "type": "boolean",
+                    "description": "Resize comment boxes to fit children (default: true)",
+                },
+            },
         },
         examples=({"blueprint_name": "BP_Player"},),
     ),
@@ -1176,39 +1630,88 @@ _LAYOUT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint name (optional, defaults to focused editor)"},
-                "graph_name": {"type": "string", "description": "Graph name (optional, defaults to focused graph)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint name (optional, defaults to focused editor)",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph name (optional, defaults to focused graph)",
+                },
                 "groups": {
                     "type": "array",
                     "description": "Array of group objects, each defining a set of nodes and its comment",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "node_ids": {"type": "array", "items": {"type": "string"}, "description": "Node GUIDs belonging to this group"},
-                            "comment_text": {"type": "string", "description": "Comment text for the group"},
-                            "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] 0.0-1.0"}
+                            "node_ids": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Node GUIDs belonging to this group",
+                            },
+                            "comment_text": {
+                                "type": "string",
+                                "description": "Comment text for the group",
+                            },
+                            "color": {
+                                "type": "array",
+                                "items": {"type": "number"},
+                                "description": "[R, G, B, A] 0.0-1.0",
+                            },
                         },
-                        "required": ["node_ids", "comment_text"]
-                    }
+                        "required": ["node_ids", "comment_text"],
+                    },
                 },
-                "group_spacing": {"type": "number", "description": "Min Y gap between group AABBs in px (default: 80)"},
-                "auto_layout": {"type": "boolean", "description": "Run auto-layout before commenting (default: true)"},
-                "clear_existing": {"type": "boolean", "description": "Remove all existing comments first (default: false)"},
-                "padding": {"type": "number", "description": "Comment box padding in px (default: 40)"},
-                "title_height": {"type": "number", "description": "Comment title height in px (default: 36)"},
-                "layer_spacing": {"type": "number", "description": "Horizontal spacing forwarded to auto-layout (default: 0=auto)"},
-                "row_spacing": {"type": "number", "description": "Vertical spacing forwarded to auto-layout (default: 0=auto)"},
-                "crossing_passes": {"type": "integer", "description": "Barycenter passes forwarded to auto-layout (default: 4)"}
+                "group_spacing": {
+                    "type": "number",
+                    "description": "Min Y gap between group AABBs in px (default: 80)",
+                },
+                "auto_layout": {
+                    "type": "boolean",
+                    "description": "Run auto-layout before commenting (default: true)",
+                },
+                "clear_existing": {
+                    "type": "boolean",
+                    "description": "Remove all existing comments first (default: false)",
+                },
+                "padding": {
+                    "type": "number",
+                    "description": "Comment box padding in px (default: 40)",
+                },
+                "title_height": {
+                    "type": "number",
+                    "description": "Comment title height in px (default: 36)",
+                },
+                "layer_spacing": {
+                    "type": "number",
+                    "description": "Horizontal spacing forwarded to auto-layout (default: 0=auto)",
+                },
+                "row_spacing": {
+                    "type": "number",
+                    "description": "Vertical spacing forwarded to auto-layout (default: 0=auto)",
+                },
+                "crossing_passes": {
+                    "type": "integer",
+                    "description": "Barycenter passes forwarded to auto-layout (default: 4)",
+                },
             },
-            "required": ["groups"]
+            "required": ["groups"],
         },
         examples=(
             {
                 "blueprint_name": "BP_Player",
                 "groups": [
-                    {"node_ids": ["GUID1", "GUID2"], "comment_text": "初始化逻辑", "color": [0.15, 0.55, 0.25, 1]},
-                    {"node_ids": ["GUID3", "GUID4", "GUID5"], "comment_text": "移动处理", "color": [0.15, 0.35, 0.65, 1]}
-                ]
+                    {
+                        "node_ids": ["GUID1", "GUID2"],
+                        "comment_text": "初始化逻辑",
+                        "color": [0.15, 0.55, 0.25, 1],
+                    },
+                    {
+                        "node_ids": ["GUID3", "GUID4", "GUID5"],
+                        "comment_text": "移动处理",
+                        "color": [0.15, 0.35, 0.65, 1],
+                    },
+                ],
             },
         ),
     ),
@@ -1227,11 +1730,17 @@ _NODE_EVENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "event_name": {"type": "string", "description": "Event name (ReceiveBeginPlay, ReceiveTick, etc.)"},
-                "node_position": {"type": "string", "description": "[X, Y] position"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "event_name": {
+                    "type": "string",
+                    "description": "Event name (ReceiveBeginPlay, ReceiveTick, etc.)",
+                },
+                "node_position": {"type": "string", "description": "[X, Y] position"},
             },
-            "required": ["blueprint_name", "event_name"]
+            "required": ["blueprint_name", "event_name"],
         },
         examples=({"blueprint_name": "BP_Player", "event_name": "ReceiveBeginPlay"},),
     ),
@@ -1243,14 +1752,30 @@ _NODE_EVENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "event_name": {"type": "string", "description": "Name for the custom event"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "event_name": {
+                    "type": "string",
+                    "description": "Name for the custom event",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "parameters": {"type": "array", "items": {"type": "object"}, "description": "Parameters with 'name' and 'type' keys"}
+                "parameters": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Parameters with 'name' and 'type' keys",
+                },
             },
-            "required": ["blueprint_name", "event_name"]
+            "required": ["blueprint_name", "event_name"],
         },
-        examples=({"blueprint_name": "BP_Player", "event_name": "OnDamaged", "parameters": [{"name": "Damage", "type": "Float"}]},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "event_name": "OnDamaged",
+                "parameters": [{"name": "Damage", "type": "Float"}],
+            },
+        ),
     ),
     ActionDef(
         id="node.add_custom_event_for_delegate",
@@ -1266,50 +1791,59 @@ _NODE_EVENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "event_name": {"type": "string", "description": "Name for the custom event"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "event_name": {
+                    "type": "string",
+                    "description": "Name for the custom event",
+                },
                 "delegate_class": {
                     "type": "string",
-                    "description": "Class that owns the delegate (e.g., 'PrimitiveComponent', 'Actor'). Used with delegate_name."
+                    "description": "Class that owns the delegate (e.g., 'PrimitiveComponent', 'Actor'). Used with delegate_name.",
                 },
                 "delegate_name": {
                     "type": "string",
-                    "description": "Delegate property name (e.g., 'OnComponentBeginOverlap'). If delegate_class is omitted, searches the Blueprint's own class."
+                    "description": "Delegate property name (e.g., 'OnComponentBeginOverlap'). If delegate_class is omitted, searches the Blueprint's own class.",
                 },
                 "source_node_id": {
                     "type": "string",
-                    "description": "Node GUID to resolve delegate signature from and optionally connect to"
+                    "description": "Node GUID to resolve delegate signature from and optionally connect to",
                 },
                 "source_pin_name": {
                     "type": "string",
-                    "description": "Pin name on source node (defaults to first unconnected delegate input pin)"
+                    "description": "Pin name on source node (defaults to first unconnected delegate input pin)",
                 },
                 "auto_connect": {
                     "type": "boolean",
-                    "description": "Connect delegate output to source pin (default: true, only for source_node_id mode)"
+                    "description": "Connect delegate output to source pin (default: true, only for source_node_id mode)",
                 },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional target graph name"}
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional target graph name",
+                },
             },
-            "required": ["blueprint_name", "event_name"]
+            "required": ["blueprint_name", "event_name"],
         },
         examples=(
             {
                 "blueprint_name": "BP_Player",
                 "event_name": "OnOverlap",
                 "delegate_class": "PrimitiveComponent",
-                "delegate_name": "OnComponentBeginOverlap"
+                "delegate_name": "OnComponentBeginOverlap",
             },
             {
                 "blueprint_name": "BP_Player",
                 "event_name": "OnMyDispatcher",
-                "delegate_name": "MyEventDispatcher"
+                "delegate_name": "MyEventDispatcher",
             },
             {
                 "blueprint_name": "BP_Player",
                 "event_name": "OnDelegateEvent",
                 "source_node_id": "<node-guid>",
-                "source_pin_name": "Event"
+                "source_pin_name": "Event",
             },
         ),
     ),
@@ -1321,11 +1855,17 @@ _NODE_EVENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "action_name": {"type": "string", "description": "Name of the input action"},
-                "node_position": {"type": "string", "description": "[X, Y] position"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "action_name": {
+                    "type": "string",
+                    "description": "Name of the input action",
+                },
+                "node_position": {"type": "string", "description": "[X, Y] position"},
             },
-            "required": ["blueprint_name", "action_name"]
+            "required": ["blueprint_name", "action_name"],
         },
     ),
     ActionDef(
@@ -1336,12 +1876,21 @@ _NODE_EVENT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "action_name": {"type": "string", "description": "Name of the Input Action asset (e.g., IA_Move)"},
-                "action_path": {"type": "string", "description": "Content path to asset (default: /Game/Input)"},
-                "node_position": {"type": "string", "description": "[X, Y] position"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "action_name": {
+                    "type": "string",
+                    "description": "Name of the Input Action asset (e.g., IA_Move)",
+                },
+                "action_path": {
+                    "type": "string",
+                    "description": "Content path to asset (default: /Game/Input)",
+                },
+                "node_position": {"type": "string", "description": "[X, Y] position"},
             },
-            "required": ["blueprint_name", "action_name"]
+            "required": ["blueprint_name", "action_name"],
         },
         examples=({"blueprint_name": "BP_Player", "action_name": "IA_Move"},),
     ),
@@ -1360,11 +1909,21 @@ _NODE_DISPATCHER_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "dispatcher_name": {"type": "string", "description": "Name for the dispatcher"},
-                "parameters": {"type": "array", "items": {"type": "object"}, "description": "Parameters with 'name' and 'type' keys"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "dispatcher_name": {
+                    "type": "string",
+                    "description": "Name for the dispatcher",
+                },
+                "parameters": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Parameters with 'name' and 'type' keys",
+                },
             },
-            "required": ["blueprint_name", "dispatcher_name"]
+            "required": ["blueprint_name", "dispatcher_name"],
         },
         examples=({"blueprint_name": "BP_Door", "dispatcher_name": "OnDoorOpened"},),
     ),
@@ -1376,12 +1935,22 @@ _NODE_DISPATCHER_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "dispatcher_name": {"type": "string", "description": "Name of the dispatcher"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "dispatcher_name": {
+                    "type": "string",
+                    "description": "Name of the dispatcher",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "dispatcher_name"]
+            "required": ["blueprint_name", "dispatcher_name"],
         },
     ),
     ActionDef(
@@ -1392,13 +1961,26 @@ _NODE_DISPATCHER_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint where to add the bind node"},
-                "dispatcher_name": {"type": "string", "description": "Name of the dispatcher to bind"},
-                "target_blueprint": {"type": "string", "description": "Blueprint that owns the dispatcher"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint where to add the bind node",
+                },
+                "dispatcher_name": {
+                    "type": "string",
+                    "description": "Name of the dispatcher to bind",
+                },
+                "target_blueprint": {
+                    "type": "string",
+                    "description": "Blueprint that owns the dispatcher",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "dispatcher_name"]
+            "required": ["blueprint_name", "dispatcher_name"],
         },
     ),
     ActionDef(
@@ -1409,16 +1991,41 @@ _NODE_DISPATCHER_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "function_name": {"type": "string", "description": "Name of the function to bind as delegate"},
-                "connect_to_node_id": {"type": "string", "description": "Node GUID to auto-connect delegate output to"},
-                "connect_to_pin": {"type": "string", "description": "Target delegate pin name (default: 'Event')"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional function graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Name of the function to bind as delegate",
+                },
+                "connect_to_node_id": {
+                    "type": "string",
+                    "description": "Node GUID to auto-connect delegate output to",
+                },
+                "connect_to_pin": {
+                    "type": "string",
+                    "description": "Target delegate pin name (default: 'Event')",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional function graph name",
+                },
             },
-            "required": ["blueprint_name", "function_name"]
+            "required": ["blueprint_name", "function_name"],
         },
-        examples=({"blueprint_name": "BP_Player", "function_name": "OnTTSEnvelope", "graph_name": "SetupTTS"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "function_name": "OnTTSEnvelope",
+                "graph_name": "SetupTTS",
+            },
+        ),
     ),
     ActionDef(
         id="component.bind_event",
@@ -1433,17 +2040,41 @@ _NODE_DISPATCHER_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_name": {"type": "string", "description": "Component variable name on the Blueprint (e.g., 'AIPortComponent', 'CapsuleComponent')"},
-                "event_name": {"type": "string", "description": "Delegate name on the component class (e.g., 'OnTTSEnvelope', 'OnComponentBeginOverlap')"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name (defaults to EventGraph)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Component variable name on the Blueprint (e.g., 'AIPortComponent', 'CapsuleComponent')",
+                },
+                "event_name": {
+                    "type": "string",
+                    "description": "Delegate name on the component class (e.g., 'OnTTSEnvelope', 'OnComponentBeginOverlap')",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional graph name (defaults to EventGraph)",
+                },
             },
-            "required": ["blueprint_name", "component_name", "event_name"]
+            "required": ["blueprint_name", "component_name", "event_name"],
         },
         examples=(
-            {"blueprint_name": "BP_SideScrollingCharacter", "component_name": "AIPortComponent", "event_name": "OnTTSEnvelope"},
-            {"blueprint_name": "BP_Player", "component_name": "CapsuleComponent", "event_name": "OnComponentBeginOverlap"},
+            {
+                "blueprint_name": "BP_SideScrollingCharacter",
+                "component_name": "AIPortComponent",
+                "event_name": "OnTTSEnvelope",
+            },
+            {
+                "blueprint_name": "BP_Player",
+                "component_name": "CapsuleComponent",
+                "event_name": "OnComponentBeginOverlap",
+            },
         ),
     ),
 ]
@@ -1461,16 +2092,34 @@ _NODE_FUNCTION_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "target": {"type": "string", "description": "Target object (component name or self)"},
-                "function_name": {"type": "string", "description": "Name of the function to call"},
-                "params": {"type": "string", "description": "Parameters as JSON string"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "target": {
+                    "type": "string",
+                    "description": "Target object (component name or self)",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Name of the function to call",
+                },
+                "params": {
+                    "type": "string",
+                    "description": "Parameters as JSON string",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "target", "function_name"]
+            "required": ["blueprint_name", "target", "function_name"],
         },
-        examples=({"blueprint_name": "BP_Player", "target": "self", "function_name": "PrintString"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "target": "self",
+                "function_name": "PrintString",
+            },
+        ),
     ),
     ActionDef(
         id="node.add_spawn_actor",
@@ -1480,12 +2129,22 @@ _NODE_FUNCTION_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "class_to_spawn": {"type": "string", "description": "Class to spawn (e.g., BP_Enemy)"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "class_to_spawn": {
+                    "type": "string",
+                    "description": "Class to spawn (e.g., BP_Enemy)",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "class_to_spawn"]
+            "required": ["blueprint_name", "class_to_spawn"],
         },
     ),
     ActionDef(
@@ -1496,13 +2155,19 @@ _NODE_FUNCTION_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "node_id": {"type": "string", "description": "GUID of the node"},
                 "pin_name": {"type": "string", "description": "Name of the pin"},
-                "default_value": {"type": "string", "description": "Default value as string"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "default_value": {
+                    "type": "string",
+                    "description": "Default value as string",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "node_id", "pin_name", "default_value"]
+            "required": ["blueprint_name", "node_id", "pin_name", "default_value"],
         },
     ),
     ActionDef(
@@ -1513,13 +2178,23 @@ _NODE_FUNCTION_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "owner_class": {"type": "string", "description": "Class that owns the property"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "owner_class": {
+                    "type": "string",
+                    "description": "Class that owns the property",
+                },
                 "property_name": {"type": "string", "description": "Property to set"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "owner_class", "property_name"]
+            "required": ["blueprint_name", "owner_class", "property_name"],
         },
     ),
     ActionDef(
@@ -1530,12 +2205,22 @@ _NODE_FUNCTION_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "subsystem_class": {"type": "string", "description": "Class name of the subsystem"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "subsystem_class": {
+                    "type": "string",
+                    "description": "Class name of the subsystem",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "subsystem_class"]
+            "required": ["blueprint_name", "subsystem_class"],
         },
     ),
 ]
@@ -1553,14 +2238,29 @@ _NODE_VARIABLE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable"},
-                "variable_type": {"type": "string", "description": "Type (Boolean, Integer, Float, Vector, String, Rotator, Transform, etc.)"},
-                "is_exposed": {"type": "boolean", "description": "Expose to editor"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable",
+                },
+                "variable_type": {
+                    "type": "string",
+                    "description": "Type (Boolean, Integer, Float, Vector, String, Rotator, Transform, etc.)",
+                },
+                "is_exposed": {"type": "boolean", "description": "Expose to editor"},
             },
-            "required": ["blueprint_name", "variable_name", "variable_type"]
+            "required": ["blueprint_name", "variable_name", "variable_type"],
         },
-        examples=({"blueprint_name": "BP_Player", "variable_name": "Health", "variable_type": "Float"},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "variable_name": "Health",
+                "variable_type": "Float",
+            },
+        ),
     ),
     ActionDef(
         id="variable.add_getter",
@@ -1570,12 +2270,18 @@ _NODE_VARIABLE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "variable_name"]
+            "required": ["blueprint_name", "variable_name"],
         },
     ),
     ActionDef(
@@ -1586,12 +2292,18 @@ _NODE_VARIABLE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "variable_name"]
+            "required": ["blueprint_name", "variable_name"],
         },
     ),
     ActionDef(
@@ -1602,13 +2314,27 @@ _NODE_VARIABLE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "function_name": {"type": "string", "description": "Function name"},
                 "variable_name": {"type": "string", "description": "Variable name"},
-                "variable_type": {"type": "string", "description": "Type (Boolean, Integer, Float, Vector, etc.)"},
-                "default_value": {"type": "string", "description": "Optional default value"}
+                "variable_type": {
+                    "type": "string",
+                    "description": "Type (Boolean, Integer, Float, Vector, etc.)",
+                },
+                "default_value": {
+                    "type": "string",
+                    "description": "Optional default value",
+                },
             },
-            "required": ["blueprint_name", "function_name", "variable_name", "variable_type"]
+            "required": [
+                "blueprint_name",
+                "function_name",
+                "variable_name",
+                "variable_type",
+            ],
         },
     ),
 ]
@@ -1626,11 +2352,14 @@ _NODE_REFERENCE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
     ),
     ActionDef(
@@ -1641,12 +2370,18 @@ _NODE_REFERENCE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "component_name": {"type": "string", "description": "Name of the component"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name of the component",
+                },
                 "node_position": {"type": "string", "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "component_name"]
+            "required": ["blueprint_name", "component_name"],
         },
     ),
     ActionDef(
@@ -1657,12 +2392,22 @@ _NODE_REFERENCE_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "target_class": {"type": "string", "description": "Class to cast to"},
-                "pure_cast": {"type": "boolean", "description": "Create as pure cast (no exec pins)"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"}
+                "pure_cast": {
+                    "type": "boolean",
+                    "description": "Create as pure cast (no exec pins)",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
-            "required": ["blueprint_name", "target_class"]
+            "required": ["blueprint_name", "target_class"],
         },
     ),
 ]
@@ -1680,27 +2425,50 @@ _NODE_FLOW_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "graph_name": {"type": "string", "description": "Optional graph name"},
-                "node_position": {"type": "string", "description": "[X, Y] position"}
+                "node_position": {"type": "string", "description": "[X, Y] position"},
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
     ),
     ActionDef(
         id="node.add_macro",
         command="add_macro_instance_node",
-        tags=("node", "macro", "loop", "foreach", "forloop", "whileloop", "doonce", "gate", "flow"),
+        tags=(
+            "node",
+            "macro",
+            "loop",
+            "foreach",
+            "forloop",
+            "whileloop",
+            "doonce",
+            "gate",
+            "flow",
+        ),
         description="Add a macro instance node (ForEachLoop, ForLoop, WhileLoop, DoOnce, Gate, etc.)",
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "macro_name": {"type": "string", "description": "Macro name (ForEachLoop, ForLoop, WhileLoop, DoOnce, Gate, etc.)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "macro_name": {
+                    "type": "string",
+                    "description": "Macro name (ForEachLoop, ForLoop, WhileLoop, DoOnce, Gate, etc.)",
+                },
                 "graph_name": {"type": "string", "description": "Optional graph name"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"}
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
-            "required": ["blueprint_name", "macro_name"]
+            "required": ["blueprint_name", "macro_name"],
         },
         examples=({"blueprint_name": "BP_Player", "macro_name": "ForEachLoop"},),
     ),
@@ -1712,11 +2480,18 @@ _NODE_FLOW_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "graph_name": {"type": "string", "description": "Optional graph name"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"}
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
         examples=({"blueprint_name": "BP_Player"},),
     ),
@@ -1735,14 +2510,35 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "source_node_id": {"type": "string", "description": "GUID of the source node"},
-                "source_pin": {"type": "string", "description": "Name of the output pin"},
-                "target_node_id": {"type": "string", "description": "GUID of the target node"},
-                "target_pin": {"type": "string", "description": "Name of the input pin"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "source_node_id": {
+                    "type": "string",
+                    "description": "GUID of the source node",
+                },
+                "source_pin": {
+                    "type": "string",
+                    "description": "Name of the output pin",
+                },
+                "target_node_id": {
+                    "type": "string",
+                    "description": "GUID of the target node",
+                },
+                "target_pin": {
+                    "type": "string",
+                    "description": "Name of the input pin",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "source_node_id", "source_pin", "target_node_id", "target_pin"]
+            "required": [
+                "blueprint_name",
+                "source_node_id",
+                "source_pin",
+                "target_node_id",
+                "target_pin",
+            ],
         },
     ),
     ActionDef(
@@ -1753,12 +2549,21 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "graph_name": {"type": "string", "description": "Optional graph name"},
-                "node_type": {"type": "string", "description": "Type of node (Event, Function, Variable, etc.)"},
-                "event_type": {"type": "string", "description": "Specific event type (BeginPlay, Tick, etc.)"}
+                "node_type": {
+                    "type": "string",
+                    "description": "Type of node (Event, Function, Variable, etc.)",
+                },
+                "event_type": {
+                    "type": "string",
+                    "description": "Specific event type (BeginPlay, Tick, etc.)",
+                },
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
         capabilities=("read",),
     ),
@@ -1770,11 +2575,17 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "node_id": {"type": "string", "description": "GUID of the node to delete"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "node_id": {
+                    "type": "string",
+                    "description": "GUID of the node to delete",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "node_id"]
+            "required": ["blueprint_name", "node_id"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
@@ -1787,11 +2598,14 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "node_id": {"type": "string", "description": "GUID of the node"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "node_id"]
+            "required": ["blueprint_name", "node_id"],
         },
         capabilities=("read",),
     ),
@@ -1803,16 +2617,29 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Optional Blueprint name — if omitted, uses the currently focused editor"},
-                "graph_name": {"type": "string", "description": "Optional graph name — if omitted, uses the focused graph"},
-                "include_hidden_pins": {"type": "boolean", "description": "Include hidden pins (default: false)"}
-            }
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Optional Blueprint name — if omitted, uses the currently focused editor",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional graph name — if omitted, uses the focused graph",
+                },
+                "include_hidden_pins": {
+                    "type": "boolean",
+                    "description": "Include hidden pins (default: false)",
+                },
+            },
         },
         capabilities=("read",),
         examples=(
             {},
             {"blueprint_name": "BP_Player"},
-            {"blueprint_name": "BP_Player", "graph_name": "EventGraph", "include_hidden_pins": True},
+            {
+                "blueprint_name": "BP_Player",
+                "graph_name": "EventGraph",
+                "include_hidden_pins": True,
+            },
         ),
     ),
     ActionDef(
@@ -1823,8 +2650,11 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Optional Blueprint name/path to target a specific open Blueprint editor"}
-            }
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Optional Blueprint name/path to target a specific open Blueprint editor",
+                }
+            },
         },
         capabilities=("write",),
         risk="moderate",
@@ -1841,8 +2671,11 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Optional Blueprint name/path to target a specific open Blueprint editor"}
-            }
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Optional Blueprint name/path to target a specific open Blueprint editor",
+                }
+            },
         },
         capabilities=("write",),
         risk="moderate",
@@ -1862,13 +2695,22 @@ _GRAPH_ACTIONS = [
                 "node_ids": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Array of node GUID strings to select"
+                    "description": "Array of node GUID strings to select",
                 },
-                "blueprint_name": {"type": "string", "description": "Optional Blueprint name — if omitted, uses the currently focused editor"},
-                "graph_name": {"type": "string", "description": "Optional graph name — if omitted, uses the focused graph"},
-                "append": {"type": "boolean", "description": "If true, add to existing selection instead of replacing it (default: false)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Optional Blueprint name — if omitted, uses the currently focused editor",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional graph name — if omitted, uses the focused graph",
+                },
+                "append": {
+                    "type": "boolean",
+                    "description": "If true, add to existing selection instead of replacing it (default: false)",
+                },
             },
-            "required": ["node_ids"]
+            "required": ["node_ids"],
         },
         capabilities=("write",),
         risk="safe",
@@ -1881,7 +2723,17 @@ _GRAPH_ACTIONS = [
     ActionDef(
         id="graph.batch_select_and_act",
         command="batch_select_and_act",
-        tags=("graph", "batch", "select", "selection", "group", "collapse", "comment", "refactor", "automation"),
+        tags=(
+            "graph",
+            "batch",
+            "select",
+            "selection",
+            "group",
+            "collapse",
+            "comment",
+            "refactor",
+            "automation",
+        ),
         description="Batch grouped selection + action execution. For each group: clears selection, selects the group's nodes, executes the specified action (e.g. collapse_selection_to_function, auto_comment), and collects the result. Enables fully automated per-group operations without manual selection.",
         input_schema={
             "type": "object",
@@ -1894,34 +2746,56 @@ _GRAPH_ACTIONS = [
                             "node_ids": {
                                 "type": "array",
                                 "items": {"type": "string"},
-                                "description": "Array of node GUID strings for this group"
+                                "description": "Array of node GUID strings for this group",
                             },
-                            "action": {"type": "string", "description": "Action command to execute on this selection (e.g. 'collapse_selection_to_function', 'auto_comment')"},
-                            "action_params": {"type": "object", "description": "Optional extra params to pass to the action (e.g. comment_text, color for auto_comment)"}
+                            "action": {
+                                "type": "string",
+                                "description": "Action command to execute on this selection (e.g. 'collapse_selection_to_function', 'auto_comment')",
+                            },
+                            "action_params": {
+                                "type": "object",
+                                "description": "Optional extra params to pass to the action (e.g. comment_text, color for auto_comment)",
+                            },
                         },
-                        "required": ["node_ids", "action"]
+                        "required": ["node_ids", "action"],
                     },
-                    "description": "Array of group objects, each with node_ids and an action to perform"
+                    "description": "Array of group objects, each with node_ids and an action to perform",
                 },
-                "blueprint_name": {"type": "string", "description": "Optional Blueprint name"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Optional Blueprint name",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["groups"]
+            "required": ["groups"],
         },
         capabilities=("write",),
         risk="moderate",
         examples=(
             {
                 "groups": [
-                    {"node_ids": ["GUID1", "GUID2"], "action": "collapse_selection_to_function"},
-                    {"node_ids": ["GUID3", "GUID4"], "action": "auto_comment", "action_params": {"comment_text": "Movement Logic", "color": [0.15, 0.35, 0.65, 1]}}
+                    {
+                        "node_ids": ["GUID1", "GUID2"],
+                        "action": "collapse_selection_to_function",
+                    },
+                    {
+                        "node_ids": ["GUID3", "GUID4"],
+                        "action": "auto_comment",
+                        "action_params": {
+                            "comment_text": "Movement Logic",
+                            "color": [0.15, 0.35, 0.65, 1],
+                        },
+                    },
                 ]
             },
             {
                 "blueprint_name": "BP_Player",
                 "groups": [
-                    {"node_ids": ["GUID1", "GUID2", "GUID3"], "action": "collapse_selection_to_function"}
-                ]
+                    {
+                        "node_ids": ["GUID1", "GUID2", "GUID3"],
+                        "action": "collapse_selection_to_function",
+                    }
+                ],
             },
         ),
     ),
@@ -1933,12 +2807,15 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "node_id": {"type": "string", "description": "GUID of the node"},
                 "pin_name": {"type": "string", "description": "Name of the pin"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "node_id", "pin_name"]
+            "required": ["blueprint_name", "node_id", "pin_name"],
         },
     ),
     ActionDef(
@@ -1949,12 +2826,19 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "node_id": {"type": "string", "description": "GUID of the node"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] new position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] new position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "node_id", "node_position"]
+            "required": ["blueprint_name", "node_id", "node_position"],
         },
     ),
     ActionDef(
@@ -1965,11 +2849,18 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
     ),
     ActionDef(
@@ -1980,14 +2871,29 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "comment_text": {"type": "string", "description": "Comment text"},
                 "graph_name": {"type": "string", "description": "Optional graph name"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "size": {"type": "array", "items": {"type": "number"}, "description": "[Width, Height]"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] 0.0-1.0"}
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "size": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[Width, Height]",
+                },
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B, A] 0.0-1.0",
+                },
             },
-            "required": ["blueprint_name", "comment_text"]
+            "required": ["blueprint_name", "comment_text"],
         },
     ),
     ActionDef(
@@ -1998,19 +2904,49 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "graph_name": {"type": "string", "description": "Optional graph name (default: EventGraph)"},
-                "node_ids": {"type": "array", "items": {"type": "string"}, "description": "Node GUIDs to wrap. OPTIONAL — omit to wrap all nodes in the graph."},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Optional graph name (default: EventGraph)",
+                },
+                "node_ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Node GUIDs to wrap. OPTIONAL — omit to wrap all nodes in the graph.",
+                },
                 "comment_text": {"type": "string", "description": "Comment text"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] 0.0-1.0 per Color Scheme"},
-                "padding": {"type": "number", "description": "Extra padding in px around nodes (default: 40)"},
-                "title_height": {"type": "number", "description": "Space reserved for comment title text (default: 36)"}
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B, A] 0.0-1.0 per Color Scheme",
+                },
+                "padding": {
+                    "type": "number",
+                    "description": "Extra padding in px around nodes (default: 40)",
+                },
+                "title_height": {
+                    "type": "number",
+                    "description": "Space reserved for comment title text (default: 36)",
+                },
             },
-            "required": ["blueprint_name", "comment_text"]
+            "required": ["blueprint_name", "comment_text"],
         },
         examples=(
-            {"blueprint_name": "BP_Player", "graph_name": "UpdateRandomFloating", "comment_text": "浮动更新全流程", "color": [0.15, 0.35, 0.65, 1]},
-            {"blueprint_name": "BP_Player", "node_ids": ["GUID1", "GUID2"], "comment_text": "BeginPlay Init", "color": [0.15, 0.55, 0.25, 1]},
+            {
+                "blueprint_name": "BP_Player",
+                "graph_name": "UpdateRandomFloating",
+                "comment_text": "浮动更新全流程",
+                "color": [0.15, 0.35, 0.65, 1],
+            },
+            {
+                "blueprint_name": "BP_Player",
+                "node_ids": ["GUID1", "GUID2"],
+                "comment_text": "BeginPlay Init",
+                "color": [0.15, 0.55, 0.25, 1],
+            },
         ),
     ),
     ActionDef(
@@ -2021,41 +2957,90 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint package name or asset path"},
-                "graph_name": {"type": "string", "description": "Target graph name (EventGraph, function name, etc.)"},
-                "include_hidden_pins": {"type": "boolean", "description": "Include hidden pins (default: false)"},
-                "include_orphan_pins": {"type": "boolean", "description": "Include orphan pins (default: false)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint package name or asset path",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Target graph name (EventGraph, function name, etc.)",
+                },
+                "include_hidden_pins": {
+                    "type": "boolean",
+                    "description": "Include hidden pins (default: false)",
+                },
+                "include_orphan_pins": {
+                    "type": "boolean",
+                    "description": "Include orphan pins (default: false)",
+                },
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
         capabilities=("read",),
         examples=(
             {"blueprint_name": "BP_Player"},
-            {"blueprint_name": "BP_Player", "graph_name": "EventGraph", "include_hidden_pins": True},
+            {
+                "blueprint_name": "BP_Player",
+                "graph_name": "EventGraph",
+                "include_hidden_pins": True,
+            },
         ),
     ),
     # -- P3: Enhanced Graph Description --
     ActionDef(
         id="graph.describe_enhanced",
         command="describe_graph_enhanced",
-        tags=("graph", "describe", "enhanced", "topology", "variables", "metadata", "read", "compact"),
+        tags=(
+            "graph",
+            "describe",
+            "enhanced",
+            "topology",
+            "variables",
+            "metadata",
+            "read",
+            "compact",
+        ),
         description="Enhanced graph topology dump: full PinType serialization, variable reference tracking, function signature expansion, and node metadata (breakpoints, enabled state). Use compact=true to omit metadata/function_signature/variable_references and use lightweight pin serialization (reduces 50-100KB → 10-20KB for large graphs).",
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint package name or asset path"},
-                "graph_name": {"type": "string", "description": "Target graph name (EventGraph, function name, etc.)"},
-                "include_hidden_pins": {"type": "boolean", "description": "Include hidden pins (default: false)"},
-                "include_orphan_pins": {"type": "boolean", "description": "Include orphan pins (default: false)"},
-                "compact": {"type": "boolean", "description": "Compact mode: omit metadata, function_signature, variable_references and use lightweight pin serialization (default: false)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint package name or asset path",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Target graph name (EventGraph, function name, etc.)",
+                },
+                "include_hidden_pins": {
+                    "type": "boolean",
+                    "description": "Include hidden pins (default: false)",
+                },
+                "include_orphan_pins": {
+                    "type": "boolean",
+                    "description": "Include orphan pins (default: false)",
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Compact mode: omit metadata, function_signature, variable_references and use lightweight pin serialization (default: false)",
+                },
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
         capabilities=("read",),
         examples=(
             {"blueprint_name": "BP_Player"},
-            {"blueprint_name": "BP_Player", "graph_name": "EventGraph", "compact": True},
-            {"blueprint_name": "BP_Player", "graph_name": "EventGraph", "include_hidden_pins": True, "include_orphan_pins": True},
+            {
+                "blueprint_name": "BP_Player",
+                "graph_name": "EventGraph",
+                "compact": True,
+            },
+            {
+                "blueprint_name": "BP_Player",
+                "graph_name": "EventGraph",
+                "include_hidden_pins": True,
+                "include_orphan_pins": True,
+            },
         ),
     ),
     # -- P3: Patch System --
@@ -2067,39 +3052,111 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "graph_name": {"type": "string", "description": "Target graph (default: EventGraph)"},
-                "continue_on_error": {"type": "boolean", "description": "Continue executing remaining ops if one fails (default: false)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Target graph (default: EventGraph)",
+                },
+                "continue_on_error": {
+                    "type": "boolean",
+                    "description": "Continue executing remaining ops if one fails (default: false)",
+                },
                 "ops": {
                     "type": "array",
                     "description": "Ordered list of patch operations",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "op": {"type": "string", "enum": ["add_node", "remove_node", "set_node_property", "connect", "disconnect", "add_variable", "set_variable_default", "set_pin_default"]},
-                            "id": {"type": "string", "description": "(add_node) Temp ID for referencing within this patch"},
-                            "node_type": {"type": "string", "description": "(add_node) Event, CustomEvent, FunctionCall, Branch, VariableGet, VariableSet, Cast, Self, Reroute, MacroInstance"},
-                            "event_name": {"type": "string", "description": "(add_node/Event) Event name e.g. BeginPlay"},
-                            "function_name": {"type": "string", "description": "(add_node/FunctionCall) Function name"},
-                            "target_class": {"type": "string", "description": "(add_node/FunctionCall) Owning class (self, GameplayStatics, Math, etc.)"},
-                            "variable_name": {"type": "string", "description": "(add_node/VariableGet|Set) Variable name"},
-                            "defaults": {"type": "object", "description": "(add_node/FunctionCall) Pin default values {pin_name: value}"},
-                            "node": {"type": "string", "description": "(various ops) Node reference: temp ID, GUID, or $last_node"},
-                            "from": {"type": "object", "description": "(connect) {node, pin}"},
-                            "to": {"type": "object", "description": "(connect) {node, pin}"},
-                            "pin": {"type": "string", "description": "(disconnect/set_pin_default) Pin name"},
-                            "property": {"type": "string", "description": "(set_node_property) Property name"},
-                            "value": {"type": "string", "description": "(set_node_property/set_pin_default/set_variable_default) Value"},
-                            "name": {"type": "string", "description": "(add_variable/set_variable_default) Variable name"},
-                            "type": {"type": "string", "description": "(add_variable) Variable type"},
-                            "pos_x": {"type": "number", "description": "(add_node) X position"},
-                            "pos_y": {"type": "number", "description": "(add_node) Y position"}
+                            "op": {
+                                "type": "string",
+                                "enum": [
+                                    "add_node",
+                                    "remove_node",
+                                    "set_node_property",
+                                    "connect",
+                                    "disconnect",
+                                    "add_variable",
+                                    "set_variable_default",
+                                    "set_pin_default",
+                                ],
+                            },
+                            "id": {
+                                "type": "string",
+                                "description": "(add_node) Temp ID for referencing within this patch",
+                            },
+                            "node_type": {
+                                "type": "string",
+                                "description": "(add_node) Event, CustomEvent, FunctionCall, Branch, VariableGet, VariableSet, Cast, Self, Reroute, MacroInstance",
+                            },
+                            "event_name": {
+                                "type": "string",
+                                "description": "(add_node/Event) Event name e.g. BeginPlay",
+                            },
+                            "function_name": {
+                                "type": "string",
+                                "description": "(add_node/FunctionCall) Function name",
+                            },
+                            "target_class": {
+                                "type": "string",
+                                "description": "(add_node/FunctionCall) Owning class (self, GameplayStatics, Math, etc.)",
+                            },
+                            "variable_name": {
+                                "type": "string",
+                                "description": "(add_node/VariableGet|Set) Variable name",
+                            },
+                            "defaults": {
+                                "type": "object",
+                                "description": "(add_node/FunctionCall) Pin default values {pin_name: value}",
+                            },
+                            "node": {
+                                "type": "string",
+                                "description": "(various ops) Node reference: temp ID, GUID, or $last_node",
+                            },
+                            "from": {
+                                "type": "object",
+                                "description": "(connect) {node, pin}",
+                            },
+                            "to": {
+                                "type": "object",
+                                "description": "(connect) {node, pin}",
+                            },
+                            "pin": {
+                                "type": "string",
+                                "description": "(disconnect/set_pin_default) Pin name",
+                            },
+                            "property": {
+                                "type": "string",
+                                "description": "(set_node_property) Property name",
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "(set_node_property/set_pin_default/set_variable_default) Value",
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "(add_variable/set_variable_default) Variable name",
+                            },
+                            "type": {
+                                "type": "string",
+                                "description": "(add_variable) Variable type",
+                            },
+                            "pos_x": {
+                                "type": "number",
+                                "description": "(add_node) X position",
+                            },
+                            "pos_y": {
+                                "type": "number",
+                                "description": "(add_node) Y position",
+                            },
                         },
-                        "required": ["op"]
-                    }
-                }
+                        "required": ["op"],
+                    },
+                },
             },
-            "required": ["blueprint_name", "ops"]
+            "required": ["blueprint_name", "ops"],
         },
         capabilities=("write",),
         risk="moderate",
@@ -2107,11 +3164,31 @@ _GRAPH_ACTIONS = [
             {
                 "blueprint_name": "BP_MyActor",
                 "ops": [
-                    {"op": "add_node", "id": "evt", "node_type": "Event", "event_name": "BeginPlay"},
-                    {"op": "add_node", "id": "print", "node_type": "FunctionCall", "function_name": "PrintString", "defaults": {"InString": "Hello from Patch!"}},
-                    {"op": "connect", "from": {"node": "evt", "pin": "then"}, "to": {"node": "print", "pin": "execute"}},
-                    {"op": "set_pin_default", "node": "print", "pin": "bPrintToScreen", "value": "true"},
-                ]
+                    {
+                        "op": "add_node",
+                        "id": "evt",
+                        "node_type": "Event",
+                        "event_name": "BeginPlay",
+                    },
+                    {
+                        "op": "add_node",
+                        "id": "print",
+                        "node_type": "FunctionCall",
+                        "function_name": "PrintString",
+                        "defaults": {"InString": "Hello from Patch!"},
+                    },
+                    {
+                        "op": "connect",
+                        "from": {"node": "evt", "pin": "then"},
+                        "to": {"node": "print", "pin": "execute"},
+                    },
+                    {
+                        "op": "set_pin_default",
+                        "node": "print",
+                        "pin": "bPrintToScreen",
+                        "value": "true",
+                    },
+                ],
             },
         ),
     ),
@@ -2123,31 +3200,49 @@ _GRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "graph_name": {"type": "string", "description": "Target graph (default: EventGraph)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Target graph (default: EventGraph)",
+                },
                 "ops": {
                     "type": "array",
                     "description": "Ordered list of patch operations (same format as graph.apply_patch)",
                     "items": {
                         "type": "object",
-                        "properties": {
-                            "op": {"type": "string"}
-                        },
-                        "required": ["op"]
-                    }
-                }
+                        "properties": {"op": {"type": "string"}},
+                        "required": ["op"],
+                    },
+                },
             },
-            "required": ["blueprint_name", "ops"]
+            "required": ["blueprint_name", "ops"],
         },
         capabilities=("read",),
         examples=(
             {
                 "blueprint_name": "BP_MyActor",
                 "ops": [
-                    {"op": "add_node", "id": "evt", "node_type": "Event", "event_name": "BeginPlay"},
-                    {"op": "add_node", "id": "print", "node_type": "FunctionCall", "function_name": "PrintString"},
-                    {"op": "connect", "from": {"node": "evt", "pin": "then"}, "to": {"node": "print", "pin": "execute"}},
-                ]
+                    {
+                        "op": "add_node",
+                        "id": "evt",
+                        "node_type": "Event",
+                        "event_name": "BeginPlay",
+                    },
+                    {
+                        "op": "add_node",
+                        "id": "print",
+                        "node_type": "FunctionCall",
+                        "function_name": "PrintString",
+                    },
+                    {
+                        "op": "connect",
+                        "from": {"node": "evt", "pin": "then"},
+                        "to": {"node": "print", "pin": "execute"},
+                    },
+                ],
             },
         ),
     ),
@@ -2155,51 +3250,90 @@ _GRAPH_ACTIONS = [
     ActionDef(
         id="graph.export_nodes",
         command="export_nodes_to_text",
-        tags=("graph", "export", "nodes", "text", "serialize", "copy", "transfer", "cross-graph"),
+        tags=(
+            "graph",
+            "export",
+            "nodes",
+            "text",
+            "serialize",
+            "copy",
+            "transfer",
+            "cross-graph",
+        ),
         description="Serialize a set of Blueprint graph nodes to text using UE's native ExportNodesToText. The exported text can later be imported into any compatible graph via graph.import_nodes, enabling cross-graph node transfer workflows.",
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint containing the source graph"},
-                "graph_name": {"type": "string", "description": "Source graph name (default: EventGraph)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint containing the source graph",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Source graph name (default: EventGraph)",
+                },
                 "node_ids": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Array of node GUID strings to export"
-                }
+                    "description": "Array of node GUID strings to export",
+                },
             },
-            "required": ["blueprint_name", "node_ids"]
+            "required": ["blueprint_name", "node_ids"],
         },
         capabilities=("read",),
         examples=(
             {
                 "blueprint_name": "BP_MyActor",
-                "node_ids": ["A1B2C3D4-E5F6-7890-ABCD-EF1234567890"]
+                "node_ids": ["A1B2C3D4-E5F6-7890-ABCD-EF1234567890"],
             },
         ),
     ),
     ActionDef(
         id="graph.import_nodes",
         command="import_nodes_from_text",
-        tags=("graph", "import", "nodes", "text", "deserialize", "paste", "transfer", "cross-graph"),
+        tags=(
+            "graph",
+            "import",
+            "nodes",
+            "text",
+            "deserialize",
+            "paste",
+            "transfer",
+            "cross-graph",
+        ),
         description="Import (paste) nodes from previously exported text into a target Blueprint graph. Supports importing into a different graph than the export source, enabling cross-graph node migration. Optionally apply a position offset to avoid overlapping.",
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the target Blueprint"},
-                "graph_name": {"type": "string", "description": "Target graph name (default: EventGraph)"},
-                "exported_text": {"type": "string", "description": "Node text obtained from graph.export_nodes"},
-                "offset_x": {"type": "number", "description": "X position offset for pasted nodes (default: 0)"},
-                "offset_y": {"type": "number", "description": "Y position offset for pasted nodes (default: 0)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the target Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Target graph name (default: EventGraph)",
+                },
+                "exported_text": {
+                    "type": "string",
+                    "description": "Node text obtained from graph.export_nodes",
+                },
+                "offset_x": {
+                    "type": "number",
+                    "description": "X position offset for pasted nodes (default: 0)",
+                },
+                "offset_y": {
+                    "type": "number",
+                    "description": "Y position offset for pasted nodes (default: 0)",
+                },
             },
-            "required": ["blueprint_name", "exported_text"]
+            "required": ["blueprint_name", "exported_text"],
         },
         examples=(
             {
                 "blueprint_name": "BP_TargetActor",
                 "exported_text": "<exported text from graph.export_nodes>",
                 "offset_x": 200,
-                "offset_y": 0
+                "offset_y": 0,
             },
         ),
     ),
@@ -2218,11 +3352,20 @@ _VARIABLE_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable"},
-                "default_value": {"type": "string", "description": "Default value as string"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable",
+                },
+                "default_value": {
+                    "type": "string",
+                    "description": "Default value as string",
+                },
             },
-            "required": ["blueprint_name", "variable_name", "default_value"]
+            "required": ["blueprint_name", "variable_name", "default_value"],
         },
     ),
     ActionDef(
@@ -2233,10 +3376,16 @@ _VARIABLE_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable to delete"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable to delete",
+                },
             },
-            "required": ["blueprint_name", "variable_name"]
+            "required": ["blueprint_name", "variable_name"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
@@ -2249,11 +3398,14 @@ _VARIABLE_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "old_name": {"type": "string", "description": "Current variable name"},
-                "new_name": {"type": "string", "description": "New variable name"}
+                "new_name": {"type": "string", "description": "New variable name"},
             },
-            "required": ["blueprint_name", "old_name", "new_name"]
+            "required": ["blueprint_name", "old_name", "new_name"],
         },
     ),
     ActionDef(
@@ -2264,17 +3416,38 @@ _VARIABLE_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "variable_name": {"type": "string", "description": "Name of the variable"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "variable_name": {
+                    "type": "string",
+                    "description": "Name of the variable",
+                },
                 "category": {"type": "string", "description": "Variable category"},
                 "tooltip": {"type": "string", "description": "Tooltip description"},
-                "instance_editable": {"type": "boolean", "description": "Expose to details panel"},
-                "blueprint_read_only": {"type": "boolean", "description": "Read-only in graph"},
-                "expose_on_spawn": {"type": "boolean", "description": "Expose on SpawnActor node"},
-                "replicated": {"type": "boolean", "description": "Enable network replication"},
-                "private": {"type": "boolean", "description": "Accessible only within this Blueprint"}
+                "instance_editable": {
+                    "type": "boolean",
+                    "description": "Expose to details panel",
+                },
+                "blueprint_read_only": {
+                    "type": "boolean",
+                    "description": "Read-only in graph",
+                },
+                "expose_on_spawn": {
+                    "type": "boolean",
+                    "description": "Expose on SpawnActor node",
+                },
+                "replicated": {
+                    "type": "boolean",
+                    "description": "Enable network replication",
+                },
+                "private": {
+                    "type": "boolean",
+                    "description": "Accessible only within this Blueprint",
+                },
             },
-            "required": ["blueprint_name", "variable_name"]
+            "required": ["blueprint_name", "variable_name"],
         },
     ),
 ]
@@ -2292,15 +3465,39 @@ _FUNCTION_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "function_name": {"type": "string", "description": "Name of the function"},
-                "inputs": {"type": "array", "items": {"type": "object"}, "description": "Input parameters with 'name' and 'type' keys"},
-                "outputs": {"type": "array", "items": {"type": "object"}, "description": "Output parameters with 'name' and 'type' keys"},
-                "is_pure": {"type": "boolean", "description": "Create as pure function (no exec pins)"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Name of the function",
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Input parameters with 'name' and 'type' keys",
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Output parameters with 'name' and 'type' keys",
+                },
+                "is_pure": {
+                    "type": "boolean",
+                    "description": "Create as pure function (no exec pins)",
+                },
             },
-            "required": ["blueprint_name", "function_name"]
+            "required": ["blueprint_name", "function_name"],
         },
-        examples=({"blueprint_name": "BP_Player", "function_name": "GetHealthPercent", "outputs": [{"name": "Percent", "type": "Float"}], "is_pure": True},),
+        examples=(
+            {
+                "blueprint_name": "BP_Player",
+                "function_name": "GetHealthPercent",
+                "outputs": [{"name": "Percent", "type": "Float"}],
+                "is_pure": True,
+            },
+        ),
     ),
     ActionDef(
         id="function.call",
@@ -2310,13 +3507,26 @@ _FUNCTION_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Blueprint where to add the node"},
-                "target_blueprint": {"type": "string", "description": "Blueprint containing the function"},
-                "function_name": {"type": "string", "description": "Name of the function"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Blueprint where to add the node",
+                },
+                "target_blueprint": {
+                    "type": "string",
+                    "description": "Blueprint containing the function",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Name of the function",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "target_blueprint", "function_name"]
+            "required": ["blueprint_name", "target_blueprint", "function_name"],
         },
     ),
     ActionDef(
@@ -2327,10 +3537,16 @@ _FUNCTION_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "function_name": {"type": "string", "description": "Name of the function to delete"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Name of the function to delete",
+                },
             },
-            "required": ["blueprint_name", "function_name"]
+            "required": ["blueprint_name", "function_name"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
@@ -2343,11 +3559,17 @@ _FUNCTION_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "function_name": {"type": "string", "description": "Current function name"},
-                "new_name": {"type": "string", "description": "New function name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Current function name",
+                },
+                "new_name": {"type": "string", "description": "New function name"},
             },
-            "required": ["blueprint_name", "function_name", "new_name"]
+            "required": ["blueprint_name", "function_name", "new_name"],
         },
     ),
     ActionDef(
@@ -2358,11 +3580,14 @@ _FUNCTION_MGMT_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
                 "macro_name": {"type": "string", "description": "Current macro name"},
-                "new_name": {"type": "string", "description": "New macro name"}
+                "new_name": {"type": "string", "description": "New macro name"},
             },
-            "required": ["blueprint_name", "macro_name", "new_name"]
+            "required": ["blueprint_name", "macro_name", "new_name"],
         },
     ),
 ]
@@ -2380,13 +3605,26 @@ _STRUCT_SWITCH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "struct_type": {"type": "string", "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color"},
-                "pin_defaults": {"type": "object", "description": "Default pin values (e.g., {'X': '1920', 'Y': '1080'})"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "struct_type": {
+                    "type": "string",
+                    "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color",
+                },
+                "pin_defaults": {
+                    "type": "object",
+                    "description": "Default pin values (e.g., {'X': '1920', 'Y': '1080'})",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "struct_type"]
+            "required": ["blueprint_name", "struct_type"],
         },
     ),
     ActionDef(
@@ -2397,12 +3635,22 @@ _STRUCT_SWITCH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "struct_type": {"type": "string", "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "struct_type": {
+                    "type": "string",
+                    "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name", "struct_type"]
+            "required": ["blueprint_name", "struct_type"],
         },
     ),
     ActionDef(
@@ -2413,12 +3661,23 @@ _STRUCT_SWITCH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "cases": {"type": "array", "items": {"type": "string"}, "description": "String case values"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "cases": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "String case values",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
     ),
     ActionDef(
@@ -2429,13 +3688,27 @@ _STRUCT_SWITCH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                "start_index": {"type": "integer", "description": "Starting index (default: 0)"},
-                "cases": {"type": "array", "items": {"type": "integer"}, "description": "Number of cases"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "graph_name": {"type": "string", "description": "Optional graph name"}
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Blueprint",
+                },
+                "start_index": {
+                    "type": "integer",
+                    "description": "Starting index (default: 0)",
+                },
+                "cases": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Number of cases",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "graph_name": {"type": "string", "description": "Optional graph name"},
             },
-            "required": ["blueprint_name"]
+            "required": ["blueprint_name"],
         },
     ),
 ]
@@ -2453,14 +3726,32 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Materials)"},
-                "domain": {"type": "string", "description": "Material domain (Surface, PostProcess, DeferredDecal, LightFunction, UI)"},
-                "blend_mode": {"type": "string", "description": "Blend mode (Opaque, Masked, Translucent, Additive, Modulate)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Materials)",
+                },
+                "domain": {
+                    "type": "string",
+                    "description": "Material domain (Surface, PostProcess, DeferredDecal, LightFunction, UI)",
+                },
+                "blend_mode": {
+                    "type": "string",
+                    "description": "Blend mode (Opaque, Masked, Translucent, Additive, Modulate)",
+                },
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
-        examples=({"material_name": "M_Glow", "domain": "Surface", "blend_mode": "Translucent"},),
+        examples=(
+            {
+                "material_name": "M_Glow",
+                "domain": "Surface",
+                "blend_mode": "Translucent",
+            },
+        ),
     ),
     ActionDef(
         id="material.add_expression",
@@ -2470,13 +3761,29 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "expression_class": {"type": "string", "description": "Type (ScalarParameter, VectorParameter, Add, Multiply, Lerp, etc.)"},
-                "node_name": {"type": "string", "description": "Unique name for this node"},
-                "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                "properties": {"type": "object", "description": "Property name/value pairs"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "expression_class": {
+                    "type": "string",
+                    "description": "Type (ScalarParameter, VectorParameter, Add, Multiply, Lerp, etc.)",
+                },
+                "node_name": {
+                    "type": "string",
+                    "description": "Unique name for this node",
+                },
+                "position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
+                "properties": {
+                    "type": "object",
+                    "description": "Property name/value pairs",
+                },
             },
-            "required": ["material_name", "expression_class", "node_name"]
+            "required": ["material_name", "expression_class", "node_name"],
         },
     ),
     ActionDef(
@@ -2487,13 +3794,28 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "source_node": {"type": "string", "description": "Source expression name"},
-                "source_output_index": {"type": "integer", "description": "Output pin index (default: 0)"},
-                "target_node": {"type": "string", "description": "Target expression name"},
-                "target_input": {"type": "string", "description": "Input pin name (A, B, Alpha, etc.)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "source_node": {
+                    "type": "string",
+                    "description": "Source expression name",
+                },
+                "source_output_index": {
+                    "type": "integer",
+                    "description": "Output pin index (default: 0)",
+                },
+                "target_node": {
+                    "type": "string",
+                    "description": "Target expression name",
+                },
+                "target_input": {
+                    "type": "string",
+                    "description": "Input pin name (A, B, Alpha, etc.)",
+                },
             },
-            "required": ["material_name", "source_node", "target_node", "target_input"]
+            "required": ["material_name", "source_node", "target_node", "target_input"],
         },
     ),
     ActionDef(
@@ -2504,12 +3826,24 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "source_node": {"type": "string", "description": "Source expression name"},
-                "source_output_index": {"type": "integer", "description": "Output pin index (default: 0)"},
-                "material_property": {"type": "string", "description": "Material property (BaseColor, EmissiveColor, Metallic, Roughness, Normal, Opacity, etc.)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "source_node": {
+                    "type": "string",
+                    "description": "Source expression name",
+                },
+                "source_output_index": {
+                    "type": "integer",
+                    "description": "Output pin index (default: 0)",
+                },
+                "material_property": {
+                    "type": "string",
+                    "description": "Material property (BaseColor, EmissiveColor, Metallic, Roughness, Normal, Opacity, etc.)",
+                },
             },
-            "required": ["material_name", "source_node", "material_property"]
+            "required": ["material_name", "source_node", "material_property"],
         },
     ),
     ActionDef(
@@ -2520,12 +3854,20 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
                 "node_name": {"type": "string", "description": "Expression node name"},
                 "property_name": {"type": "string", "description": "Property to set"},
-                "property_value": {"type": "string", "description": "Value to set"}
+                "property_value": {"type": "string", "description": "Value to set"},
             },
-            "required": ["material_name", "node_name", "property_name", "property_value"]
+            "required": [
+                "material_name",
+                "node_name",
+                "property_name",
+                "property_value",
+            ],
         },
     ),
     ActionDef(
@@ -2536,9 +3878,12 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material (optional; uses current material if omitted)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material (optional; uses current material if omitted)",
+                }
             },
-            "required": []
+            "required": [],
         },
     ),
     ActionDef(
@@ -2549,15 +3894,36 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "instance_name": {"type": "string", "description": "Name for the instance"},
-                "parent_material": {"type": "string", "description": "Parent material name"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Materials)"},
-                "scalar_parameters": {"type": "object", "description": "Scalar parameter overrides {name: value}"},
-                "vector_parameters": {"type": "object", "description": "Vector parameter overrides {name: [R,G,B,A]}"},
-                "texture_parameters": {"type": "object", "description": "Texture parameter overrides {name: asset_path}"},
-                "static_switch_parameters": {"type": "object", "description": "Static switch parameter overrides {name: bool}"}
+                "instance_name": {
+                    "type": "string",
+                    "description": "Name for the instance",
+                },
+                "parent_material": {
+                    "type": "string",
+                    "description": "Parent material name",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Materials)",
+                },
+                "scalar_parameters": {
+                    "type": "object",
+                    "description": "Scalar parameter overrides {name: value}",
+                },
+                "vector_parameters": {
+                    "type": "object",
+                    "description": "Vector parameter overrides {name: [R,G,B,A]}",
+                },
+                "texture_parameters": {
+                    "type": "object",
+                    "description": "Texture parameter overrides {name: asset_path}",
+                },
+                "static_switch_parameters": {
+                    "type": "object",
+                    "description": "Static switch parameter overrides {name: bool}",
+                },
             },
-            "required": ["instance_name", "parent_material"]
+            "required": ["instance_name", "parent_material"],
         },
     ),
     ActionDef(
@@ -2568,11 +3934,17 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "property_name": {"type": "string", "description": "Property (ShadingModel, TwoSided, BlendMode, etc.)"},
-                "property_value": {"type": "string", "description": "Value to set"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "property_name": {
+                    "type": "string",
+                    "description": "Property (ShadingModel, TwoSided, BlendMode, etc.)",
+                },
+                "property_value": {"type": "string", "description": "Value to set"},
             },
-            "required": ["material_name", "property_name", "property_value"]
+            "required": ["material_name", "property_name", "property_value"],
         },
     ),
     ActionDef(
@@ -2584,12 +3956,26 @@ _MATERIAL_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name for the volume"},
-                "location": {"type": "array", "items": {"type": "number"}, "description": "[X, Y, Z]"},
-                "infinite_extent": {"type": "boolean", "description": "Apply everywhere (default: true)"},
-                "priority": {"type": "number", "description": "Priority (default: 0.0)"},
-                "post_process_materials": {"type": "array", "items": {"type": "string"}, "description": "Materials to add"}
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y, Z]",
+                },
+                "infinite_extent": {
+                    "type": "boolean",
+                    "description": "Apply everywhere (default: true)",
+                },
+                "priority": {
+                    "type": "number",
+                    "description": "Priority (default: 0.0)",
+                },
+                "post_process_materials": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Materials to add",
+                },
             },
-            "required": ["name"]
+            "required": ["name"],
         },
     ),
     # Phase 4 Material Actions
@@ -2601,9 +3987,12 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("read",),
     ),
@@ -2615,11 +4004,21 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "node_name": {"type": "string", "description": "Single node name to remove"},
-                "node_names": {"type": "array", "items": {"type": "string"}, "description": "Array of node names to remove"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "node_name": {
+                    "type": "string",
+                    "description": "Single node name to remove",
+                },
+                "node_names": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Array of node names to remove",
+                },
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("write", "destructive"),
         risk="destructive",
@@ -2632,11 +4031,20 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "layer_spacing": {"type": "number", "description": "Horizontal spacing (>0=fixed px, 0=auto)"},
-                "row_spacing": {"type": "number", "description": "Vertical spacing (>0=fixed px, 0=auto)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "layer_spacing": {
+                    "type": "number",
+                    "description": "Horizontal spacing (>0=fixed px, 0=auto)",
+                },
+                "row_spacing": {
+                    "type": "number",
+                    "description": "Vertical spacing (>0=fixed px, 0=auto)",
+                },
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
     ),
     ActionDef(
@@ -2647,16 +4055,39 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
                 "comment_text": {"type": "string", "description": "Comment text"},
-                "node_names": {"type": "array", "items": {"type": "string"}, "description": "Node names to wrap ($expr_N, param names, $selected). Default: all"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] (0-1)"},
-                "padding": {"type": "number", "description": "Padding around nodes in pixels (default: 40)"},
-                "use_selected": {"type": "boolean", "description": "Wrap currently selected nodes in editor (default: false)"},
-                "overwrite": {"type": "boolean", "description": "Remove existing comments with same text before creating (default: false)"},
-                "clear_all": {"type": "boolean", "description": "Remove ALL existing comments before creating (default: false)"}
+                "node_names": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Node names to wrap ($expr_N, param names, $selected). Default: all",
+                },
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B, A] (0-1)",
+                },
+                "padding": {
+                    "type": "number",
+                    "description": "Padding around nodes in pixels (default: 40)",
+                },
+                "use_selected": {
+                    "type": "boolean",
+                    "description": "Wrap currently selected nodes in editor (default: false)",
+                },
+                "overwrite": {
+                    "type": "boolean",
+                    "description": "Remove existing comments with same text before creating (default: false)",
+                },
+                "clear_all": {
+                    "type": "boolean",
+                    "description": "Remove ALL existing comments before creating (default: false)",
+                },
             },
-            "required": ["material_name", "comment_text"]
+            "required": ["material_name", "comment_text"],
         },
     ),
     # Phase 5: Material apply actions
@@ -2668,12 +4099,24 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "actor_name": {"type": "string", "description": "Name of the Actor in the level"},
-                "material_path": {"type": "string", "description": "Asset path of the material (e.g. /Game/Materials/M_Example)"},
-                "component_name": {"type": "string", "description": "Component name (default: first PrimitiveComponent)"},
-                "slot_index": {"type": "integer", "description": "Material slot index (default: 0)"}
+                "actor_name": {
+                    "type": "string",
+                    "description": "Name of the Actor in the level",
+                },
+                "material_path": {
+                    "type": "string",
+                    "description": "Asset path of the material (e.g. /Game/Materials/M_Example)",
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Component name (default: first PrimitiveComponent)",
+                },
+                "slot_index": {
+                    "type": "integer",
+                    "description": "Material slot index (default: 0)",
+                },
             },
-            "required": ["actor_name", "material_path"]
+            "required": ["actor_name", "material_path"],
         },
     ),
     ActionDef(
@@ -2684,11 +4127,20 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "actor_name": {"type": "string", "description": "Name of the Actor in the level"},
-                "material_path": {"type": "string", "description": "Asset path of the material"},
-                "slot_index": {"type": "integer", "description": "Material slot index (default: 0)"}
+                "actor_name": {
+                    "type": "string",
+                    "description": "Name of the Actor in the level",
+                },
+                "material_path": {
+                    "type": "string",
+                    "description": "Asset path of the material",
+                },
+                "slot_index": {
+                    "type": "integer",
+                    "description": "Material slot index (default: 0)",
+                },
             },
-            "required": ["actor_name", "material_path"]
+            "required": ["actor_name", "material_path"],
         },
     ),
     ActionDef(
@@ -2699,9 +4151,12 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material to refresh"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material to refresh",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
     ),
     ActionDef(
@@ -2712,9 +4167,12 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material (auto-detected if omitted)"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material (auto-detected if omitted)",
+                }
             },
-            "required": []
+            "required": [],
         },
         capabilities=("read",),
     ),
@@ -2722,14 +4180,25 @@ _MATERIAL_ACTIONS = [
     ActionDef(
         id="material.analyze_complexity",
         command="analyze_material_complexity",
-        tags=("material", "analyze", "analysis", "complexity", "performance", "instructions", "read"),
+        tags=(
+            "material",
+            "analyze",
+            "analysis",
+            "complexity",
+            "performance",
+            "instructions",
+            "read",
+        ),
         description="Analyze material graph complexity: node count, type distribution, connection count, shader instructions, parameters, and texture samples.",
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("read",),
         examples=({"material_name": "M_Glow"},),
@@ -2737,14 +4206,25 @@ _MATERIAL_ACTIONS = [
     ActionDef(
         id="material.analyze_dependencies",
         command="analyze_material_dependencies",
-        tags=("material", "analyze", "analysis", "dependencies", "textures", "references", "read"),
+        tags=(
+            "material",
+            "analyze",
+            "analysis",
+            "dependencies",
+            "textures",
+            "references",
+            "read",
+        ),
         description="Analyze external asset dependencies (textures, material functions) and level actor references for a material.",
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("read",),
         examples=({"material_name": "M_Rock"},),
@@ -2752,14 +4232,26 @@ _MATERIAL_ACTIONS = [
     ActionDef(
         id="material.diagnose",
         command="diagnose_material",
-        tags=("material", "analyze", "analysis", "diagnose", "diagnostic", "issues", "health", "read"),
+        tags=(
+            "material",
+            "analyze",
+            "analysis",
+            "diagnose",
+            "diagnostic",
+            "issues",
+            "health",
+            "read",
+        ),
         description="Diagnose a material for common issues: incompatible domain/blend mode, excessive texture samples, orphan nodes, and custom HLSL usage.",
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("read",),
         examples=({"material_name": "M_Character"},),
@@ -2767,15 +4259,29 @@ _MATERIAL_ACTIONS = [
     ActionDef(
         id="material.diff",
         command="diff_materials",
-        tags=("material", "analyze", "analysis", "diff", "compare", "difference", "read"),
+        tags=(
+            "material",
+            "analyze",
+            "analysis",
+            "diff",
+            "compare",
+            "difference",
+            "read",
+        ),
         description="Compare two materials and report differences in node count, connections, material properties, and parameters.",
         input_schema={
             "type": "object",
             "properties": {
-                "material_name_a": {"type": "string", "description": "Name of the first Material"},
-                "material_name_b": {"type": "string", "description": "Name of the second Material"}
+                "material_name_a": {
+                    "type": "string",
+                    "description": "Name of the first Material",
+                },
+                "material_name_b": {
+                    "type": "string",
+                    "description": "Name of the second Material",
+                },
             },
-            "required": ["material_name_a", "material_name_b"]
+            "required": ["material_name_a", "material_name_b"],
         },
         capabilities=("read",),
         examples=({"material_name_a": "M_Base", "material_name_b": "M_Base_V2"},),
@@ -2783,14 +4289,27 @@ _MATERIAL_ACTIONS = [
     ActionDef(
         id="material.extract_parameters",
         command="extract_material_parameters",
-        tags=("material", "analyze", "analysis", "parameters", "extract", "scalar", "vector", "texture", "read"),
+        tags=(
+            "material",
+            "analyze",
+            "analysis",
+            "parameters",
+            "extract",
+            "scalar",
+            "vector",
+            "texture",
+            "read",
+        ),
         description="Extract all parameter nodes from a material with their metadata: name, type, default value, group, and sort priority.",
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                }
             },
-            "required": ["material_name"]
+            "required": ["material_name"],
         },
         capabilities=("read",),
         examples=({"material_name": "M_Master"},),
@@ -2803,22 +4322,33 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "parent_material": {"type": "string", "description": "Name of the parent Material"},
+                "parent_material": {
+                    "type": "string",
+                    "description": "Name of the parent Material",
+                },
                 "instances": {
                     "type": "array",
                     "description": "Array of instance definitions {name, path?, scalar_parameters?, vector_parameters?, texture_parameters?, static_switch_parameters?}",
-                    "items": {"type": "object"}
-                }
+                    "items": {"type": "object"},
+                },
             },
-            "required": ["parent_material", "instances"]
+            "required": ["parent_material", "instances"],
         },
         examples=(
             {
                 "parent_material": "M_Master",
                 "instances": [
-                    {"name": "MI_Red", "scalar_parameters": {"Roughness": 0.2}, "vector_parameters": {"BaseColor": [1, 0, 0, 1]}},
-                    {"name": "MI_Blue", "scalar_parameters": {"Roughness": 0.5}, "vector_parameters": {"BaseColor": [0, 0, 1, 1]}},
-                ]
+                    {
+                        "name": "MI_Red",
+                        "scalar_parameters": {"Roughness": 0.2},
+                        "vector_parameters": {"BaseColor": [1, 0, 0, 1]},
+                    },
+                    {
+                        "name": "MI_Blue",
+                        "scalar_parameters": {"Roughness": 0.5},
+                        "vector_parameters": {"BaseColor": [0, 0, 1, 1]},
+                    },
+                ],
             },
         ),
     ),
@@ -2830,15 +4360,32 @@ _MATERIAL_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "material_name": {"type": "string", "description": "Name of the Material"},
-                "node_name": {"type": "string", "description": "Name of the node to replace"},
-                "new_expression_class": {"type": "string", "description": "Target expression type (e.g. Multiply, Add, Lerp)"},
-                "new_properties": {"type": "object", "description": "Optional property overrides for the new node"}
+                "material_name": {
+                    "type": "string",
+                    "description": "Name of the Material",
+                },
+                "node_name": {
+                    "type": "string",
+                    "description": "Name of the node to replace",
+                },
+                "new_expression_class": {
+                    "type": "string",
+                    "description": "Target expression type (e.g. Multiply, Add, Lerp)",
+                },
+                "new_properties": {
+                    "type": "object",
+                    "description": "Optional property overrides for the new node",
+                },
             },
-            "required": ["material_name", "node_name", "new_expression_class"]
+            "required": ["material_name", "node_name", "new_expression_class"],
         },
         examples=(
-            {"material_name": "M_Glow", "node_name": "blend_node", "new_expression_class": "Lerp", "new_properties": {"ConstAlpha": 0.5}},
+            {
+                "material_name": "M_Glow",
+                "node_name": "blend_node",
+                "new_expression_class": "Lerp",
+                "new_properties": {"ConstAlpha": 0.5},
+            },
         ),
     ),
 ]
@@ -2856,11 +4403,20 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the widget blueprint"},
-                "parent_class": {"type": "string", "description": "Parent class (default: UserWidget)"},
-                "path": {"type": "string", "description": "Content path (default: /Game/UI)"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the widget blueprint",
+                },
+                "parent_class": {
+                    "type": "string",
+                    "description": "Parent class (default: UserWidget)",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/UI)",
+                },
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
         examples=({"widget_name": "WBP_HUD"},),
     ),
@@ -2872,9 +4428,12 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint to delete"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint to delete",
+                }
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
         capabilities=("write", "destructive"),
         risk="destructive",
@@ -2887,16 +4446,65 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "component_type": {"type": "string", "enum": ["TextBlock", "Button", "Image", "Border", "Overlay", "HorizontalBox", "VerticalBox", "Slider", "ProgressBar", "SizeBox", "ScaleBox", "CanvasPanel", "ComboBox", "CheckBox", "SpinBox", "EditableTextBox", "ScrollBox", "WidgetSwitcher", "BackgroundBlur", "UniformGridPanel", "Spacer", "RichTextBlock", "WrapBox", "CircularThrobber"]},
-                "component_name": {"type": "string", "description": "Name for the component"},
-                "text": {"type": "string", "description": "Text content (TextBlock, Button)"},
-                "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y]"},
-                "size": {"type": "array", "items": {"type": "number"}, "description": "[Width, Height]"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "component_type": {
+                    "type": "string",
+                    "enum": [
+                        "TextBlock",
+                        "Button",
+                        "Image",
+                        "Border",
+                        "Overlay",
+                        "HorizontalBox",
+                        "VerticalBox",
+                        "Slider",
+                        "ProgressBar",
+                        "SizeBox",
+                        "ScaleBox",
+                        "CanvasPanel",
+                        "ComboBox",
+                        "CheckBox",
+                        "SpinBox",
+                        "EditableTextBox",
+                        "ScrollBox",
+                        "WidgetSwitcher",
+                        "BackgroundBlur",
+                        "UniformGridPanel",
+                        "Spacer",
+                        "RichTextBlock",
+                        "WrapBox",
+                        "CircularThrobber",
+                    ],
+                },
+                "component_name": {
+                    "type": "string",
+                    "description": "Name for the component",
+                },
+                "text": {
+                    "type": "string",
+                    "description": "Text content (TextBlock, Button)",
+                },
+                "position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y]",
+                },
+                "size": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[Width, Height]",
+                },
                 "font_size": {"type": "integer", "description": "Font size"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A]"}
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B, A]",
+                },
             },
-            "required": ["widget_name", "component_type", "component_name"]
+            "required": ["widget_name", "component_type", "component_name"],
         },
     ),
     ActionDef(
@@ -2907,11 +4515,20 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "widget_component_name": {"type": "string", "description": "Component name (e.g., RestartButton)"},
-                "event_name": {"type": "string", "description": "Event (OnClicked, OnPressed, OnReleased, etc.)"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "widget_component_name": {
+                    "type": "string",
+                    "description": "Component name (e.g., RestartButton)",
+                },
+                "event_name": {
+                    "type": "string",
+                    "description": "Event (OnClicked, OnPressed, OnReleased, etc.)",
+                },
             },
-            "required": ["widget_name", "widget_component_name", "event_name"]
+            "required": ["widget_name", "widget_component_name", "event_name"],
         },
     ),
     ActionDef(
@@ -2922,10 +4539,16 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "z_order": {"type": "integer", "description": "Z-order (higher = on top)"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "z_order": {
+                    "type": "integer",
+                    "description": "Z-order (higher = on top)",
+                },
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
     ),
     ActionDef(
@@ -2936,12 +4559,24 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "text_block_name": {"type": "string", "description": "Name of the Text Block"},
-                "binding_property": {"type": "string", "description": "Property to bind to"},
-                "binding_type": {"type": "string", "description": "Binding type (Text, Visibility, etc.)"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "text_block_name": {
+                    "type": "string",
+                    "description": "Name of the Text Block",
+                },
+                "binding_property": {
+                    "type": "string",
+                    "description": "Property to bind to",
+                },
+                "binding_type": {
+                    "type": "string",
+                    "description": "Binding type (Text, Visibility, etc.)",
+                },
             },
-            "required": ["widget_name", "text_block_name", "binding_property"]
+            "required": ["widget_name", "text_block_name", "binding_property"],
         },
     ),
     ActionDef(
@@ -2952,9 +4587,12 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                }
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
         capabilities=("read",),
     ),
@@ -2966,9 +4604,12 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                }
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
         capabilities=("read",),
     ),
@@ -2980,17 +4621,47 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "target": {"type": "string", "description": "Name of the widget to modify"},
-                "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] (CanvasPanel slot)"},
-                "size": {"type": "array", "items": {"type": "number"}, "description": "[W, H] (CanvasPanel slot)"},
-                "visibility": {"type": "string", "description": "Visible, Hidden, Collapsed, HitTestInvisible, SelfHitTestInvisible"},
-                "is_enabled": {"type": "boolean", "description": "Whether widget is enabled"},
-                "h_align": {"type": "string", "description": "Horizontal alignment: Fill, Left, Center, Right"},
-                "v_align": {"type": "string", "description": "Vertical alignment: Fill, Top, Center, Bottom"},
-                "padding": {"type": "array", "items": {"type": "number"}, "description": "[Left, Top, Right, Bottom]"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "target": {
+                    "type": "string",
+                    "description": "Name of the widget to modify",
+                },
+                "position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] (CanvasPanel slot)",
+                },
+                "size": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[W, H] (CanvasPanel slot)",
+                },
+                "visibility": {
+                    "type": "string",
+                    "description": "Visible, Hidden, Collapsed, HitTestInvisible, SelfHitTestInvisible",
+                },
+                "is_enabled": {
+                    "type": "boolean",
+                    "description": "Whether widget is enabled",
+                },
+                "h_align": {
+                    "type": "string",
+                    "description": "Horizontal alignment: Fill, Left, Center, Right",
+                },
+                "v_align": {
+                    "type": "string",
+                    "description": "Vertical alignment: Fill, Top, Center, Bottom",
+                },
+                "padding": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[Left, Top, Right, Bottom]",
+                },
             },
-            "required": ["widget_name", "target"]
+            "required": ["widget_name", "target"],
         },
     ),
     ActionDef(
@@ -3001,14 +4672,24 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
                 "target": {"type": "string", "description": "TextBlock or Button name"},
                 "text": {"type": "string", "description": "Text to set"},
                 "font_size": {"type": "integer", "description": "Font size"},
-                "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A]"},
-                "justification": {"type": "string", "enum": ["Left", "Center", "Right"]}
+                "color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[R, G, B, A]",
+                },
+                "justification": {
+                    "type": "string",
+                    "enum": ["Left", "Center", "Right"],
+                },
             },
-            "required": ["widget_name", "target"]
+            "required": ["widget_name", "target"],
         },
     ),
     ActionDef(
@@ -3019,13 +4700,29 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "target": {"type": "string", "description": "ComboBoxString widget name"},
-                "mode": {"type": "string", "enum": ["replace", "add", "remove", "clear"]},
-                "options": {"type": "array", "items": {"type": "string"}, "description": "Options to apply"},
-                "selected_option": {"type": "string", "description": "Option to select"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "target": {
+                    "type": "string",
+                    "description": "ComboBoxString widget name",
+                },
+                "mode": {
+                    "type": "string",
+                    "enum": ["replace", "add", "remove", "clear"],
+                },
+                "options": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Options to apply",
+                },
+                "selected_option": {
+                    "type": "string",
+                    "description": "Option to select",
+                },
             },
-            "required": ["widget_name", "target"]
+            "required": ["widget_name", "target"],
         },
     ),
     ActionDef(
@@ -3036,13 +4733,18 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
                 "target": {"type": "string", "description": "Slider widget name"},
                 "value": {"type": "number", "description": "Slider value"},
-                "min_value": {"type": "number"}, "max_value": {"type": "number"},
-                "step_size": {"type": "number"}, "locked": {"type": "boolean"}
+                "min_value": {"type": "number"},
+                "max_value": {"type": "number"},
+                "step_size": {"type": "number"},
+                "locked": {"type": "boolean"},
             },
-            "required": ["widget_name", "target"]
+            "required": ["widget_name", "target"],
         },
     ),
     ActionDef(
@@ -3053,13 +4755,29 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "target_container_name": {"type": "string", "description": "Target container name"},
-                "container_type": {"type": "string", "description": "Container type (VerticalBox, HorizontalBox, etc.)"},
-                "children": {"type": "array", "items": {"type": "string"}, "description": "Widget names to move"},
-                "filter_class": {"type": "string", "description": "Move only widgets of this class"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "target_container_name": {
+                    "type": "string",
+                    "description": "Target container name",
+                },
+                "container_type": {
+                    "type": "string",
+                    "description": "Container type (VerticalBox, HorizontalBox, etc.)",
+                },
+                "children": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Widget names to move",
+                },
+                "filter_class": {
+                    "type": "string",
+                    "description": "Move only widgets of this class",
+                },
             },
-            "required": ["widget_name", "target_container_name"]
+            "required": ["widget_name", "target_container_name"],
         },
     ),
     ActionDef(
@@ -3070,11 +4788,14 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
                 "child": {"type": "string", "description": "Widget to move"},
-                "parent": {"type": "string", "description": "Target parent container"}
+                "parent": {"type": "string", "description": "Target parent container"},
             },
-            "required": ["widget_name", "child", "parent"]
+            "required": ["widget_name", "child", "parent"],
         },
     ),
     ActionDef(
@@ -3085,10 +4806,16 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "target": {"type": "string", "description": "Widget component to delete"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "target": {
+                    "type": "string",
+                    "description": "Widget component to delete",
+                },
             },
-            "required": ["widget_name", "target"]
+            "required": ["widget_name", "target"],
         },
         capabilities=("write", "destructive"),
         risk="moderate",
@@ -3101,11 +4828,14 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
                 "target": {"type": "string", "description": "Current component name"},
-                "new_name": {"type": "string", "description": "New name"}
+                "new_name": {"type": "string", "description": "New name"},
             },
-            "required": ["widget_name", "target", "new_name"]
+            "required": ["widget_name", "target", "new_name"],
         },
     ),
     # --- MVVM Actions ---
@@ -3117,21 +4847,47 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "viewmodel_class": {"type": "string", "description": "ViewModel class name (must implement INotifyFieldValueChanged / derive from UMVVMViewModelBase)"},
-                "viewmodel_name": {"type": "string", "description": "Display name for this ViewModel in the Widget (defaults to class name)"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "viewmodel_class": {
+                    "type": "string",
+                    "description": "ViewModel class name (must implement INotifyFieldValueChanged / derive from UMVVMViewModelBase)",
+                },
+                "viewmodel_name": {
+                    "type": "string",
+                    "description": "Display name for this ViewModel in the Widget (defaults to class name)",
+                },
                 "creation_type": {
                     "type": "string",
-                    "enum": ["CreateInstance", "Manual", "GlobalViewModelCollection", "PropertyPath", "Resolver"],
-                    "description": "How the ViewModel is created at runtime (default: CreateInstance)"
+                    "enum": [
+                        "CreateInstance",
+                        "Manual",
+                        "GlobalViewModelCollection",
+                        "PropertyPath",
+                        "Resolver",
+                    ],
+                    "description": "How the ViewModel is created at runtime (default: CreateInstance)",
                 },
-                "create_setter": {"type": "boolean", "description": "Generate a public setter function (default: false)"},
-                "create_getter": {"type": "boolean", "description": "Generate a public getter function (default: true)"}
+                "create_setter": {
+                    "type": "boolean",
+                    "description": "Generate a public setter function (default: false)",
+                },
+                "create_getter": {
+                    "type": "boolean",
+                    "description": "Generate a public getter function (default: true)",
+                },
             },
-            "required": ["widget_name", "viewmodel_class"]
+            "required": ["widget_name", "viewmodel_class"],
         },
         examples=(
-            {"widget_name": "WBP_HUD", "viewmodel_class": "StatusViewModel", "viewmodel_name": "StatusVM", "creation_type": "CreateInstance"},
+            {
+                "widget_name": "WBP_HUD",
+                "viewmodel_class": "StatusViewModel",
+                "viewmodel_name": "StatusVM",
+                "creation_type": "CreateInstance",
+            },
         ),
     ),
     ActionDef(
@@ -3142,23 +4898,50 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "viewmodel_name": {"type": "string", "description": "Name of the ViewModel (as registered via mvvm_add_viewmodel)"},
-                "source_property": {"type": "string", "description": "Property name on the ViewModel (source)"},
-                "destination_widget": {"type": "string", "description": "Name of the target widget in the Widget Tree"},
-                "destination_property": {"type": "string", "description": "Property name on the target widget (e.g. Text, Percent, Visibility)"},
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "viewmodel_name": {
+                    "type": "string",
+                    "description": "Name of the ViewModel (as registered via mvvm_add_viewmodel)",
+                },
+                "source_property": {
+                    "type": "string",
+                    "description": "Property name on the ViewModel (source)",
+                },
+                "destination_widget": {
+                    "type": "string",
+                    "description": "Name of the target widget in the Widget Tree",
+                },
+                "destination_property": {
+                    "type": "string",
+                    "description": "Property name on the target widget (e.g. Text, Percent, Visibility)",
+                },
                 "binding_mode": {
                     "type": "string",
-                    "enum": ["OneTimeToDestination", "OneWayToDestination", "TwoWay", "OneTimeToSource", "OneWayToSource"],
-                    "description": "Binding direction (default: OneWayToDestination)"
+                    "enum": [
+                        "OneTimeToDestination",
+                        "OneWayToDestination",
+                        "TwoWay",
+                        "OneTimeToSource",
+                        "OneWayToSource",
+                    ],
+                    "description": "Binding direction (default: OneWayToDestination)",
                 },
                 "execution_mode": {
                     "type": "string",
                     "enum": ["Immediate", "Delayed", "Tick", "Auto"],
-                    "description": "When to execute the binding (optional, uses engine default if omitted)"
-                }
+                    "description": "When to execute the binding (optional, uses engine default if omitted)",
+                },
             },
-            "required": ["widget_name", "viewmodel_name", "source_property", "destination_widget", "destination_property"]
+            "required": [
+                "widget_name",
+                "viewmodel_name",
+                "source_property",
+                "destination_widget",
+                "destination_property",
+            ],
         },
         examples=(
             {
@@ -3167,7 +4950,7 @@ _WIDGET_ACTIONS = [
                 "source_property": "HealthPercent",
                 "destination_widget": "HealthBar",
                 "destination_property": "Percent",
-                "binding_mode": "OneWayToDestination"
+                "binding_mode": "OneWayToDestination",
             },
         ),
     ),
@@ -3179,13 +4962,14 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                }
             },
-            "required": ["widget_name"]
+            "required": ["widget_name"],
         },
-        examples=(
-            {"widget_name": "WBP_HUD"},
-        ),
+        examples=({"widget_name": "WBP_HUD"},),
         capabilities=("read",),
     ),
     ActionDef(
@@ -3196,13 +4980,22 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "binding_id": {"type": "string", "description": "Binding ID to remove (from mvvm_get_bindings)"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "binding_id": {
+                    "type": "string",
+                    "description": "Binding ID to remove (from mvvm_get_bindings)",
+                },
             },
-            "required": ["widget_name", "binding_id"]
+            "required": ["widget_name", "binding_id"],
         },
         examples=(
-            {"widget_name": "WBP_HUD", "binding_id": "102D0F354A7C97A46E6E22B42A0C9394"},
+            {
+                "widget_name": "WBP_HUD",
+                "binding_id": "102D0F354A7C97A46E6E22B42A0C9394",
+            },
         ),
     ),
     ActionDef(
@@ -3213,14 +5006,18 @@ _WIDGET_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                "viewmodel_name": {"type": "string", "description": "ViewModel name to remove"}
+                "widget_name": {
+                    "type": "string",
+                    "description": "Name of the Widget Blueprint",
+                },
+                "viewmodel_name": {
+                    "type": "string",
+                    "description": "ViewModel name to remove",
+                },
             },
-            "required": ["widget_name", "viewmodel_name"]
+            "required": ["widget_name", "viewmodel_name"],
         },
-        examples=(
-            {"widget_name": "WBP_HUD", "viewmodel_name": "StatusVM"},
-        ),
+        examples=({"widget_name": "WBP_HUD", "viewmodel_name": "StatusVM"},),
     ),
 ]
 
@@ -3238,11 +5035,17 @@ _INPUT_ACTIONS = [
             "type": "object",
             "properties": {
                 "action_name": {"type": "string", "description": "Input action name"},
-                "key": {"type": "string", "description": "Key (SpaceBar, W, LeftMouseButton, etc.)"},
+                "key": {
+                    "type": "string",
+                    "description": "Key (SpaceBar, W, LeftMouseButton, etc.)",
+                },
                 "input_type": {"type": "string", "description": "Type: Action or Axis"},
-                "scale": {"type": "number", "description": "Scale for Axis (1.0 or -1.0)"}
+                "scale": {
+                    "type": "number",
+                    "description": "Scale for Axis (1.0 or -1.0)",
+                },
             },
-            "required": ["action_name", "key"]
+            "required": ["action_name", "key"],
         },
     ),
     ActionDef(
@@ -3254,10 +5057,16 @@ _INPUT_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name (e.g., IA_Move)"},
-                "value_type": {"type": "string", "description": "Boolean, Axis1D/Float, Axis2D/Vector2D, Axis3D/Vector"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Input)"}
+                "value_type": {
+                    "type": "string",
+                    "description": "Boolean, Axis1D/Float, Axis2D/Vector2D, Axis3D/Vector",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Input)",
+                },
             },
-            "required": ["name"]
+            "required": ["name"],
         },
         examples=({"name": "IA_Move", "value_type": "Axis2D"},),
     ),
@@ -3270,9 +5079,12 @@ _INPUT_ACTIONS = [
             "type": "object",
             "properties": {
                 "name": {"type": "string", "description": "Name (e.g., IMC_Default)"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Input)"}
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Input)",
+                },
             },
-            "required": ["name"]
+            "required": ["name"],
         },
         examples=({"name": "IMC_Default"},),
     ),
@@ -3285,13 +5097,20 @@ _INPUT_ACTIONS = [
             "type": "object",
             "properties": {
                 "context_name": {"type": "string", "description": "IMC asset name"},
-                "action_name": {"type": "string", "description": "Input Action asset name"},
+                "action_name": {
+                    "type": "string",
+                    "description": "Input Action asset name",
+                },
                 "key": {"type": "string", "description": "Key (W, A, SpaceBar, etc.)"},
-                "modifiers": {"type": "array", "items": {"type": "string"}, "description": "Modifiers: Negate, SwizzleYXZ, etc."},
+                "modifiers": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Modifiers: Negate, SwizzleYXZ, etc.",
+                },
                 "context_path": {"type": "string", "description": "Path to IMC"},
-                "action_path": {"type": "string", "description": "Path to IA"}
+                "action_path": {"type": "string", "description": "Path to IA"},
             },
-            "required": ["context_name", "action_name", "key"]
+            "required": ["context_name", "action_name", "key"],
         },
     ),
 ]
@@ -3313,14 +5132,18 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "asset_path": {"type": "string", "description": "Optional full asset path"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "asset_path": {
+                    "type": "string",
+                    "description": "Optional full asset path",
+                },
             },
             "required": ["blueprint_name"],
         },
-        examples=(
-            {"blueprint_name": "ABP_Player"},
-        ),
+        examples=({"blueprint_name": "ABP_Player"},),
     ),
     ActionDef(
         id="animgraph.describe_topology",
@@ -3332,14 +5155,27 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "graph_name": {"type": "string", "description": "Name of the graph to describe"},
-                "compact": {"type": "boolean", "description": "Omit hidden pins and metadata (default: false)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Name of the graph to describe",
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Omit hidden pins and metadata (default: false)",
+                },
             },
             "required": ["blueprint_name", "graph_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "graph_name": "AnimGraph", "compact": True},
+            {
+                "blueprint_name": "ABP_Player",
+                "graph_name": "AnimGraph",
+                "compact": True,
+            },
         ),
     ),
     ActionDef(
@@ -3352,8 +5188,14 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine graph"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine graph",
+                },
             },
             "required": ["blueprint_name", "state_machine_name"],
         },
@@ -3371,15 +5213,28 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "state_name": {"type": "string", "description": "Name of the state"},
-                "compact": {"type": "boolean", "description": "Compact output (default: false)"},
+                "compact": {
+                    "type": "boolean",
+                    "description": "Compact output (default: false)",
+                },
             },
             "required": ["blueprint_name", "state_machine_name", "state_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "state_name": "Idle"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "state_name": "Idle",
+            },
         ),
     ),
     ActionDef(
@@ -3392,16 +5247,35 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "source_state": {"type": "string", "description": "Source state name"},
                 "target_state": {"type": "string", "description": "Target state name"},
-                "compact": {"type": "boolean", "description": "Compact output (default: false)"},
+                "compact": {
+                    "type": "boolean",
+                    "description": "Compact output (default: false)",
+                },
             },
-            "required": ["blueprint_name", "state_machine_name", "source_state", "target_state"],
+            "required": [
+                "blueprint_name",
+                "state_machine_name",
+                "source_state",
+                "target_state",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "source_state": "Idle", "target_state": "Walk"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "source_state": "Idle",
+                "target_state": "Walk",
+            },
         ),
     ),
     # ------------------------------------------------------------------
@@ -3417,16 +5291,26 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "name": {"type": "string", "description": "Name of the new Animation Blueprint"},
-                "skeleton": {"type": "string", "description": "Asset path of the target skeleton (e.g. /Game/Characters/SK_Mannequin)"},
-                "parent_class": {"type": "string", "description": "Parent class (default: AnimInstance)"},
-                "path": {"type": "string", "description": "Content path (default: /Game/Blueprints)"},
+                "name": {
+                    "type": "string",
+                    "description": "Name of the new Animation Blueprint",
+                },
+                "skeleton": {
+                    "type": "string",
+                    "description": "Asset path of the target skeleton (e.g. /Game/Characters/SK_Mannequin)",
+                },
+                "parent_class": {
+                    "type": "string",
+                    "description": "Parent class (default: AnimInstance)",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Content path (default: /Game/Blueprints)",
+                },
             },
             "required": ["name", "skeleton"],
         },
-        examples=(
-            {"name": "ABP_Player", "skeleton": "/Game/Characters/SK_Mannequin"},
-        ),
+        examples=({"name": "ABP_Player", "skeleton": "/Game/Characters/SK_Mannequin"},),
     ),
     ActionDef(
         id="animgraph.add_state_machine",
@@ -3438,14 +5322,28 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name for the new state machine"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name for the new state machine",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
             "required": ["blueprint_name", "state_machine_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "node_position": [200, 100]},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "node_position": [200, 100],
+            },
         ),
     ),
     ActionDef(
@@ -3458,15 +5356,32 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
-                "state_name": {"type": "string", "description": "Name for the new state"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
+                "state_name": {
+                    "type": "string",
+                    "description": "Name for the new state",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
             "required": ["blueprint_name", "state_machine_name", "state_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "state_name": "Run"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "state_name": "Run",
+            },
         ),
     ),
     ActionDef(
@@ -3479,14 +5394,27 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
-                "state_name": {"type": "string", "description": "Name of the state to remove"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
+                "state_name": {
+                    "type": "string",
+                    "description": "Name of the state to remove",
+                },
             },
             "required": ["blueprint_name", "state_machine_name", "state_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "state_name": "OldState"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "state_name": "OldState",
+            },
         ),
     ),
     ActionDef(
@@ -3499,36 +5427,75 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "source_state": {"type": "string", "description": "Source state name"},
                 "target_state": {"type": "string", "description": "Target state name"},
             },
-            "required": ["blueprint_name", "state_machine_name", "source_state", "target_state"],
+            "required": [
+                "blueprint_name",
+                "state_machine_name",
+                "source_state",
+                "target_state",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "source_state": "Idle", "target_state": "Walk"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "source_state": "Idle",
+                "target_state": "Walk",
+            },
         ),
     ),
     ActionDef(
         id="animgraph.remove_transition",
         command="remove_transition_rule",
-        tags=("animgraph", "animation", "write", "destructive", "state_machine", "transition"),
+        tags=(
+            "animgraph",
+            "animation",
+            "write",
+            "destructive",
+            "state_machine",
+            "transition",
+        ),
         capabilities=("write", "destructive"),
         risk="moderate",
         description="Remove a transition rule between two states in a state machine.",
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "source_state": {"type": "string", "description": "Source state name"},
                 "target_state": {"type": "string", "description": "Target state name"},
             },
-            "required": ["blueprint_name", "state_machine_name", "source_state", "target_state"],
+            "required": [
+                "blueprint_name",
+                "state_machine_name",
+                "source_state",
+                "target_state",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "source_state": "Idle", "target_state": "Walk"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "source_state": "Idle",
+                "target_state": "Walk",
+            },
         ),
     ),
     ActionDef(
@@ -3541,20 +5508,42 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
                 "graph_name": {"type": "string", "description": "Target graph name"},
                 "node_type": {
                     "type": "string",
-                    "enum": ["AnimSequencePlayer", "BlendSpacePlayer", "LayeredBlendPerBone", "TwoWayBlend", "BlendPosesByBool", "BlendPosesByInt"],
+                    "enum": [
+                        "AnimSequencePlayer",
+                        "BlendSpacePlayer",
+                        "LayeredBlendPerBone",
+                        "TwoWayBlend",
+                        "BlendPosesByBool",
+                        "BlendPosesByInt",
+                    ],
                     "description": "Type of animation node to create",
                 },
-                "anim_asset": {"type": "string", "description": "Optional asset path to bind (AnimSequence or BlendSpace)"},
-                "node_position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
+                "anim_asset": {
+                    "type": "string",
+                    "description": "Optional asset path to bind (AnimSequence or BlendSpace)",
+                },
+                "node_position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "[X, Y] position",
+                },
             },
             "required": ["blueprint_name", "graph_name", "node_type"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "graph_name": "AnimGraph", "node_type": "AnimSequencePlayer", "anim_asset": "/Game/Animations/Idle_Anim"},
+            {
+                "blueprint_name": "ABP_Player",
+                "graph_name": "AnimGraph",
+                "node_type": "AnimSequencePlayer",
+                "anim_asset": "/Game/Animations/Idle_Anim",
+            },
         ),
     ),
     ActionDef(
@@ -3567,16 +5556,42 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "graph_name": {"type": "string", "description": "Graph containing the node"},
-                "node_guid": {"type": "string", "description": "GUID of the target node"},
-                "property_name": {"type": "string", "description": "Property name to set"},
-                "property_value": {"description": "Value to set (string, number, bool, or asset path)"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph containing the node",
+                },
+                "node_guid": {
+                    "type": "string",
+                    "description": "GUID of the target node",
+                },
+                "property_name": {
+                    "type": "string",
+                    "description": "Property name to set",
+                },
+                "property_value": {
+                    "description": "Value to set (string, number, bool, or asset path)"
+                },
             },
-            "required": ["blueprint_name", "graph_name", "node_guid", "property_name", "property_value"],
+            "required": [
+                "blueprint_name",
+                "graph_name",
+                "node_guid",
+                "property_name",
+                "property_value",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "graph_name": "AnimGraph", "node_guid": "...", "property_name": "Sequence", "property_value": "/Game/Animations/Run_Anim"},
+            {
+                "blueprint_name": "ABP_Player",
+                "graph_name": "AnimGraph",
+                "node_guid": "...",
+                "property_name": "Sequence",
+                "property_value": "/Game/Animations/Run_Anim",
+            },
         ),
     ),
     ActionDef(
@@ -3589,17 +5604,43 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "graph_name": {"type": "string", "description": "Graph containing the nodes"},
-                "source_node_id": {"type": "string", "description": "GUID of the source node"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph containing the nodes",
+                },
+                "source_node_id": {
+                    "type": "string",
+                    "description": "GUID of the source node",
+                },
                 "source_pin": {"type": "string", "description": "Source pin name"},
-                "target_node_id": {"type": "string", "description": "GUID of the target node"},
+                "target_node_id": {
+                    "type": "string",
+                    "description": "GUID of the target node",
+                },
                 "target_pin": {"type": "string", "description": "Target pin name"},
             },
-            "required": ["blueprint_name", "graph_name", "source_node_id", "source_pin", "target_node_id", "target_pin"],
+            "required": [
+                "blueprint_name",
+                "graph_name",
+                "source_node_id",
+                "source_pin",
+                "target_node_id",
+                "target_pin",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "graph_name": "AnimGraph", "source_node_id": "...", "source_pin": "Pose", "target_node_id": "...", "target_pin": "Pose"},
+            {
+                "blueprint_name": "ABP_Player",
+                "graph_name": "AnimGraph",
+                "source_node_id": "...",
+                "source_pin": "Pose",
+                "target_node_id": "...",
+                "target_pin": "Pose",
+            },
         ),
     ),
     ActionDef(
@@ -3612,15 +5653,26 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "graph_name": {"type": "string", "description": "Graph containing the node"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "graph_name": {
+                    "type": "string",
+                    "description": "Graph containing the node",
+                },
                 "node_guid": {"type": "string", "description": "GUID of the node"},
                 "pin_name": {"type": "string", "description": "Pin name to disconnect"},
             },
             "required": ["blueprint_name", "graph_name", "node_guid", "pin_name"],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "graph_name": "AnimGraph", "node_guid": "...", "pin_name": "Pose"},
+            {
+                "blueprint_name": "ABP_Player",
+                "graph_name": "AnimGraph",
+                "node_guid": "...",
+                "pin_name": "Pose",
+            },
         ),
     ),
     ActionDef(
@@ -3633,15 +5685,31 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "old_name": {"type": "string", "description": "Current state name"},
                 "new_name": {"type": "string", "description": "New state name"},
             },
-            "required": ["blueprint_name", "state_machine_name", "old_name", "new_name"],
+            "required": [
+                "blueprint_name",
+                "state_machine_name",
+                "old_name",
+                "new_name",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "old_name": "Walk", "new_name": "Walking"},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "old_name": "Walk",
+                "new_name": "Walking",
+            },
         ),
     ),
     ActionDef(
@@ -3654,16 +5722,37 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint"},
-                "state_machine_name": {"type": "string", "description": "Name of the state machine"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint",
+                },
+                "state_machine_name": {
+                    "type": "string",
+                    "description": "Name of the state machine",
+                },
                 "source_state": {"type": "string", "description": "Source state name"},
                 "target_state": {"type": "string", "description": "Target state name"},
-                "priority": {"type": "integer", "description": "New priority order (lower = higher priority)"},
+                "priority": {
+                    "type": "integer",
+                    "description": "New priority order (lower = higher priority)",
+                },
             },
-            "required": ["blueprint_name", "state_machine_name", "source_state", "target_state", "priority"],
+            "required": [
+                "blueprint_name",
+                "state_machine_name",
+                "source_state",
+                "target_state",
+                "priority",
+            ],
         },
         examples=(
-            {"blueprint_name": "ABP_Player", "state_machine_name": "Locomotion", "source_state": "Idle", "target_state": "Walk", "priority": 2},
+            {
+                "blueprint_name": "ABP_Player",
+                "state_machine_name": "Locomotion",
+                "source_state": "Idle",
+                "target_state": "Walk",
+                "priority": 2,
+            },
         ),
     ),
     ActionDef(
@@ -3676,12 +5765,13 @@ _ANIMGRAPH_ACTIONS = [
         input_schema={
             "type": "object",
             "properties": {
-                "blueprint_name": {"type": "string", "description": "Name of the Animation Blueprint to compile"},
+                "blueprint_name": {
+                    "type": "string",
+                    "description": "Name of the Animation Blueprint to compile",
+                },
             },
             "required": ["blueprint_name"],
         },
-        examples=(
-            {"blueprint_name": "ABP_Player"},
-        ),
+        examples=({"blueprint_name": "ABP_Player"},),
     ),
 ]

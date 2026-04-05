@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ConnectionState(Enum):
     """Connection lifecycle states."""
+
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
     CONNECTED = "connected"
@@ -29,6 +30,7 @@ class ConnectionState(Enum):
 @dataclass
 class ConnectionConfig:
     """Configuration for the Unreal connection."""
+
     host: str = "127.0.0.1"
     port: int = 55558  # New UEEditorMCP plugin port
     timeout: float = 120.0
@@ -41,6 +43,7 @@ class ConnectionConfig:
 @dataclass
 class CommandResult:
     """Result of a command execution."""
+
     success: bool
     data: dict = field(default_factory=dict)
     error: Optional[str] = None
@@ -120,7 +123,9 @@ class PersistentUnrealConnection:
                 # Start heartbeat thread
                 self._start_heartbeat()
 
-                logger.info(f"Connected to Unreal at {self.config.host}:{self.config.port}")
+                logger.info(
+                    f"Connected to Unreal at {self.config.host}:{self.config.port}"
+                )
                 self._fire_state_change("alive", old_state.value)
                 return True
 
@@ -151,7 +156,9 @@ class PersistentUnrealConnection:
             logger.info("Disconnected from Unreal")
             self._fire_state_change("disconnected", old_state.value)
 
-    def send_command(self, command_type: str, params: Optional[dict] = None) -> CommandResult:
+    def send_command(
+        self, command_type: str, params: Optional[dict] = None
+    ) -> CommandResult:
         """
         Send a command to Unreal and wait for response.
 
@@ -169,7 +176,7 @@ class PersistentUnrealConnection:
                     return CommandResult(
                         success=False,
                         error="Not connected to Unreal and reconnect failed",
-                        recoverable=True
+                        recoverable=True,
                     )
 
             command = {"type": command_type}
@@ -179,7 +186,9 @@ class PersistentUnrealConnection:
             try:
                 # Log outgoing command (truncate large params)
                 params_preview = json.dumps(params)[:200] if params else "none"
-                logger.debug(f">>> Sending command '{command_type}' with params: {params_preview}")
+                logger.debug(
+                    f">>> Sending command '{command_type}' with params: {params_preview}"
+                )
 
                 # Send command
                 self._send_raw(command)
@@ -204,7 +213,7 @@ class PersistentUnrealConnection:
                     return CommandResult(
                         success=False,
                         error="Connection lost and reconnect failed",
-                        recoverable=True
+                        recoverable=True,
                     )
 
                 # Parse response - handle both formats:
@@ -220,18 +229,29 @@ class PersistentUnrealConnection:
                     if response.get("success") is True:
                         # Extract all fields except 'success' as data
                         data = {k: v for k, v in response.items() if k != "success"}
-                        return CommandResult(
-                            success=True,
-                            data=data
-                        )
+                        return CommandResult(success=True, data=data)
                     else:
-                        error_msg = response.get("error", "Unknown error (no error message in response)")
+                        error_msg = response.get(
+                            "error", "Unknown error (no error message in response)"
+                        )
                         error_type = response.get("error_type", "unknown")
                         # Include structured error details (e.g., compilation errors array, patch results)
                         error_details = {}
-                        for detail_key in ("errors", "warnings", "error_count", "warning_count",
-                                           "name", "status", "results", "total", "executed",
-                                           "succeeded", "failed", "compiled", "compile_error"):
+                        for detail_key in (
+                            "errors",
+                            "warnings",
+                            "error_count",
+                            "warning_count",
+                            "name",
+                            "status",
+                            "results",
+                            "total",
+                            "executed",
+                            "succeeded",
+                            "failed",
+                            "compiled",
+                            "compile_error",
+                        ):
                             if detail_key in response:
                                 error_details[detail_key] = response[detail_key]
                         detail_str = ""
@@ -241,30 +261,46 @@ class PersistentUnrealConnection:
                         logger.error(f"Command '{command_type}' failed: {full_error}")
                         # Preserve all structured data so callers (e.g. ue_batch)
                         # can still access results/total/executed/failed fields.
-                        data = {k: v for k, v in response.items()
-                                if k not in ("success", "error", "error_type")}
+                        data = {
+                            k: v
+                            for k, v in response.items()
+                            if k not in ("success", "error", "error_type")
+                        }
                         return CommandResult(
                             success=False,
                             data=data,
                             error=full_error,
-                            recoverable=response.get("recoverable", True)
+                            recoverable=response.get("recoverable", True),
                         )
 
                 # Check Format 2 (legacy status field - only if no success field)
                 elif "status" in response:
                     if response.get("status") == "success":
                         return CommandResult(
-                            success=True,
-                            data=response.get("result", {})
+                            success=True, data=response.get("result", {})
                         )
                     else:
-                        error_msg = response.get("error", "Unknown error (no error message in response)")
+                        error_msg = response.get(
+                            "error", "Unknown error (no error message in response)"
+                        )
                         error_type = response.get("error_type", "unknown")
                         # Include structured error details (e.g., patch results)
                         error_details = {}
-                        for detail_key in ("errors", "warnings", "error_count", "warning_count",
-                                           "name", "status", "results", "total", "executed",
-                                           "succeeded", "failed", "compiled", "compile_error"):
+                        for detail_key in (
+                            "errors",
+                            "warnings",
+                            "error_count",
+                            "warning_count",
+                            "name",
+                            "status",
+                            "results",
+                            "total",
+                            "executed",
+                            "succeeded",
+                            "failed",
+                            "compiled",
+                            "compile_error",
+                        ):
                             if detail_key in response:
                                 error_details[detail_key] = response[detail_key]
                         detail_str = ""
@@ -272,22 +308,27 @@ class PersistentUnrealConnection:
                             detail_str = f" | DETAILS: {json.dumps(error_details)}"
                         full_error = f"[{error_type}] {error_msg}{detail_str}"
                         logger.error(f"Command '{command_type}' failed: {full_error}")
-                        data = {k: v for k, v in response.items()
-                                if k not in ("status", "error", "error_type")}
+                        data = {
+                            k: v
+                            for k, v in response.items()
+                            if k not in ("status", "error", "error_type")
+                        }
                         return CommandResult(
                             success=False,
                             data=data,
                             error=full_error,
-                            recoverable=response.get("recoverable", True)
+                            recoverable=response.get("recoverable", True),
                         )
 
                 # Unknown response format - log the raw response for debugging
                 else:
-                    logger.error(f"Command '{command_type}' returned unknown response format: {json.dumps(response)[:500]}")
+                    logger.error(
+                        f"Command '{command_type}' returned unknown response format: {json.dumps(response)[:500]}"
+                    )
                     return CommandResult(
                         success=False,
                         error=f"Unknown response format from Unreal. Raw: {json.dumps(response)[:500]}",
-                        recoverable=True
+                        recoverable=True,
                     )
 
             except socket.timeout:
@@ -295,7 +336,7 @@ class PersistentUnrealConnection:
                 return CommandResult(
                     success=False,
                     error=f"Command '{command_type}' timed out after {self.config.timeout}s",
-                    recoverable=True
+                    recoverable=True,
                 )
             except (socket.error, BrokenPipeError, ConnectionResetError) as e:
                 logger.error(f"Socket error during command '{command_type}': {e}")
@@ -303,11 +344,7 @@ class PersistentUnrealConnection:
                 self._state = ConnectionState.ERROR
                 self._cleanup_socket()
                 self._fire_state_change("crashed", old_state.value)
-                return CommandResult(
-                    success=False,
-                    error=str(e),
-                    recoverable=True
-                )
+                return CommandResult(success=False, error=str(e), recoverable=True)
 
     def ping(self) -> bool:
         """
@@ -334,11 +371,11 @@ class PersistentUnrealConnection:
             raise ConnectionError("Socket not connected")
 
         json_str = json.dumps(data)
-        message = json_str.encode('utf-8')
+        message = json_str.encode("utf-8")
 
         # Send length prefix (4 bytes, big endian)
         length = len(message)
-        self._socket.sendall(length.to_bytes(4, byteorder='big'))
+        self._socket.sendall(length.to_bytes(4, byteorder="big"))
         self._socket.sendall(message)
 
     def _receive_raw(self) -> Optional[dict]:
@@ -352,7 +389,7 @@ class PersistentUnrealConnection:
             if not length_bytes:
                 return None
 
-            length = int.from_bytes(length_bytes, byteorder='big')
+            length = int.from_bytes(length_bytes, byteorder="big")
 
             # Sanity check length
             if length <= 0 or length > 100 * 1024 * 1024:  # Max 100MB
@@ -364,7 +401,7 @@ class PersistentUnrealConnection:
             if not message_bytes:
                 return None
 
-            return json.loads(message_bytes.decode('utf-8'))
+            return json.loads(message_bytes.decode("utf-8"))
 
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             logger.error(f"Failed to parse response: {e}")
@@ -413,24 +450,31 @@ class PersistentUnrealConnection:
 
             # Calculate delay with exponential backoff
             delay = min(
-                self.config.reconnect_base_delay * (2 ** (self._reconnect_attempts - 1)),
-                self.config.reconnect_max_delay
+                self.config.reconnect_base_delay
+                * (2 ** (self._reconnect_attempts - 1)),
+                self.config.reconnect_max_delay,
             )
 
-            logger.info(f"Reconnect attempt {self._reconnect_attempts}/{self.config.max_reconnect_attempts} in {delay:.1f}s")
+            logger.info(
+                f"Reconnect attempt {self._reconnect_attempts}/{self.config.max_reconnect_attempts} in {delay:.1f}s"
+            )
             time.sleep(delay)
 
             if self.connect():
                 return True
 
         self._state = ConnectionState.ERROR
-        logger.error(f"Failed to reconnect after {self.config.max_reconnect_attempts} attempts")
+        logger.error(
+            f"Failed to reconnect after {self.config.max_reconnect_attempts} attempts"
+        )
         return False
 
     def _start_heartbeat(self):
         """Start the heartbeat thread."""
         self._stop_heartbeat.clear()
-        self._heartbeat_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._heartbeat_thread = threading.Thread(
+            target=self._heartbeat_loop, daemon=True
+        )
         self._heartbeat_thread.start()
 
     def _heartbeat_loop(self):
@@ -446,7 +490,9 @@ class PersistentUnrealConnection:
             if elapsed >= self.config.heartbeat_interval:
                 try:
                     if not self.ping():
-                        logger.warning("Heartbeat ping returned false, marking connection stale")
+                        logger.warning(
+                            "Heartbeat ping returned false, marking connection stale"
+                        )
                         # Don't reconnect from heartbeat thread - let the next
                         # send_command handle reconnection to avoid blocking
                         with self._lock:
@@ -470,6 +516,7 @@ class PersistentUnrealConnection:
         if cb is not None:
             try:
                 import datetime as _dt
+
                 ts = _dt.datetime.now(_dt.timezone.utc).isoformat()
                 cb(new_state, old_state, ts)
             except Exception:

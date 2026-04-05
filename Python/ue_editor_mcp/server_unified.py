@@ -57,6 +57,7 @@ def _to_serializable(obj: Any) -> Any:
         return [_to_serializable(item) for item in obj]
     return obj
 
+
 logger = logging.getLogger(__name__)
 
 # ── constants ───────────────────────────────────────────────────────────
@@ -73,14 +74,18 @@ _context_store: ContextStore | None = None
 _command_log: deque[dict] = deque(maxlen=_LOG_BUFFER_SIZE)
 
 
-def _log_command(action_id: str, params: dict | None, result: dict, elapsed_ms: float) -> None:
-    _command_log.append({
-        "ts": time.strftime("%H:%M:%S"),
-        "action": action_id,
-        "ok": result.get("success", False),
-        "ms": round(elapsed_ms, 1),
-        "error": result.get("error"),
-    })
+def _log_command(
+    action_id: str, params: dict | None, result: dict, elapsed_ms: float
+) -> None:
+    _command_log.append(
+        {
+            "ts": time.strftime("%H:%M:%S"),
+            "action": action_id,
+            "ok": result.get("success", False),
+            "ms": round(elapsed_ms, 1),
+            "error": result.get("error"),
+        }
+    )
 
 
 # ── UMG component dispatch table ───────────────────────────────────────
@@ -102,15 +107,39 @@ _UMG_COMPONENT_TYPE_MAP: dict[str, tuple[str, str, str | None]] = {
     "ComboBox": ("add_combo_box_to_widget", "combo_box_name", None),
     "CheckBox": ("add_check_box_to_widget", "check_box_name", None),
     "SpinBox": ("add_spin_box_to_widget", "spin_box_name", None),
-    "EditableTextBox": ("add_editable_text_box_to_widget", "editable_text_box_name", None),
+    "EditableTextBox": (
+        "add_editable_text_box_to_widget",
+        "editable_text_box_name",
+        None,
+    ),
     "ScrollBox": ("add_generic_widget_to_widget", "component_name", "ScrollBox"),
-    "WidgetSwitcher": ("add_generic_widget_to_widget", "component_name", "WidgetSwitcher"),
-    "BackgroundBlur": ("add_generic_widget_to_widget", "component_name", "BackgroundBlur"),
-    "UniformGridPanel": ("add_generic_widget_to_widget", "component_name", "UniformGridPanel"),
+    "WidgetSwitcher": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "WidgetSwitcher",
+    ),
+    "BackgroundBlur": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "BackgroundBlur",
+    ),
+    "UniformGridPanel": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "UniformGridPanel",
+    ),
     "Spacer": ("add_generic_widget_to_widget", "component_name", "Spacer"),
-    "RichTextBlock": ("add_generic_widget_to_widget", "component_name", "RichTextBlock"),
+    "RichTextBlock": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "RichTextBlock",
+    ),
     "WrapBox": ("add_generic_widget_to_widget", "component_name", "WrapBox"),
-    "CircularThrobber": ("add_generic_widget_to_widget", "component_name", "CircularThrobber"),
+    "CircularThrobber": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "CircularThrobber",
+    ),
 }
 
 
@@ -123,12 +152,19 @@ def _read_resource(name: str) -> str:
     """Read an embedded resource file."""
     path = _RESOURCES_DIR / name
     if not path.exists():
-        available = [f.name for f in _RESOURCES_DIR.iterdir()] if _RESOURCES_DIR.exists() else []
-        return json.dumps({"error": f"Resource '{name}' not found. Available: {available}"})
+        available = (
+            [f.name for f in _RESOURCES_DIR.iterdir()]
+            if _RESOURCES_DIR.exists()
+            else []
+        )
+        return json.dumps(
+            {"error": f"Resource '{name}' not found. Available: {available}"}
+        )
     return path.read_text(encoding="utf-8")
 
 
 # ── core command executor ───────────────────────────────────────────────
+
 
 def _send_command(command_type: str, params: dict | None = None) -> dict:
     """Send command to Unreal, return result dict."""
@@ -139,9 +175,11 @@ def _send_command(command_type: str, params: dict | None = None) -> dict:
     return result.to_dict()
 
 
-def _resolve_action_to_cpp_command(action_id: str, params: dict | None = None) -> tuple[str | None, dict, str | None]:
+def _resolve_action_to_cpp_command(
+    action_id: str, params: dict | None = None
+) -> tuple[str | None, dict, str | None]:
     """Resolve an action_id + params to C++ command type + final params.
-    
+
     Returns (command, final_params, error).  error is non-None on failure.
     Handles UMG component_type dispatch.
     """
@@ -158,7 +196,11 @@ def _resolve_action_to_cpp_command(action_id: str, params: dict | None = None) -
         component_type = final_params.get("component_type", "")
         if component_type not in _UMG_COMPONENT_TYPE_MAP:
             supported = list(_UMG_COMPONENT_TYPE_MAP.keys())
-            return None, {}, f"Unknown component_type: {component_type}. Supported: {supported}"
+            return (
+                None,
+                {},
+                f"Unknown component_type: {component_type}. Supported: {supported}",
+            )
         cmd_key, name_param, component_class = _UMG_COMPONENT_TYPE_MAP[component_type]
         if "component_name" in final_params:
             final_params[name_param] = final_params.pop("component_name")
@@ -241,8 +283,8 @@ TOOLS = [
             "Execute a single action in Unreal Engine. "
             "Use ue_actions_search + ue_actions_schema first to discover the required parameters. "
             "IMPORTANT: You may pass action parameters in TWO ways — "
-            "(A) nested under 'params' key: {\"action_id\": \"x\", \"params\": {\"foo\": 1}} "
-            "(B) flat top-level keys alongside action_id: {\"action_id\": \"x\", \"foo\": 1} "
+            '(A) nested under \'params\' key: {"action_id": "x", "params": {"foo": 1}} '
+            '(B) flat top-level keys alongside action_id: {"action_id": "x", "foo": 1} '
             "Both forms are accepted. Use (B) when the params schema is opaque."
         ),
         inputSchema={
@@ -470,7 +512,9 @@ async def list_tools() -> list[Tool]:
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | ImageContent]:
+async def call_tool(
+    name: str, arguments: dict[str, Any]
+) -> list[TextContent | ImageContent]:
     """Route tool calls to the appropriate handler."""
     args = arguments or {}
     t0 = time.perf_counter()
@@ -486,7 +530,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
         success = isinstance(result, dict) and result.get("success", False)
         action_id = args.get("action_id") or args.get("action") or None
         try:
-            _context_store.record_operation(name, action_id, args, success, result, elapsed_ms)
+            _context_store.record_operation(
+                name, action_id, args, success, result, elapsed_ms
+            )
             _context_store.track_assets(args, action_id)
         except Exception:
             logger.warning("Context recording failed", exc_info=True)
@@ -508,14 +554,21 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
                         base64_data = base64_data.split(",", 1)[1]
                     image_key = (mime_type, base64_data)
                     if image_key not in seen_images:
-                        contents.append(ImageContent(type="image", data=base64_data, mimeType=mime_type))
+                        contents.append(
+                            ImageContent(
+                                type="image", data=base64_data, mimeType=mime_type
+                            )
+                        )
                         seen_images.add(image_key)
                         nonlocal image_blocks_count
                         image_blocks_count += 1
                 item["image_base64"] = "<base64_data_extracted_to_image_content>"
 
         # Prefer list-form thumbnails. Fallback to top-level singleton fields.
-        has_thumbnail_list = isinstance(result.get("thumbnails"), list) and len(result.get("thumbnails", [])) > 0
+        has_thumbnail_list = (
+            isinstance(result.get("thumbnails"), list)
+            and len(result.get("thumbnails", [])) > 0
+        )
 
         if has_thumbnail_list:
             for thumb in result.get("thumbnails", []):
@@ -531,7 +584,10 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
         # Handle batch results
         for batch_res in result.get("results", []):
             if isinstance(batch_res, dict):
-                batch_has_thumbnail_list = isinstance(batch_res.get("thumbnails"), list) and len(batch_res.get("thumbnails", [])) > 0
+                batch_has_thumbnail_list = (
+                    isinstance(batch_res.get("thumbnails"), list)
+                    and len(batch_res.get("thumbnails", [])) > 0
+                )
                 if batch_has_thumbnail_list:
                     for thumb in batch_res.get("thumbnails", []):
                         if isinstance(thumb, dict):
@@ -540,14 +596,24 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
                     _extract_image(batch_res)
 
                 if "image_base64" in batch_res:
-                    batch_res["image_base64"] = "<base64_data_extracted_to_image_content>"
+                    batch_res["image_base64"] = (
+                        "<base64_data_extracted_to_image_content>"
+                    )
 
             result["image_blocks_count"] = image_blocks_count
 
-    safe_result = _to_serializable(result) if isinstance(result, (dict, CommandResult)) else result
-    text = json.dumps(safe_result, indent=2, ensure_ascii=False) if isinstance(safe_result, dict) else str(safe_result)
+    safe_result = (
+        _to_serializable(result)
+        if isinstance(result, (dict, CommandResult))
+        else result
+    )
+    text = (
+        json.dumps(safe_result, indent=2, ensure_ascii=False)
+        if isinstance(safe_result, dict)
+        else str(safe_result)
+    )
     contents.append(TextContent(type="text", text=text))
-    
+
     return contents
 
 
@@ -594,9 +660,16 @@ def _handle_tool(name: str, args: dict) -> Any:
     if name == "ue_actions_run":
         action_id = args.get("action_id", "")
         params = args.get("params")
-        logger.info("ue_actions_run: action_id=%s, raw params type=%s, params=%s",
-                    action_id, type(params).__name__,
-                    json.dumps(params, ensure_ascii=False)[:300] if isinstance(params, dict) else repr(params)[:300])
+        logger.info(
+            "ue_actions_run: action_id=%s, raw params type=%s, params=%s",
+            action_id,
+            type(params).__name__,
+            (
+                json.dumps(params, ensure_ascii=False)[:300]
+                if isinstance(params, dict)
+                else repr(params)[:300]
+            ),
+        )
         # LLMs often flatten params as top-level keys instead of nesting
         # under "params".  Auto-collect them so single-action calls work.
         # Also catches empty dict {} that some MCP clients send for
@@ -605,7 +678,10 @@ def _handle_tool(name: str, args: dict) -> Any:
             extra = {k: v for k, v in args.items() if k != "action_id"}
             if extra:
                 params = extra
-                logger.info("ue_actions_run: auto-collected %d top-level keys as params", len(extra))
+                logger.info(
+                    "ue_actions_run: auto-collected %d top-level keys as params",
+                    len(extra),
+                )
         return _execute_action(action_id, params)
 
     # ── 5. ue_batch ─────────────────────────────────────────────────
@@ -616,10 +692,19 @@ def _handle_tool(name: str, args: dict) -> Any:
         continue_on_error = args.get("continue_on_error", False)
 
         if len(actions) > _MAX_BATCH:
-            return {"success": False, "error": f"Max {_MAX_BATCH} actions per batch, got {len(actions)}"}
+            return {
+                "success": False,
+                "error": f"Max {_MAX_BATCH} actions per batch, got {len(actions)}",
+            }
 
         if not actions:
-            return {"success": True, "total": 0, "executed": 0, "failed": 0, "results": []}
+            return {
+                "success": True,
+                "total": 0,
+                "executed": 0,
+                "failed": 0,
+                "results": [],
+            }
 
         # Phase 1: Resolve all action_ids to C++ commands (Python-side, no TCP)
         cpp_commands = []
@@ -628,15 +713,21 @@ def _handle_tool(name: str, args: dict) -> Any:
             params = item.get("params")
             command, final_params, error = _resolve_action_to_cpp_command(aid, params)
             if error:
-                return {"success": False, "error": f"Action at index {i} ('{aid}'): {error}"}
+                return {
+                    "success": False,
+                    "error": f"Action at index {i} ('{aid}'): {error}",
+                }
             cpp_commands.append({"type": command, "params": final_params or {}})
 
         # Phase 2: Single TCP round-trip via C++ batch_execute
         t0 = time.perf_counter()
-        result = _send_command("batch_execute", {
-            "commands": cpp_commands,
-            "stop_on_error": not continue_on_error,
-        })
+        result = _send_command(
+            "batch_execute",
+            {
+                "commands": cpp_commands,
+                "stop_on_error": not continue_on_error,
+            },
+        )
         elapsed = (time.perf_counter() - t0) * 1000
 
         # Phase 3: Enrich results with action_ids and log
@@ -648,8 +739,12 @@ def _handle_tool(name: str, args: dict) -> Any:
         # Log each action for the Python command log
         per_action_ms = elapsed / max(len(actions), 1)
         for i, item in enumerate(actions):
-            sub_result = batch_results[i] if i < len(batch_results) else {"success": False}
-            _log_command(item.get("action_id", ""), item.get("params"), sub_result, per_action_ms)
+            sub_result = (
+                batch_results[i] if i < len(batch_results) else {"success": False}
+            )
+            _log_command(
+                item.get("action_id", ""), item.get("params"), sub_result, per_action_ms
+            )
 
         return {
             "success": result.get("success", False),
@@ -692,7 +787,11 @@ def _handle_tool(name: str, args: dict) -> Any:
             try:
                 conn = get_connection()
                 editor_result = conn.send_command("get_editor_logs", editor_params)
-                editor_dict = editor_result.to_dict() if isinstance(editor_result, CommandResult) else editor_result
+                editor_dict = (
+                    editor_result.to_dict()
+                    if isinstance(editor_result, CommandResult)
+                    else editor_result
+                )
                 result["editor_log"] = _to_serializable(editor_dict)
             except Exception as exc:
                 result["editor_log"] = {"error": str(exc)}
@@ -719,14 +818,24 @@ def _handle_tool(name: str, args: dict) -> Any:
         if action == "load":
             skill_id = args.get("skill_id", "")
             if not skill_id:
-                return {"success": False, "error": "skill_id is required when action='load'"}
+                return {
+                    "success": False,
+                    "error": "skill_id is required when action='load'",
+                }
             skill_data = load_skill(skill_id)
             if skill_data is None:
                 available = [s["skill_id"] for s in get_skill_list()]
-                return {"success": False, "error": f"Unknown skill_id: '{skill_id}'", "available": available}
+                return {
+                    "success": False,
+                    "error": f"Unknown skill_id: '{skill_id}'",
+                    "available": available,
+                }
             return {"success": True, **skill_data}
 
-        return {"success": False, "error": f"Unknown action: '{action}'. Use 'list' or 'load'."}
+        return {
+            "success": False,
+            "error": f"Unknown action: '{action}'. Use 'list' or 'load'.",
+        }
 
     # ── 9. ue_python_exec ───────────────────────────────────────────
     if name == "ue_python_exec":
@@ -750,13 +859,18 @@ def _handle_tool(name: str, args: dict) -> Any:
                 return {"success": False, "error": "action_id is required for submit"}
             params = args.get("params")
             # Resolve action_id to C++ command
-            command, final_params, error = _resolve_action_to_cpp_command(action_id, params)
+            command, final_params, error = _resolve_action_to_cpp_command(
+                action_id, params
+            )
             if error:
                 return {"success": False, "error": error}
-            result = _send_command("async_execute", {
-                "command": command,
-                "params": final_params or {},
-            })
+            result = _send_command(
+                "async_execute",
+                {
+                    "command": command,
+                    "params": final_params or {},
+                },
+            )
             return result
 
         if action == "poll":
@@ -766,7 +880,10 @@ def _handle_tool(name: str, args: dict) -> Any:
             result = _send_command("get_task_result", {"task_id": task_id})
             return result
 
-        return {"success": False, "error": f"Unknown action: '{action}'. Use 'submit' or 'poll'."}
+        return {
+            "success": False,
+            "error": f"Unknown action: '{action}'. Use 'submit' or 'poll'.",
+        }
 
     # ── 11. ue_context ──────────────────────────────────────────────
     if name == "ue_context":
@@ -789,23 +906,37 @@ def _handle_tool(name: str, args: dict) -> Any:
 
         if action == "workset":
             workset = _context_store.get_workset()
-            return {"success": True, "assets": list(workset.values()), "count": len(workset)}
+            return {
+                "success": True,
+                "assets": list(workset.values()),
+                "count": len(workset),
+            }
 
         if action == "clear":
             _context_store.clear()
-            return {"success": True, "message": "Context cleared (workset, history, op_count reset)"}
+            return {
+                "success": True,
+                "message": "Context cleared (workset, history, op_count reset)",
+            }
 
-        return {"success": False, "error": f"Unknown action: '{action}'. Use 'resume', 'status', 'history', 'workset', or 'clear'."}
+        return {
+            "success": False,
+            "error": f"Unknown action: '{action}'. Use 'resume', 'status', 'history', 'workset', or 'clear'.",
+        }
 
     return {"success": False, "error": f"Unknown tool: {name}"}
 
 
 # ── entry point ─────────────────────────────────────────────────────────
 
+
 async def _run():
     global _context_store
 
-    logger.info("Starting ue-editor-mcp unified server (%d actions registered)", get_registry().count)
+    logger.info(
+        "Starting ue-editor-mcp unified server (%d actions registered)",
+        get_registry().count,
+    )
 
     # Initialise context store
     ctx_dir = Path(__file__).parent.parent.parent / ".context"

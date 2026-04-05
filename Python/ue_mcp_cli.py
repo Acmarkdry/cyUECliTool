@@ -18,7 +18,6 @@ import socket
 import sys
 from typing import Optional
 
-
 HOST = "127.0.0.1"
 PORT = 55558
 TIMEOUT = 30.0
@@ -91,7 +90,10 @@ def main():
         result = send_command(command_type, params)
         print(json.dumps(result, indent=2, ensure_ascii=False))
     except ConnectionRefusedError:
-        print("ERROR: Cannot connect to UE MCPBridge (port 55558). Is Unreal Editor running?", file=sys.stderr)
+        print(
+            "ERROR: Cannot connect to UE MCPBridge (port 55558). Is Unreal Editor running?",
+            file=sys.stderr,
+        )
         sys.exit(1)
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

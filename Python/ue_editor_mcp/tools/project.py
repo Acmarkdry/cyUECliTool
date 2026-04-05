@@ -28,15 +28,26 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "action_name": {"type": "string", "description": "Name of the input action"},
-                    "key": {"type": "string", "description": "Key to bind (SpaceBar, W, LeftMouseButton, etc.)"},
-                    "input_type": {"type": "string", "description": "Type: Action or Axis"},
-                    "scale": {"type": "number", "description": "Scale for Axis mappings (1.0 or -1.0)"}
+                    "action_name": {
+                        "type": "string",
+                        "description": "Name of the input action",
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Key to bind (SpaceBar, W, LeftMouseButton, etc.)",
+                    },
+                    "input_type": {
+                        "type": "string",
+                        "description": "Type: Action or Axis",
+                    },
+                    "scale": {
+                        "type": "number",
+                        "description": "Scale for Axis mappings (1.0 or -1.0)",
+                    },
                 },
-                "required": ["action_name", "key"]
-            }
+                "required": ["action_name", "key"],
+            },
         ),
-
         # Enhanced Input System
         Tool(
             name="create_input_action",
@@ -44,12 +55,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Name of the Input Action (e.g., IA_Move)"},
-                    "value_type": {"type": "string", "description": "Value type: Boolean, Axis1D/Float, Axis2D/Vector2D, Axis3D/Vector"},
-                    "path": {"type": "string", "description": "Content browser path (default: /Game/Input)"}
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the Input Action (e.g., IA_Move)",
+                    },
+                    "value_type": {
+                        "type": "string",
+                        "description": "Value type: Boolean, Axis1D/Float, Axis2D/Vector2D, Axis3D/Vector",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Content browser path (default: /Game/Input)",
+                    },
                 },
-                "required": ["name"]
-            }
+                "required": ["name"],
+            },
         ),
         Tool(
             name="create_input_mapping_context",
@@ -57,11 +77,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Name of the IMC (e.g., IMC_Default)"},
-                    "path": {"type": "string", "description": "Content browser path (default: /Game/Input)"}
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the IMC (e.g., IMC_Default)",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Content browser path (default: /Game/Input)",
+                    },
                 },
-                "required": ["name"]
-            }
+                "required": ["name"],
+            },
         ),
         Tool(
             name="add_key_mapping_to_context",
@@ -69,19 +95,34 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "context_name": {"type": "string", "description": "Name of the IMC asset"},
-                    "action_name": {"type": "string", "description": "Name of the Input Action asset"},
-                    "key": {"type": "string", "description": "Key to bind (W, A, SpaceBar, etc.)"},
+                    "context_name": {
+                        "type": "string",
+                        "description": "Name of the IMC asset",
+                    },
+                    "action_name": {
+                        "type": "string",
+                        "description": "Name of the Input Action asset",
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Key to bind (W, A, SpaceBar, etc.)",
+                    },
                     "modifiers": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Modifier names: Negate, SwizzleYXZ, SwizzleZYX, SwizzleXZY, SwizzleYZX, SwizzleZXY"
+                        "description": "Modifier names: Negate, SwizzleYXZ, SwizzleZYX, SwizzleXZY, SwizzleYZX, SwizzleZXY",
                     },
-                    "context_path": {"type": "string", "description": "Path to IMC (default: /Game/Input)"},
-                    "action_path": {"type": "string", "description": "Path to IA (default: /Game/Input)"}
+                    "context_path": {
+                        "type": "string",
+                        "description": "Path to IMC (default: /Game/Input)",
+                    },
+                    "action_path": {
+                        "type": "string",
+                        "description": "Path to IA (default: /Game/Input)",
+                    },
                 },
-                "required": ["context_name", "action_name", "key"]
-            }
+                "required": ["context_name", "action_name", "key"],
+            },
         ),
     ]
 
@@ -98,6 +139,11 @@ async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]
     """Handle a project tool call."""
     command_type = TOOL_HANDLERS.get(name)
     if not command_type:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     return _send_command(command_type, arguments if arguments else None)

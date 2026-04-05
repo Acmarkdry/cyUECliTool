@@ -27,12 +27,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the widget blueprint"},
-                    "parent_class": {"type": "string", "description": "Parent class (default: UserWidget)"},
-                    "path": {"type": "string", "description": "Content browser path (default: /Game/UI)"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the widget blueprint",
+                    },
+                    "parent_class": {
+                        "type": "string",
+                        "description": "Parent class (default: UserWidget)",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Content browser path (default: /Game/UI)",
+                    },
                 },
-                "required": ["widget_name"]
-            }
+                "required": ["widget_name"],
+            },
         ),
         Tool(
             name="add_widget_component",
@@ -40,34 +49,138 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "component_type": {"type": "string", "enum": ["TextBlock", "Button", "Image", "Border", "Overlay", "HorizontalBox", "VerticalBox", "Slider", "ProgressBar", "SizeBox", "ScaleBox", "CanvasPanel", "ComboBox", "CheckBox", "SpinBox", "EditableTextBox", "ScrollBox", "WidgetSwitcher", "BackgroundBlur", "UniformGridPanel", "Spacer", "RichTextBlock", "WrapBox", "CircularThrobber"], "description": "Type of widget component to add"},
-                    "component_name": {"type": "string", "description": "Name for the new component"},
-                    "text": {"type": "string", "description": "Text content (TextBlock, Button, EditableTextBox, RichTextBlock)"},
-                    "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position"},
-                    "size": {"type": "array", "items": {"type": "number"}, "description": "[Width, Height]"},
-                    "font_size": {"type": "integer", "description": "Font size (TextBlock, Button)"},
-                    "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] values 0.0-1.0"},
-                    "background_color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] background (Button)"},
-                    "texture_path": {"type": "string", "description": "Texture asset path (Image)"},
-                    "z_order": {"type": "integer", "description": "Z-order (higher = on top)"},
-                    "value": {"type": "number", "description": "Initial value (Slider 0-1, SpinBox)"},
-                    "percent": {"type": "number", "description": "Initial percent 0-1 (ProgressBar)"},
-                    "options": {"type": "array", "items": {"type": "string"}, "description": "Dropdown options (ComboBox)"},
-                    "selected_option": {"type": "string", "description": "Default selected option (ComboBox)"},
-                    "is_checked": {"type": "boolean", "description": "Initial checked state (CheckBox)"},
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "component_type": {
+                        "type": "string",
+                        "enum": [
+                            "TextBlock",
+                            "Button",
+                            "Image",
+                            "Border",
+                            "Overlay",
+                            "HorizontalBox",
+                            "VerticalBox",
+                            "Slider",
+                            "ProgressBar",
+                            "SizeBox",
+                            "ScaleBox",
+                            "CanvasPanel",
+                            "ComboBox",
+                            "CheckBox",
+                            "SpinBox",
+                            "EditableTextBox",
+                            "ScrollBox",
+                            "WidgetSwitcher",
+                            "BackgroundBlur",
+                            "UniformGridPanel",
+                            "Spacer",
+                            "RichTextBlock",
+                            "WrapBox",
+                            "CircularThrobber",
+                        ],
+                        "description": "Type of widget component to add",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name for the new component",
+                    },
+                    "text": {
+                        "type": "string",
+                        "description": "Text content (TextBlock, Button, EditableTextBox, RichTextBlock)",
+                    },
+                    "position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position",
+                    },
+                    "size": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[Width, Height]",
+                    },
+                    "font_size": {
+                        "type": "integer",
+                        "description": "Font size (TextBlock, Button)",
+                    },
+                    "color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] values 0.0-1.0",
+                    },
+                    "background_color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] background (Button)",
+                    },
+                    "texture_path": {
+                        "type": "string",
+                        "description": "Texture asset path (Image)",
+                    },
+                    "z_order": {
+                        "type": "integer",
+                        "description": "Z-order (higher = on top)",
+                    },
+                    "value": {
+                        "type": "number",
+                        "description": "Initial value (Slider 0-1, SpinBox)",
+                    },
+                    "percent": {
+                        "type": "number",
+                        "description": "Initial percent 0-1 (ProgressBar)",
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Dropdown options (ComboBox)",
+                    },
+                    "selected_option": {
+                        "type": "string",
+                        "description": "Default selected option (ComboBox)",
+                    },
+                    "is_checked": {
+                        "type": "boolean",
+                        "description": "Initial checked state (CheckBox)",
+                    },
                     "label": {"type": "string", "description": "Text label (CheckBox)"},
-                    "min_value": {"type": "number", "description": "Minimum value (SpinBox)"},
-                    "max_value": {"type": "number", "description": "Maximum value (SpinBox)"},
-                    "delta": {"type": "number", "description": "Step increment (SpinBox, default: 1)"},
-                    "hint_text": {"type": "string", "description": "Placeholder text (EditableTextBox)"},
-                    "is_read_only": {"type": "boolean", "description": "Read-only (EditableTextBox)"},
-                    "blur_strength": {"type": "number", "description": "Blur intensity (BackgroundBlur, default: 10)"},
-                    "orientation": {"type": "string", "enum": ["Vertical", "Horizontal"], "description": "Scroll orientation (ScrollBox, default: Vertical)"},
-                    "active_index": {"type": "integer", "description": "Active child index (WidgetSwitcher, default: 0)"}
+                    "min_value": {
+                        "type": "number",
+                        "description": "Minimum value (SpinBox)",
+                    },
+                    "max_value": {
+                        "type": "number",
+                        "description": "Maximum value (SpinBox)",
+                    },
+                    "delta": {
+                        "type": "number",
+                        "description": "Step increment (SpinBox, default: 1)",
+                    },
+                    "hint_text": {
+                        "type": "string",
+                        "description": "Placeholder text (EditableTextBox)",
+                    },
+                    "is_read_only": {
+                        "type": "boolean",
+                        "description": "Read-only (EditableTextBox)",
+                    },
+                    "blur_strength": {
+                        "type": "number",
+                        "description": "Blur intensity (BackgroundBlur, default: 10)",
+                    },
+                    "orientation": {
+                        "type": "string",
+                        "enum": ["Vertical", "Horizontal"],
+                        "description": "Scroll orientation (ScrollBox, default: Vertical)",
+                    },
+                    "active_index": {
+                        "type": "integer",
+                        "description": "Active child index (WidgetSwitcher, default: 0)",
+                    },
                 },
-                "required": ["widget_name", "component_type", "component_name"]
-            }
+                "required": ["widget_name", "component_type", "component_name"],
+            },
         ),
         Tool(
             name="bind_widget_event",
@@ -75,12 +188,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "widget_component_name": {"type": "string", "description": "Name of the widget component (e.g., RestartButton)"},
-                    "event_name": {"type": "string", "description": "Event to bind (OnClicked, OnPressed, OnReleased, etc.)"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "widget_component_name": {
+                        "type": "string",
+                        "description": "Name of the widget component (e.g., RestartButton)",
+                    },
+                    "event_name": {
+                        "type": "string",
+                        "description": "Event to bind (OnClicked, OnPressed, OnReleased, etc.)",
+                    },
                 },
-                "required": ["widget_name", "widget_component_name", "event_name"]
-            }
+                "required": ["widget_name", "widget_component_name", "event_name"],
+            },
         ),
         Tool(
             name="add_widget_to_viewport",
@@ -88,11 +210,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "z_order": {"type": "integer", "description": "Z-order (higher = on top)"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "z_order": {
+                        "type": "integer",
+                        "description": "Z-order (higher = on top)",
+                    },
                 },
-                "required": ["widget_name"]
-            }
+                "required": ["widget_name"],
+            },
         ),
         Tool(
             name="set_text_block_binding",
@@ -100,13 +228,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "text_block_name": {"type": "string", "description": "Name of the Text Block"},
-                    "binding_property": {"type": "string", "description": "Property to bind to"},
-                    "binding_type": {"type": "string", "description": "Type of binding (Text, Visibility, etc.)"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "text_block_name": {
+                        "type": "string",
+                        "description": "Name of the Text Block",
+                    },
+                    "binding_property": {
+                        "type": "string",
+                        "description": "Property to bind to",
+                    },
+                    "binding_type": {
+                        "type": "string",
+                        "description": "Type of binding (Text, Visibility, etc.)",
+                    },
                 },
-                "required": ["widget_name", "text_block_name", "binding_property"]
-            }
+                "required": ["widget_name", "text_block_name", "binding_property"],
+            },
         ),
         Tool(
             name="list_widget_components",
@@ -114,10 +254,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    }
                 },
-                "required": ["widget_name"]
-            }
+                "required": ["widget_name"],
+            },
         ),
         Tool(
             name="reparent_widgets",
@@ -125,17 +268,44 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target_container_name": {"type": "string", "description": "Name for the target container (creates if not found)"},
-                    "container_type": {"type": "string", "description": "Container type: VerticalBox, HorizontalBox, Overlay, CanvasPanel, SizeBox, ScaleBox, Border (default: VerticalBox)"},
-                    "children": {"type": "array", "items": {"type": "string"}, "description": "Explicit list of widget names to move (optional)"},
-                    "filter_class": {"type": "string", "description": "Move only widgets of this class, e.g. Button, TextBlock, Image (optional)"},
-                    "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position for new container"},
-                    "size": {"type": "array", "items": {"type": "number"}, "description": "[Width, Height] for new container"},
-                    "z_order": {"type": "integer", "description": "Z-order for new container"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target_container_name": {
+                        "type": "string",
+                        "description": "Name for the target container (creates if not found)",
+                    },
+                    "container_type": {
+                        "type": "string",
+                        "description": "Container type: VerticalBox, HorizontalBox, Overlay, CanvasPanel, SizeBox, ScaleBox, Border (default: VerticalBox)",
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Explicit list of widget names to move (optional)",
+                    },
+                    "filter_class": {
+                        "type": "string",
+                        "description": "Move only widgets of this class, e.g. Button, TextBlock, Image (optional)",
+                    },
+                    "position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position for new container",
+                    },
+                    "size": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[Width, Height] for new container",
+                    },
+                    "z_order": {
+                        "type": "integer",
+                        "description": "Z-order for new container",
+                    },
                 },
-                "required": ["widget_name", "target_container_name"]
-            }
+                "required": ["widget_name", "target_container_name"],
+            },
         ),
         Tool(
             name="set_widget_properties",
@@ -143,36 +313,131 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Name of the widget to modify"},
-                    "position": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] position (CanvasPanel slot only)"},
-                    "size": {"type": "array", "items": {"type": "number"}, "description": "[W, H] size (CanvasPanel slot only)"},
-                    "auto_size": {"type": "boolean", "description": "Auto-size (CanvasPanel slot only)"},
-                    "z_order": {"type": "integer", "description": "Z-order (CanvasPanel slot only)"},
-                    "alignment": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] alignment 0-1 (CanvasPanel slot only)"},
-                    "anchors": {"type": "array", "items": {"type": "number"}, "description": "[MinX, MinY, MaxX, MaxY] anchors 0-1 (CanvasPanel slot only)"},
-                    "padding": {"type": "array", "items": {"type": "number"}, "description": "[Left, Top, Right, Bottom] padding (VBox/HBox/Overlay slot)"},
-                    "h_align": {"type": "string", "description": "Horizontal alignment: Fill, Left, Center, Right (VBox/HBox/Overlay slot)"},
-                    "v_align": {"type": "string", "description": "Vertical alignment: Fill, Top, Center, Bottom (VBox/HBox/Overlay slot)"},
-                    "size_rule": {"type": "string", "description": "Size rule: Auto or Fill (VBox/HBox slot)"},
-                    "render_scale": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] render scale"},
-                    "render_angle": {"type": "number", "description": "Render rotation angle in degrees"},
-                    "render_shear": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] render shear"},
-                    "render_translation": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] render translation offset"},
-                    "render_pivot": {"type": "array", "items": {"type": "number"}, "description": "[X, Y] render transform pivot 0-1"},
-                    "visibility": {"type": "string", "description": "Visible, Hidden, Collapsed, HitTestInvisible, SelfHitTestInvisible"},
-                    "is_enabled": {"type": "boolean", "description": "Whether widget is enabled"},
-                    "brush_texture": {"type": "string", "description": "Texture asset path to set on Image widget"},
-                    "brush_size": {"type": "array", "items": {"type": "number"}, "description": "[W, H] brush image size (Image)"},
-                    "color_and_opacity": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] color and opacity (Image)"},
-                    "button_normal_color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] Normal state tint (Button)"},
-                    "button_hovered_color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] Hovered state tint (Button)"},
-                    "button_pressed_color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] Pressed state tint (Button)"},
-                    "active_widget_index": {"type": "integer", "description": "Active child index (WidgetSwitcher)"},
-                    "blur_strength": {"type": "number", "description": "Blur intensity (BackgroundBlur)"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Name of the widget to modify",
+                    },
+                    "position": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] position (CanvasPanel slot only)",
+                    },
+                    "size": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[W, H] size (CanvasPanel slot only)",
+                    },
+                    "auto_size": {
+                        "type": "boolean",
+                        "description": "Auto-size (CanvasPanel slot only)",
+                    },
+                    "z_order": {
+                        "type": "integer",
+                        "description": "Z-order (CanvasPanel slot only)",
+                    },
+                    "alignment": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] alignment 0-1 (CanvasPanel slot only)",
+                    },
+                    "anchors": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[MinX, MinY, MaxX, MaxY] anchors 0-1 (CanvasPanel slot only)",
+                    },
+                    "padding": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[Left, Top, Right, Bottom] padding (VBox/HBox/Overlay slot)",
+                    },
+                    "h_align": {
+                        "type": "string",
+                        "description": "Horizontal alignment: Fill, Left, Center, Right (VBox/HBox/Overlay slot)",
+                    },
+                    "v_align": {
+                        "type": "string",
+                        "description": "Vertical alignment: Fill, Top, Center, Bottom (VBox/HBox/Overlay slot)",
+                    },
+                    "size_rule": {
+                        "type": "string",
+                        "description": "Size rule: Auto or Fill (VBox/HBox slot)",
+                    },
+                    "render_scale": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] render scale",
+                    },
+                    "render_angle": {
+                        "type": "number",
+                        "description": "Render rotation angle in degrees",
+                    },
+                    "render_shear": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] render shear",
+                    },
+                    "render_translation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] render translation offset",
+                    },
+                    "render_pivot": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[X, Y] render transform pivot 0-1",
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "description": "Visible, Hidden, Collapsed, HitTestInvisible, SelfHitTestInvisible",
+                    },
+                    "is_enabled": {
+                        "type": "boolean",
+                        "description": "Whether widget is enabled",
+                    },
+                    "brush_texture": {
+                        "type": "string",
+                        "description": "Texture asset path to set on Image widget",
+                    },
+                    "brush_size": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[W, H] brush image size (Image)",
+                    },
+                    "color_and_opacity": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] color and opacity (Image)",
+                    },
+                    "button_normal_color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] Normal state tint (Button)",
+                    },
+                    "button_hovered_color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] Hovered state tint (Button)",
+                    },
+                    "button_pressed_color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] Pressed state tint (Button)",
+                    },
+                    "active_widget_index": {
+                        "type": "integer",
+                        "description": "Active child index (WidgetSwitcher)",
+                    },
+                    "blur_strength": {
+                        "type": "number",
+                        "description": "Blur intensity (BackgroundBlur)",
+                    },
                 },
-                "required": ["widget_name", "target"]
-            }
+                "required": ["widget_name", "target"],
+            },
         ),
         Tool(
             name="set_combo_box_options",
@@ -180,14 +445,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Name of the ComboBoxString widget"},
-                    "mode": {"type": "string", "enum": ["replace", "add", "remove", "clear"], "description": "How to apply options (default: replace)"},
-                    "options": {"type": "array", "items": {"type": "string"}, "description": "Options to apply"},
-                    "selected_option": {"type": "string", "description": "Option to select after update"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Name of the ComboBoxString widget",
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["replace", "add", "remove", "clear"],
+                        "description": "How to apply options (default: replace)",
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Options to apply",
+                    },
+                    "selected_option": {
+                        "type": "string",
+                        "description": "Option to select after update",
+                    },
                 },
-                "required": ["widget_name", "target"]
-            }
+                "required": ["widget_name", "target"],
+            },
         ),
         Tool(
             name="set_widget_text",
@@ -195,16 +477,37 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Name of the TextBlock or Button widget"},
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Name of the TextBlock or Button widget",
+                    },
                     "text": {"type": "string", "description": "Text to set"},
-                    "font_size": {"type": "integer", "description": "Font size (TextBlock)"},
-                    "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] 0-1 (TextBlock)"},
-                    "justification": {"type": "string", "enum": ["Left", "Center", "Right"], "description": "Text justification (TextBlock)"},
-                    "background_color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B, A] 0-1 (Button background)"}
+                    "font_size": {
+                        "type": "integer",
+                        "description": "Font size (TextBlock)",
+                    },
+                    "color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] 0-1 (TextBlock)",
+                    },
+                    "justification": {
+                        "type": "string",
+                        "enum": ["Left", "Center", "Right"],
+                        "description": "Text justification (TextBlock)",
+                    },
+                    "background_color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B, A] 0-1 (Button background)",
+                    },
                 },
-                "required": ["widget_name", "target"]
-            }
+                "required": ["widget_name", "target"],
+            },
         ),
         Tool(
             name="set_slider_properties",
@@ -212,16 +515,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Name of the Slider widget"},
-                    "value": {"type": "number", "description": "Slider value (0-1 typically)"},
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Name of the Slider widget",
+                    },
+                    "value": {
+                        "type": "number",
+                        "description": "Slider value (0-1 typically)",
+                    },
                     "min_value": {"type": "number", "description": "Min value"},
                     "max_value": {"type": "number", "description": "Max value"},
                     "step_size": {"type": "number", "description": "Step size"},
-                    "locked": {"type": "boolean", "description": "Lock slider"}
+                    "locked": {"type": "boolean", "description": "Lock slider"},
                 },
-                "required": ["widget_name", "target"]
-            }
+                "required": ["widget_name", "target"],
+            },
         ),
         Tool(
             name="get_widget_tree",
@@ -229,10 +541,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    }
                 },
-                "required": ["widget_name"]
-            }
+                "required": ["widget_name"],
+            },
         ),
         Tool(
             name="delete_widget_from_blueprint",
@@ -240,11 +555,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Name of the widget component to delete"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Name of the widget component to delete",
+                    },
                 },
-                "required": ["widget_name", "target"]
-            }
+                "required": ["widget_name", "target"],
+            },
         ),
         Tool(
             name="rename_widget_in_blueprint",
@@ -252,12 +573,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "target": {"type": "string", "description": "Current name of the widget component"},
-                    "new_name": {"type": "string", "description": "New name for the widget component"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Current name of the widget component",
+                    },
+                    "new_name": {
+                        "type": "string",
+                        "description": "New name for the widget component",
+                    },
                 },
-                "required": ["widget_name", "target", "new_name"]
-            }
+                "required": ["widget_name", "target", "new_name"],
+            },
         ),
         Tool(
             name="add_widget_child",
@@ -265,12 +595,21 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint"},
-                    "child": {"type": "string", "description": "Name of the widget to move (child)"},
-                    "parent": {"type": "string", "description": "Name of the target parent container widget"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint",
+                    },
+                    "child": {
+                        "type": "string",
+                        "description": "Name of the widget to move (child)",
+                    },
+                    "parent": {
+                        "type": "string",
+                        "description": "Name of the target parent container widget",
+                    },
                 },
-                "required": ["widget_name", "child", "parent"]
-            }
+                "required": ["widget_name", "child", "parent"],
+            },
         ),
         Tool(
             name="delete_umg_widget_blueprint",
@@ -278,10 +617,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "widget_name": {"type": "string", "description": "Name of the Widget Blueprint to delete"}
+                    "widget_name": {
+                        "type": "string",
+                        "description": "Name of the Widget Blueprint to delete",
+                    }
                 },
-                "required": ["widget_name"]
-            }
+                "required": ["widget_name"],
+            },
         ),
     ]
 
@@ -303,16 +645,40 @@ _COMPONENT_TYPE_MAP = {
     "ComboBox": ("add_combo_box_to_widget", "combo_box_name", None),
     "CheckBox": ("add_check_box_to_widget", "check_box_name", None),
     "SpinBox": ("add_spin_box_to_widget", "spin_box_name", None),
-    "EditableTextBox": ("add_editable_text_box_to_widget", "editable_text_box_name", None),
+    "EditableTextBox": (
+        "add_editable_text_box_to_widget",
+        "editable_text_box_name",
+        None,
+    ),
     # New generic widget types
     "ScrollBox": ("add_generic_widget_to_widget", "component_name", "ScrollBox"),
-    "WidgetSwitcher": ("add_generic_widget_to_widget", "component_name", "WidgetSwitcher"),
-    "BackgroundBlur": ("add_generic_widget_to_widget", "component_name", "BackgroundBlur"),
-    "UniformGridPanel": ("add_generic_widget_to_widget", "component_name", "UniformGridPanel"),
+    "WidgetSwitcher": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "WidgetSwitcher",
+    ),
+    "BackgroundBlur": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "BackgroundBlur",
+    ),
+    "UniformGridPanel": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "UniformGridPanel",
+    ),
     "Spacer": ("add_generic_widget_to_widget", "component_name", "Spacer"),
-    "RichTextBlock": ("add_generic_widget_to_widget", "component_name", "RichTextBlock"),
+    "RichTextBlock": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "RichTextBlock",
+    ),
     "WrapBox": ("add_generic_widget_to_widget", "component_name", "WrapBox"),
-    "CircularThrobber": ("add_generic_widget_to_widget", "component_name", "CircularThrobber"),
+    "CircularThrobber": (
+        "add_generic_widget_to_widget",
+        "component_name",
+        "CircularThrobber",
+    ),
 }
 
 TOOL_HANDLERS = {
@@ -338,13 +704,23 @@ TOOL_HANDLERS = {
 async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     """Handle a UMG tool call."""
     if name not in TOOL_HANDLERS:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     # Route the merged add_widget_component tool to the correct C++ command
     if name == "add_widget_component":
         component_type = (arguments or {}).get("component_type", "")
         if component_type not in _COMPONENT_TYPE_MAP:
-            return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown component_type: {component_type}. Supported: {list(_COMPONENT_TYPE_MAP.keys())}"}}')]
+            return [
+                TextContent(
+                    type="text",
+                    text=f'{{"success": false, "error": "Unknown component_type: {component_type}. Supported: {list(_COMPONENT_TYPE_MAP.keys())}"}}',
+                )
+            ]
 
         command_key, name_param, component_class = _COMPONENT_TYPE_MAP[component_type]
 
