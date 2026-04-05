@@ -1,5 +1,5 @@
 # ============================================================================
-#  UEEditorMCP - One-Click Python Setup (PowerShell)
+#  UECliTool - One-Click Python Setup (PowerShell)
 #  Automatically finds UE engine's built-in Python, creates a venv,
 #  and installs the MCP package. No external Python installation required.
 # ============================================================================
@@ -16,7 +16,7 @@ $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PluginDir)  # Up from Plu
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host " UEEditorMCP - Python Environment Setup"  -ForegroundColor Cyan
+Write-Host " UECliTool - Python Environment Setup"  -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -253,19 +253,12 @@ $pythonPath = $PythonDir.Replace('\', '/')
 $mcpJson = @"
 {
   "servers": {
-    "ue-editor-mcp": {
+    "ue-cli-tool": {
       "command": "$venvPython",
-      "args": ["-m", "ue_editor_mcp.server_unified"],
+      "args": ["-m", "ue_cli_tool.server"],
       "env": {
         "PYTHONPATH": "$pythonPath"
       }
-        },
-        "ue-editor-mcp-logs": {
-            "command": "$venvPython",
-            "args": ["-m", "ue_editor_mcp.server_unreal_logs"],
-            "env": {
-                "PYTHONPATH": "$pythonPath"
-            }
     }
   }
 }
@@ -289,6 +282,6 @@ Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host " Next steps:" -ForegroundColor Yellow
 Write-Host "   1. Open your UE project in the Editor"
-Write-Host "   2. Open VS Code - both ue-editor-mcp and ue-editor-mcp-logs servers will auto-start"
+Write-Host "   2. Open VS Code - ue-cli-tool server will auto-start"
 Write-Host "   3. Use Copilot Chat to control Blueprints"
 Write-Host ""

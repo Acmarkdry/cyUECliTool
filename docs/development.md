@@ -5,7 +5,7 @@
 ### 第 1 步：C++ 实现
 
 ```cpp
-// Source/UEEditorMCP/Public/Actions/MyActions.h
+// Source/UECliTool/Public/Actions/MyActions.h
 class FMyNewAction : public FBlueprintNodeAction
 {
 public:
@@ -23,7 +23,7 @@ ActionHandlers.Add(TEXT("my_new_action"), MakeShared<FMyNewAction>());
 
 ### 第 2 步：Python ActionDef
 
-在 `Python/ue_editor_mcp/registry/actions.py` 中添加：
+在 `Python/ue_cli_tool/registry/actions.py` 中添加：
 ```python
 ActionDef(
     id="domain.my_new_action",
@@ -49,7 +49,7 @@ ActionDef(
 Engine\Build\BatchFiles\Build.bat <ProjectName>Editor Win64 Development ...
 ```
 
-无需修改服务器代码，`ue_actions_search` / `ue_actions_run` 自动识别新动作。
+无需修改服务器代码，`ue_query(query="search ...")` 和 `ue_cli` 自动识别新动作。
 
 ---
 
@@ -103,7 +103,7 @@ _result = {"path": bp.get_path_name()} if bp else {"error": "Failed to create bl
 """)
 ```
 
-详细的 Python API 用法和迁移对照表见 [python-api skill](../Python/ue_editor_mcp/skills/python-api.md)。
+详细的 Python API 用法和迁移对照表见 [python-api skill](../Python/ue_cli_tool/skills/python-api.md)。
 
 ---
 
@@ -168,12 +168,14 @@ UnrealEditor-Cmd.exe YourProject.uproject -run=UEEditorMCP -format=markdown
 ## 测试
 
 ```bash
-cd Plugins/UEEditorMCP
+cd Plugins/UECliTool
 python -m pytest tests/ -v
 ```
 
-当前测试覆盖：
+当前测试覆盖（91 项）：
+- `test_cli_parser.py` — CLI 解析器完整测试（41 用例）
 - `test_animgraph.py` — AnimGraph ActionDef 结构、capabilities、JSON round-trip
 - `test_skills.py` — Skill 系统完整性
 - `test_schema_contract.py` — Python ↔ C++ 接口一致性
-- `test_unreal_logs_server.py` — 日志服务器基础功能
+- `test_context.py` — ContextStore 功能
+- `test_materials_analysis.py` — 材质分析 Action 搜索与完整性

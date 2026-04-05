@@ -1,8 +1,12 @@
-# UEEditorMCP - 开发计划
+# ⚠️ [ARCHIVED] UEEditorMCP - 开发计划
+
+> **此文档为历史归档文件。** 项目已于 2026-04 重构为 **cyUECliTool**，
+> 12 个 JSON MCP 工具替换为 2 个 CLI-native 工具（`ue_cli` + `ue_query`）。
+> 当前架构请参考 [architecture.md](architecture.md) 和 [README.md](../README.md)。
 
 > 创建日期: 2026-02-13  
 > 最后更新: 2026-02-23  
-> 目标: 7 固定 MCP 工具 + Action Registry 架构
+> 目标: 7 固定 MCP 工具 + Action Registry 架构（**已弃用**）
 
 ## 0) 状态快照（2026-02-22）
 

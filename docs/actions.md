@@ -11,7 +11,7 @@ import unreal
 _result = [a.get_name() for a in unreal.EditorLevelLibrary.get_all_level_actors()]
 ```
 
-设置 `_result = <value>` 返回数据。详见 [python-api skill](../Python/ue_editor_mcp/skills/python-api.md)。
+设置 `_result = <value>` 返回数据。详见 [python-api skill](../Python/ue_cli_tool/skills/python-api.md)。
 
 ## 动作域（核心）
 
@@ -34,52 +34,28 @@ _result = [a.get_name() for a in unreal.EditorLevelLibrary.get_all_level_actors(
 
 ## AI 工作流
 
-### 推荐路径：ue_python_exec
+### CLI 语法（推荐）
 
 ```
-# 大部分操作都可以通过 ue_python_exec 完成
-ue_python_exec(code="import unreal\nfactory = unreal.BlueprintFactory()\n...")
+ue_cli(command="@BP_Player\nadd_blueprint_variable Speed --variable_type Float\nadd_blueprint_event_node ReceiveBeginPlay\ncompile_blueprint")
 ```
 
-### 批量路径（1 次往返）
+### 查询
 
 ```
-ue_batch(actions=[
-  {action_id: "variable.create", params: {blueprint_name: "BP_Player", variable_name: "Speed", variable_type: "Float"}},
-  {action_id: "node.add_event", params: {blueprint_name: "BP_Player", event_name: "BeginPlay"}}
-])
-```
-
-### 异步路径
-
-```
-# 提交长时间运行的操作
-ue_async_run(action="submit", command="exec_python", params={code: "..."})
-# → {task_id: "uuid"}
-
-# 轮询结果
-ue_async_run(action="poll", task_id="uuid")
-# → {status: "completed", result: {...}}
-```
-
-### 发现路径（3 次往返）
-
-```
-1. ue_actions_search(query="material layout")
-2. ue_actions_schema(action_id="material.auto_layout")
-3. ue_actions_run(action_id="material.auto_layout", params={...})
+ue_query(query="help add_blueprint_variable")
+ue_query(query="search material")
+ue_query(query="skills")
 ```
 
 ## 编译诊断
 
 ### 蓝图
 
-- 通过 `ue_python_exec` 编译蓝图
-- 详细诊断：`editor.get_logs` → `category="LogBlueprint"`, `min_verbosity="Error"`
-- Fatal 上下文：`category="LogOutputDevice"`
+- 通过 `compile_blueprint` CLI 命令编译
+- 详细日志：`ue_query(query="logs --source editor --category LogBlueprint")`
 
 ### 材质
 
-- 通过 `ue_python_exec` 或保留的 C++ 动作操作材质
-- 使用 `material.diagnose` 检查常见问题
-- 详细日志：`ue_logs_tail(source="editor", category="LogMaterial", min_verbosity="Error")`
+- 使用 `material_diagnose` 检查常见问题
+- 详细日志：`ue_query(query="logs --source editor --category LogMaterial")`
