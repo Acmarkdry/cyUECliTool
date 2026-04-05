@@ -14,7 +14,7 @@ asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
 mat = asset_tools.create_asset("M_Glow", "/Game/Materials", None, factory)
 
 # For complex expression graphs, use the retained C++ actions:
-# material.get_summary, material.auto_layout, material.auto_comment
+# material_get_summary, material_auto_layout, material_auto_comment
 _result = mat.get_path_name() if mat else "failed"
 ```
 
@@ -25,9 +25,9 @@ retained C++ actions for analysis, layout, and diagnostics:
 
 ```
 # Step 1: Create material via ue_python_exec
-# Step 2: Analyze with material.get_summary (C++ action)
-# Step 3: Auto-organize with material.auto_layout (C++ action)
-# Step 4: Diagnose issues with material.diagnose (C++ action)
+# Step 2: Analyze with material_get_summary (C++ action)
+# Step 3: Auto-organize with material_auto_layout (C++ action)
+# Step 4: Diagnose issues with material_diagnose (C++ action)
 # Step 5: Apply to actor via ue_python_exec
 ```
 
@@ -35,41 +35,42 @@ retained C++ actions for analysis, layout, and diagnostics:
 
 | Action | Purpose |
 |---|---|
-| `material.get_summary` | Full graph structure inspection |
-| `material.set_property` | Set material domain/blend mode properties |
-| `material.remove_expression` | Remove expression nodes |
-| `material.auto_layout` | Organize graph layout after modifications |
-| `material.auto_comment` | Auto-generate comment boxes |
-| `material.refresh_editor` | Update open editor UI after programmatic changes |
-| `material.get_selected_nodes` | Query selected nodes in material editor |
-| `material.analyze_complexity` | Node count, shader instructions, texture samples |
-| `material.analyze_dependencies` | External asset dependencies |
-| `material.diagnose` | Common issue detection (orphan nodes, etc.) |
-| `material.diff` | Compare two materials structurally |
-| `material.extract_parameters` | Discover all parameters and defaults |
-| `material.batch_create_instances` | Create multiple instances in one call |
-| `material.replace_node` | Swap expression node while preserving connections |
+| `material_get_summary` | Full graph structure inspection |
+| `material_set_property` | Set material domain/blend mode properties |
+| `material_remove_expression` | Remove expression nodes |
+| `material_auto_layout` | Organize graph layout after modifications |
+| `material_auto_comment` | Auto-generate comment boxes |
+| `material_refresh_editor` | Update open editor UI after programmatic changes |
+| `material_get_selected_nodes` | Query selected nodes in material editor |
+| `material_analyze_complexity` | Node count, shader instructions, texture samples |
+| `material_analyze_dependencies` | External asset dependencies |
+| `material_diagnose` | Common issue detection (orphan nodes, etc.) |
+| `material_diff` | Compare two materials structurally |
+| `material_extract_parameters` | Discover all parameters and defaults |
+| `material_batch_create_instances` | Create multiple instances in one call |
+| `material_replace_node` | Swap expression node while preserving connections |
 
 ## Material Analysis Workflow
 
 Use the analysis actions to inspect and compare materials before making changes.
 
 ```
+@M_Character
 # Check complexity and performance budget
-ue_actions_run(action_id="material.analyze_complexity", params={material_name: "M_Character"})
+material_analyze_complexity
 # → node_count, node_type_distribution, connection_count, shader_instructions{vs, ps}, texture_samples[]
 
-# Inspect external dependencies (textures, material functions, level references)
-ue_actions_run(action_id="material.analyze_dependencies", params={material_name: "M_Character"})
+# Inspect external dependencies
+material_analyze_dependencies
 # → external_assets[]{type, path, node_name}, level_references[]{actor_name, component_name}
 
-# Diagnose common issues (orphan nodes, excessive samples, domain/blend mode mismatches)
-ue_actions_run(action_id="material.diagnose", params={material_name: "M_Character"})
+# Diagnose common issues
+material_diagnose
 # → status("healthy"|"has_issues"), diagnostics[]{severity, code, message, node_name?}
 
-# Diff two materials to spot structural differences
-ue_actions_run(action_id="material.diff", params={material_name_a: "M_Base", material_name_b: "M_Base_V2"})
-# → summary{node_count_diff, connection_count_diff}, property_diffs[], parameters_only_in_a[], parameters_only_in_b[]
+# Diff two materials
+material_diff M_Base --material_name_b M_Base_V2
+# → summary{node_count_diff, connection_count_diff}, property_diffs[], parameters_only_in_a/b[]
 ```
 
 ## Batch Instantiation Workflow
@@ -78,17 +79,12 @@ Extract parameters from a master material, then create multiple instances in one
 
 ```
 # Step 1 — discover all parameters and their defaults
-ue_actions_run(action_id="material.extract_parameters", params={material_name: "M_Master"})
+@M_Master
+material_extract_parameters
 # → parameters[]{name, type, default_value, group, sort_priority}
 
 # Step 2 — batch-create instances (failures are isolated; batch continues)
-ue_actions_run(action_id="material.batch_create_instances", params={
-    parent_material: "M_Master",
-    instances: [
-        {name: "MI_Red", scalar_parameters: {Roughness: 0.2}, vector_parameters: {BaseColor: [1,0,0,1]}},
-        {name: "MI_Blue", scalar_parameters: {Roughness: 0.5}, vector_parameters: {BaseColor: [0,0,1,1]}}
-    ]
-})
+material_batch_create_instances --instances [{"name":"MI_Red","scalar_parameters":{"Roughness":0.2},"vector_parameters":{"BaseColor":[1,0,0,1]}},{"name":"MI_Blue","scalar_parameters":{"Roughness":0.5},"vector_parameters":{"BaseColor":[0,0,1,1]}}]
 ```
 
 ## Applying Materials (via ue_python_exec)
@@ -107,8 +103,8 @@ _result = "applied"
 
 ## Key Patterns
 
-- Use `material.get_summary` to inspect full graph structure before modifications
-- `material.auto_layout` after batch modifications to organize the graph
-- `material.refresh_editor` to update the open editor UI after programmatic changes
+- Use `material_get_summary` to inspect full graph structure before modifications
+- `material_auto_layout` after batch modifications to organize the graph
+- `material_refresh_editor` to update the open editor UI after programmatic changes
 - For creating/compiling/applying materials → use `ue_python_exec`
 - For analysis/diagnostics/layout → use retained C++ actions

@@ -1,10 +1,10 @@
 """
 Skill system — domain-grouped action catalogs for AI on-demand loading.
 
-Instead of search → schema → run (3 round-trips), AI uses:
-  1. ue_skills(action="list")  → see skill catalog index
-  2. ue_skills(action="load", skill_id="materials")  → get full schemas + workflows
-  3. ue_actions_run / ue_batch  → execute directly
+AI uses:
+  1. ue_query(query="skills")           → see skill catalog index
+  2. ue_query(query="skills materials") → get full schemas + workflows
+  3. ue_cli(command="...")               → execute directly via CLI syntax
 
 Skills are auto-generated from ActionDef registry data + hand-written
 workflow tips stored in markdown files under skills/.
