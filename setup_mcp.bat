@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM  UEEditorMCP - One-Click Python Setup
+REM  UECliTool - One-Click Python Setup
 REM  Automatically finds UE engine's built-in Python, creates a venv,
 REM  and installs the MCP package. No external Python installation required.
 REM ============================================================================
@@ -14,7 +14,7 @@ REM ProjectRoot = go up two levels from Plugins/UEEditorMCP
 for %%I in ("%PLUGIN_DIR%..\..\") do set "PROJECT_ROOT=%%~fI"
 
 echo ============================================
-echo  UEEditorMCP - Python Environment Setup
+echo  UECliTool - Python Environment Setup
 echo ============================================
 echo.
 
@@ -153,14 +153,9 @@ set "PP=%PYTHON_DIR:\=/%"
 
 >  "%MCP_JSON%" echo {
 >> "%MCP_JSON%" echo   "servers": {
->> "%MCP_JSON%" echo     "ue-editor-mcp": {
+>> "%MCP_JSON%" echo     "ue-cli-tool": {
 >> "%MCP_JSON%" echo       "command": "%VP%/Scripts/python.exe",
->> "%MCP_JSON%" echo       "args": ["-m", "ue_editor_mcp.server_unified"],
->> "%MCP_JSON%" echo       "env": { "PYTHONPATH": "%PP%" }
->> "%MCP_JSON%" echo     },
->> "%MCP_JSON%" echo     "ue-editor-mcp-logs": {
->> "%MCP_JSON%" echo       "command": "%VP%/Scripts/python.exe",
->> "%MCP_JSON%" echo       "args": ["-m", "ue_editor_mcp.server_unreal_logs"],
+>> "%MCP_JSON%" echo       "args": ["-m", "ue_cli_tool.server"],
 >> "%MCP_JSON%" echo       "env": { "PYTHONPATH": "%PP%" }
 >> "%MCP_JSON%" echo     }
 >> "%MCP_JSON%" echo   }
@@ -170,7 +165,7 @@ echo   Generated: %MCP_JSON%
 echo.
 echo ============================================
 echo  Done! No external Python installation needed.
-echo  Configured servers: ue-editor-mcp + ue-editor-mcp-logs
+echo  Configured server: ue-cli-tool
 echo ============================================
 
 pause
