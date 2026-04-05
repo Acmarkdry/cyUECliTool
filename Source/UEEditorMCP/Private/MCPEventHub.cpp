@@ -151,7 +151,7 @@ int32 FMCPEventHub::GetPendingEventCount(int32 ClientId) const
 
 void FMCPEventHub::BindEditorDelegates()
 {
-	// Blueprint compiled
+	// Blueprint compiled (event has no parameters in UE 5.6+)
 	if (GEditor)
 	{
 		BlueprintCompiledHandle = GEditor->OnBlueprintCompiled().AddRaw(this, &FMCPEventHub::OnBlueprintCompiled);
@@ -176,11 +176,8 @@ void FMCPEventHub::BindEditorDelegates()
 		PIEEndedHandle = FEditorDelegates::EndPIE.AddRaw(this, &FMCPEventHub::OnPIEEnded);
 	}
 
-	// Undo/Redo
-	if (GEditor && GEditor->Trans)
-	{
-		PostUndoHandle = GEditor->Trans->OnUndo().AddRaw(this, &FMCPEventHub::OnPostUndo);
-	}
+	// Undo/Redo — use GEditor->RegisterForUndo in UE 5.6+
+	// (Deferred to future: requires implementing FEditorUndoClient interface)
 
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: EventHub bound editor delegates"));
 }
@@ -226,30 +223,21 @@ void FMCPEventHub::UnbindEditorDelegates()
 		PIEEndedHandle.Reset();
 	}
 
-	if (GEditor && GEditor->Trans && PostUndoHandle.IsValid())
-	{
-		GEditor->Trans->OnUndo().Remove(PostUndoHandle);
-		PostUndoHandle.Reset();
-	}
+	// Undo/Redo — no handle to unbind (deferred)
 
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: EventHub unbound editor delegates"));
 }
 
 // ─── Editor event handlers ────────────────────────────────────────────
 
-void FMCPEventHub::OnBlueprintCompiled(UBlueprint* Blueprint)
+void FMCPEventHub::OnBlueprintCompiled()
 {
-	if (!Blueprint || !bIsListening) return;
+	if (!bIsListening) return;
 
+	// UE 5.6 OnBlueprintCompiled() has no Blueprint parameter;
+	// we broadcast a generic event so subscribers know a compile happened.
 	TSharedPtr<FJsonObject> Data = MakeShared<FJsonObject>();
-	Data->SetStringField(TEXT("blueprint_name"), Blueprint->GetName());
-	Data->SetStringField(TEXT("blueprint_path"), Blueprint->GetPathName());
-	Data->SetStringField(TEXT("status"),
-		Blueprint->Status == BS_Error ? TEXT("error") :
-		Blueprint->Status == BS_UpToDate ? TEXT("up_to_date") :
-		Blueprint->Status == BS_UpToDateWithWarnings ? TEXT("up_to_date_with_warnings") :
-		TEXT("unknown"));
-	Data->SetBoolField(TEXT("has_errors"), Blueprint->Status == BS_Error);
+	Data->SetStringField(TEXT("info"), TEXT("A blueprint was compiled (use get_editor_logs for details)"));
 
 	EnqueueEvent(FMCPEvent(EMCPEventType::BlueprintCompiled, TEXT("blueprint_compiled"), Data));
 }
@@ -355,7 +343,7 @@ void FMCPEventHub::OnSelectionChanged(UObject* SelectedObject)
 	EnqueueEvent(FMCPEvent(EMCPEventType::SelectionChanged, TEXT("selection_changed"), Data));
 }
 
-void FMCPEventHub::OnPostUndo(bool bSuccess)
+void FMCPEventHub::OnPostUndo(bool bSuccess, bool /* bFinalized */)
 {
 	if (!bIsListening) return;
 
