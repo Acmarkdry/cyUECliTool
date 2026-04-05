@@ -1,4 +1,4 @@
-"""
+﻿"""
 Property-based tests for Material Analysis & Creation actions (Python layer).
 
 Validates ActionDef structure and registry behavior without requiring a live
@@ -53,8 +53,8 @@ for attr in ("Tool", "TextContent", "ImageContent"):
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from ue_editor_mcp.registry import get_registry
-from ue_editor_mcp.registry.actions import _MATERIAL_ACTIONS
+from ue_cli_tool.registry import get_registry
+from ue_cli_tool.registry.actions import _MATERIAL_ACTIONS
 
 # The 7 new action IDs introduced by this feature
 NEW_ACTION_IDS = [

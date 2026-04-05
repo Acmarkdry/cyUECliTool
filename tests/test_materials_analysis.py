@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for Material Analysis & Creation actions (Python layer).
 
 Validates ActionRegistry search, ActionDef completeness, and skills loading
@@ -48,8 +48,8 @@ for attr in ("Tool", "TextContent", "ImageContent"):
         type(attr, (), {"__init__": lambda self, **kw: None}),
     )
 
-from ue_editor_mcp.registry import get_registry
-from ue_editor_mcp.skills import load_skill
+from ue_cli_tool.registry import get_registry
+from ue_cli_tool.skills import load_skill
 
 # The 7 new action IDs introduced by this feature
 NEW_ACTION_IDS = [

@@ -1,4 +1,4 @@
-"""Tests for the skill system — catalog listing and loading."""
+﻿"""Tests for the skill system 鈥?catalog listing and loading."""
 
 import sys
 import types
@@ -41,8 +41,8 @@ for attr in ("Tool", "TextContent", "ImageContent"):
         type(attr, (), {"__init__": lambda self, **kw: None}),
     )
 
-from ue_editor_mcp.registry import get_registry
-from ue_editor_mcp.skills import get_skill_list, load_skill, SKILL_DEFS, _WORKFLOWS_DIR
+from ue_cli_tool.registry import get_registry
+from ue_cli_tool.skills import get_skill_list, load_skill, SKILL_DEFS, _WORKFLOWS_DIR
 
 
 def test_skill_list_returns_all_skills():

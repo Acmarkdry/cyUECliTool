@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-UE MCP Bridge CLI — send commands to Unreal MCPBridge via TCP.
+UE MCP Bridge CLI 锟?send commands to Unreal MCPBridge via TCP.
 
 Usage:
     python ue_mcp_cli.py <command> [json_params]
@@ -31,17 +31,17 @@ import os
 import sys
 from typing import Optional
 
-# Ensure the ue_editor_mcp package is importable
+# Ensure the ue_cli_tool package is importable
 _parent = os.path.dirname(os.path.abspath(__file__))
 if _parent not in sys.path:
     sys.path.insert(0, _parent)
 
-from ue_editor_mcp.connection import (
+from ue_cli_tool.connection import (
     PersistentUnrealConnection,
     ConnectionConfig,
     _wire_metrics,
 )
-from ue_editor_mcp.metrics import get_metrics
+from ue_cli_tool.metrics import get_metrics
 
 
 def _get_connection(timeout: Optional[float] = None) -> PersistentUnrealConnection:
@@ -138,7 +138,9 @@ def _handle_script() -> None:
         python ue_mcp_cli.py --script script.ues
         echo "@BP_Test\ncreate Actor\ncompile" | python ue_mcp_cli.py --script
     """
-    from ue_editor_mcp.script import execute_script, format_script_result
+    from ue_cli_tool.cli_parser import CliParser
+    from ue_cli_tool.registry import get_registry
+    from ue_cli_tool.connection import TimeoutTier
 
     # Read script from file argument or stdin
     script_text = ""
@@ -159,18 +161,26 @@ def _handle_script() -> None:
         print("ERROR: Empty script", file=sys.stderr)
         sys.exit(1)
 
+    parser = CliParser(get_registry())
+    parsed = parser.parse(script_text)
+
+    if parsed.errors:
+        print(f"ERROR: Parse errors: {'; '.join(parsed.errors)}", file=sys.stderr)
+        sys.exit(1)
+
     conn = _get_connection()
     try:
         if not conn.connect():
             print("ERROR: Cannot connect to UE MCPBridge", file=sys.stderr)
             sys.exit(1)
 
-        result = execute_script(script_text, conn)
+        batch = parser.to_batch_commands(parsed)
+        result = conn.send_raw_dict(
+            "batch_execute",
+            {"commands": batch, "continue_on_error": True},
+            timeout_tier=TimeoutTier.EXTRA_SLOW,
+        )
 
-        # Print human-readable summary
-        print(format_script_result(result))
-        print()
-        # Also print JSON for machine consumption
         print(json.dumps(result, indent=2, ensure_ascii=False))
     finally:
         conn.disconnect()

@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-UE Bridge — Complete Python interface to Unreal Engine MCPBridge.
+UE Bridge 鈥?Complete Python interface to Unreal Engine MCPBridge.
 
 All registered commands are accessible as typed Python methods via dynamic
 proxy (CommandProxy).  High-frequency commands have explicit signatures for
@@ -70,40 +70,40 @@ import sys
 from typing import Any, Dict, List, Optional
 
 try:
-    import readline  # noqa: F401 — enables arrow-key editing in REPL
+    import readline  # noqa: F401 鈥?enables arrow-key editing in REPL
 except ImportError:
     pass
 
-# ═══════════════════════════════════════════════════════════
-# Imports from the ue_editor_mcp package
-# ═══════════════════════════════════════════════════════════
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+# Imports from the ue_cli_tool package
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
 # Ensure the package is importable when running ue_bridge.py directly
-# (it lives in Python/ alongside ue_editor_mcp/)
+# (it lives in Python/ alongside ue_cli_tool/)
 import os as _os
 
-_pkg_dir = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "ue_editor_mcp")
+_pkg_dir = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "ue_cli_tool")
 if _os.path.isdir(_pkg_dir):
     _parent = _os.path.dirname(_os.path.abspath(__file__))
     if _parent not in sys.path:
         sys.path.insert(0, _parent)
 
-from ue_editor_mcp.connection import (
+from ue_cli_tool.connection import (
     PersistentUnrealConnection,
     ConnectionConfig,
     ConnectionState,
 )
-from ue_editor_mcp.command_proxy import CommandProxy
-from ue_editor_mcp.pipeline import BatchContext, AsyncSubmitter
-from ue_editor_mcp.metrics import get_metrics
+from ue_cli_tool.command_proxy import CommandProxy
+from ue_cli_tool.pipeline import BatchContext, AsyncSubmitter
+from ue_cli_tool.metrics import get_metrics
 
 HOST = "127.0.0.1"
 PORT = 55558
 
 
-# ═══════════════════════════════════════════════════════════
-# UEBridge — Public SDK
-# ═══════════════════════════════════════════════════════════
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+# UEBridge 鈥?Public SDK
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
 
 class UEBridge:
@@ -134,13 +134,13 @@ class UEBridge:
         config = ConnectionConfig(host=host, port=port)
         self._conn = PersistentUnrealConnection(config)
         # Wire metrics
-        from ue_editor_mcp.connection import _wire_metrics
+        from ue_cli_tool.connection import _wire_metrics
 
         _wire_metrics(self._conn)
         self._proxy = CommandProxy(self._conn)
         self._async = AsyncSubmitter(self._conn)
 
-    # ── Generic call ────────────────────────────────────────────────
+    # 鈹€鈹€ Generic call 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def call(self, command: str, **params: Any) -> dict:
         """Send any command by C++ command name. Use for unregistered commands."""
@@ -150,7 +150,7 @@ class UEBridge:
         """Disconnect from Unreal."""
         self._conn.disconnect()
 
-    # ── Dynamic proxy fallback ──────────────────────────────────────
+    # 鈹€鈹€ Dynamic proxy fallback 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def __getattr__(self, name: str) -> Any:
         """Delegate unknown methods to CommandProxy for dynamic resolution."""
@@ -158,7 +158,7 @@ class UEBridge:
             raise AttributeError(name)
         return getattr(self._proxy, name)
 
-    # ── Pipeline ────────────────────────────────────────────────────
+    # 鈹€鈹€ Pipeline 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def batch(
         self, *, continue_on_error: bool = False, transactional: bool = False
@@ -186,7 +186,7 @@ class UEBridge:
         """Wait for an async task to complete."""
         return self._async.wait(task_id, timeout=timeout)
 
-    # ── Diagnostics ─────────────────────────────────────────────────
+    # 鈹€鈹€ Diagnostics 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def health(self) -> dict:
         """Get connection health status."""
@@ -200,11 +200,11 @@ class UEBridge:
         """Search available commands by keyword."""
         return self._proxy.search(query, **kwargs)
 
-    # ═══════════════════════════════════════════════════════════════
+    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     # HIGH-FREQUENCY EXPLICIT METHODS (IDE autocompletion friendly)
-    # ═══════════════════════════════════════════════════════════════
+    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
-    # ── Meta ────────────────────────────────────────────────────────
+    # 鈹€鈹€ Meta 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def ping(self) -> dict:
         return self.call("ping")
@@ -215,7 +215,7 @@ class UEBridge:
     def save_all(self) -> dict:
         return self.call("save_all")
 
-    # ── Blueprint CRUD ──────────────────────────────────────────────
+    # 鈹€鈹€ Blueprint CRUD 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def create_blueprint(
         self, name: str, parent_class: str, *, path: str = None
@@ -236,7 +236,7 @@ class UEBridge:
             asset_path=asset_path,
         )
 
-    # ── Components ──────────────────────────────────────────────────
+    # 鈹€鈹€ Components 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def add_component_to_blueprint(
         self,
@@ -260,7 +260,7 @@ class UEBridge:
             component_properties=component_properties,
         )
 
-    # ── Nodes ───────────────────────────────────────────────────────
+    # 鈹€鈹€ Nodes 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def add_blueprint_event_node(
         self, blueprint_name: str, event_name: str, *, node_position: str = None
@@ -292,7 +292,7 @@ class UEBridge:
             graph_name=graph_name,
         )
 
-    # ── Variables ───────────────────────────────────────────────────
+    # 鈹€鈹€ Variables 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def add_blueprint_variable(
         self,
@@ -320,7 +320,7 @@ class UEBridge:
             default_value=default_value,
         )
 
-    # ── Graph wiring ────────────────────────────────────────────────
+    # 鈹€鈹€ Graph wiring 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def connect_blueprint_nodes(
         self,
@@ -402,7 +402,7 @@ class UEBridge:
             graph_name=graph_name,
         )
 
-    # ── Actors ──────────────────────────────────────────────────────
+    # 鈹€鈹€ Actors 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def get_actors_in_level(self) -> dict:
         return self.call("get_actors_in_level")
@@ -419,7 +419,7 @@ class UEBridge:
             "spawn_actor", name=name, type=type, location=location, rotation=rotation
         )
 
-    # ── Materials ───────────────────────────────────────────────────
+    # 鈹€鈹€ Materials 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def create_material(
         self,
@@ -473,7 +473,7 @@ class UEBridge:
             source_output_index=source_output_index,
         )
 
-    # ── UMG Widgets ─────────────────────────────────────────────────
+    # 鈹€鈹€ UMG Widgets 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def create_umg_widget_blueprint(
         self, widget_name: str, *, parent_class: str = None, path: str = None
@@ -501,7 +501,7 @@ class UEBridge:
             "set_widget_properties", widget_name=widget_name, target=target, **kwargs
         )
 
-    # ── Assets ──────────────────────────────────────────────────────
+    # 鈹€鈹€ Assets 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
     def list_assets(
         self,
@@ -522,9 +522,9 @@ class UEBridge:
         )
 
 
-# ═══════════════════════════════════════════════════════════
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 # CLI Entry Point
-# ═══════════════════════════════════════════════════════════
+# 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
 
 
 def _cli_main():
@@ -595,7 +595,7 @@ def _cli_main():
 
 def _repl():
     """Interactive REPL for testing commands."""
-    print("UE Bridge REPL — type 'help', 'health', 'stats', or 'quit'")
+    print("UE Bridge REPL 鈥?type 'help', 'health', 'stats', or 'quit'")
     ue = UEBridge()
     try:
         while True:
