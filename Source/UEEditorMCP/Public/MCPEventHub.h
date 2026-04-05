@@ -156,7 +156,7 @@ private:
 
 	// ─── Editor event handlers ─────────────────────────────────────
 
-	void OnBlueprintCompiled(UBlueprint* Blueprint);
+	void OnBlueprintCompiled();
 	void OnAssetSaved(const FString& PackageName, UObject* Asset);
 	void OnAssetRemoved(const FAssetData& AssetData);
 	void OnAssetRenamed(const FAssetData& AssetData, const FString& OldPath);
@@ -164,7 +164,7 @@ private:
 	void OnPIEStarted(bool bIsSimulating);
 	void OnPIEEnded(bool bIsSimulating);
 	void OnSelectionChanged(UObject* SelectedObject);
-	void OnPostUndo(bool bSuccess);
+	void OnPostUndo(bool bSuccess, bool bFinalized);
 
 	// ─── Per-client event queues ───────────────────────────────────
 
