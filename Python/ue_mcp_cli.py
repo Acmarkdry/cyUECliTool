@@ -113,7 +113,9 @@ def _handle_batch(file_path: str) -> None:
         commands = json.load(f)
 
     if not isinstance(commands, list):
-        print("ERROR: Batch file must contain a JSON array of commands", file=sys.stderr)
+        print(
+            "ERROR: Batch file must contain a JSON array of commands", file=sys.stderr
+        )
         sys.exit(1)
 
     conn = _get_connection()
@@ -124,6 +126,51 @@ def _handle_batch(file_path: str) -> None:
 
         batch_params = {"commands": commands, "continue_on_error": True}
         result = conn.send_raw_dict("batch_execute", batch_params)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    finally:
+        conn.disconnect()
+
+
+def _handle_script() -> None:
+    """Execute a compact script from file or stdin.
+
+    Usage:
+        python ue_mcp_cli.py --script script.ues
+        echo "@BP_Test\ncreate Actor\ncompile" | python ue_mcp_cli.py --script
+    """
+    from ue_editor_mcp.script import execute_script, format_script_result
+
+    # Read script from file argument or stdin
+    script_text = ""
+    if len(sys.argv) >= 3 and not sys.argv[2].startswith("-"):
+        file_path = sys.argv[2]
+        if not os.path.isfile(file_path):
+            print(f"ERROR: Script file not found: {file_path}", file=sys.stderr)
+            sys.exit(1)
+        with open(file_path, "r", encoding="utf-8") as f:
+            script_text = f.read()
+    elif not sys.stdin.isatty():
+        script_text = sys.stdin.read()
+    else:
+        print("ERROR: --script requires a file path or piped input", file=sys.stderr)
+        sys.exit(1)
+
+    if not script_text.strip():
+        print("ERROR: Empty script", file=sys.stderr)
+        sys.exit(1)
+
+    conn = _get_connection()
+    try:
+        if not conn.connect():
+            print("ERROR: Cannot connect to UE MCPBridge", file=sys.stderr)
+            sys.exit(1)
+
+        result = execute_script(script_text, conn)
+
+        # Print human-readable summary
+        print(format_script_result(result))
+        print()
+        # Also print JSON for machine consumption
         print(json.dumps(result, indent=2, ensure_ascii=False))
     finally:
         conn.disconnect()
@@ -156,6 +203,10 @@ def main():
         _handle_batch(sys.argv[2])
         return
 
+    if arg1 == "--script":
+        _handle_script()
+        return
+
     # Parse optional --timeout
     timeout = None
     command_type = arg1
@@ -167,11 +218,16 @@ def main():
             try:
                 timeout = float(sys.argv[idx + 1])
             except ValueError:
-                print(f"ERROR: Invalid timeout value: {sys.argv[idx + 1]}", file=sys.stderr)
+                print(
+                    f"ERROR: Invalid timeout value: {sys.argv[idx + 1]}",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
             # Remove --timeout and its value from extra_args
             extra_args = [
-                a for i, a in enumerate(sys.argv[2:]) if i + 2 != idx and i + 2 != idx + 1
+                a
+                for i, a in enumerate(sys.argv[2:])
+                if i + 2 != idx and i + 2 != idx + 1
             ]
 
     params = None

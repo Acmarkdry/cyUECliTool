@@ -120,7 +120,9 @@ class MetricsCollector:
             "p99_ms": round(durations[min(int(n * 0.99), n - 1)], 1),
             "max_ms": round(durations[-1], 1),
             "by_command": dict(self._counters),
-            "errors_by_command": {k: v for k, v in self._error_counters.items() if v > 0},
+            "errors_by_command": {
+                k: v for k, v in self._error_counters.items() if v > 0
+            },
         }
 
     def get_recent(self, last_n: int = 20) -> list[dict[str, Any]]:

@@ -14,7 +14,8 @@ exposes:
      8. ue_skills         — on-demand skill catalog (list / load)
      9. ue_python_exec    — execute Python code in UE embedded Python
     10. ue_events          — subscribe/poll editor events (P9 event push)
-    11. ue_async_run      — submit/poll async commands
+    11. ue_script         — compact script execution (token-efficient batch)
+    12. ue_async_run      — submit/poll async commands
     12. ue_context         — persistent context (resume/status/history/workset/clear)
 
 AI workflow (skill-based, preferred):
@@ -80,7 +81,9 @@ _context_store: ContextStore | None = None
 _command_log: deque[dict] = deque(maxlen=_LOG_BUFFER_SIZE)
 
 
-def _log_command(action_id: str, params: dict | None, result: dict, elapsed_ms: float) -> None:
+def _log_command(
+    action_id: str, params: dict | None, result: dict, elapsed_ms: float
+) -> None:
     _command_log.append(
         {
             "ts": time.strftime("%H:%M:%S"),
@@ -156,8 +159,14 @@ def _read_resource(name: str) -> str:
     """Read an embedded resource file."""
     path = _RESOURCES_DIR / name
     if not path.exists():
-        available = [f.name for f in _RESOURCES_DIR.iterdir()] if _RESOURCES_DIR.exists() else []
-        return json.dumps({"error": f"Resource '{name}' not found. Available: {available}"})
+        available = (
+            [f.name for f in _RESOURCES_DIR.iterdir()]
+            if _RESOURCES_DIR.exists()
+            else []
+        )
+        return json.dumps(
+            {"error": f"Resource '{name}' not found. Available: {available}"}
+        )
     return path.read_text(encoding="utf-8")
 
 
@@ -548,6 +557,42 @@ TOOLS = [
             "required": ["action"],
         },
     ),
+    Tool(
+        name="ue_script",
+        description=(
+            "Execute a compact script — a token-efficient alternative to ue_batch. "
+            "Uses context inheritance (@target) and short aliases to express multi-step "
+            "operations in ~20% of the tokens that JSON would require.\n\n"
+            "Syntax:\n"
+            "  @BP_Enemy              # set target (auto-fills blueprint_name)\n"
+            "  create Actor           # positional args mapped to required params\n"
+            "  +comp StaticMeshComponent Mesh   # short alias for add_component\n"
+            "  +event ReceiveBeginPlay\n"
+            "  +var Health Float is_exposed=true  # mixed positional + named\n"
+            "  compile\n"
+            "  save\n\n"
+            "Aliases: +comp +event +func +var +varget +varset +pin +conn "
+            "+cast +selfref +dispatch create compile save summary describe find pins\n\n"
+            "All commands execute as a single batch (one round-trip)."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "script": {
+                    "type": "string",
+                    "description": (
+                        "Compact script text. Use @target for context, "
+                        "+alias for short commands, key=value for named params."
+                    ),
+                },
+                "continue_on_error": {
+                    "type": "boolean",
+                    "description": "Continue executing after a command fails (default: true)",
+                },
+            },
+            "required": ["script"],
+        },
+    ),
 ]
 
 
@@ -562,7 +607,9 @@ async def list_tools() -> list[Tool]:
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | ImageContent]:
+async def call_tool(
+    name: str, arguments: dict[str, Any]
+) -> list[TextContent | ImageContent]:
     """Route tool calls to the appropriate handler."""
     args = arguments or {}
     t0 = time.perf_counter()
@@ -578,7 +625,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
         success = isinstance(result, dict) and result.get("success", False)
         action_id = args.get("action_id") or args.get("action") or None
         try:
-            _context_store.record_operation(name, action_id, args, success, result, elapsed_ms)
+            _context_store.record_operation(
+                name, action_id, args, success, result, elapsed_ms
+            )
             _context_store.track_assets(args, action_id)
         except Exception:
             logger.warning("Context recording failed", exc_info=True)
@@ -617,7 +666,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
 
         # Prefer list-form thumbnails. Fallback to top-level singleton fields.
         has_thumbnail_list = (
-            isinstance(result.get("thumbnails"), list) and len(result.get("thumbnails", [])) > 0
+            isinstance(result.get("thumbnails"), list)
+            and len(result.get("thumbnails", [])) > 0
         )
 
         if has_thumbnail_list:
@@ -646,11 +696,17 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
                     _extract_image(batch_res)
 
                 if "image_base64" in batch_res:
-                    batch_res["image_base64"] = "<base64_data_extracted_to_image_content>"
+                    batch_res["image_base64"] = (
+                        "<base64_data_extracted_to_image_content>"
+                    )
 
             result["image_blocks_count"] = image_blocks_count
 
-    safe_result = _to_serializable(result) if isinstance(result, (dict, CommandResult)) else result
+    safe_result = (
+        _to_serializable(result)
+        if isinstance(result, (dict, CommandResult))
+        else result
+    )
     text = (
         json.dumps(safe_result, indent=2, ensure_ascii=False)
         if isinstance(safe_result, dict)
@@ -785,8 +841,12 @@ def _handle_tool(name: str, args: dict) -> Any:
         # Log each action for the Python command log
         per_action_ms = elapsed / max(len(actions), 1)
         for i, item in enumerate(actions):
-            sub_result = batch_results[i] if i < len(batch_results) else {"success": False}
-            _log_command(item.get("action_id", ""), item.get("params"), sub_result, per_action_ms)
+            sub_result = (
+                batch_results[i] if i < len(batch_results) else {"success": False}
+            )
+            _log_command(
+                item.get("action_id", ""), item.get("params"), sub_result, per_action_ms
+            )
 
         return {
             "success": result.get("success", False),
@@ -932,7 +992,18 @@ def _handle_tool(name: str, args: dict) -> Any:
             "error": f"Unknown action: '{action}'. Use 'subscribe', 'poll', or 'unsubscribe'.",
         }
 
-    # ── 11. ue_async_run ────────────────────────────────────────────
+    # ── 11a. ue_script ──────────────────────────────────────────────
+    if name == "ue_script":
+        script_text = args.get("script", "")
+        if not script_text:
+            return {"success": False, "error": "script text is required"}
+        continue_on_error = args.get("continue_on_error", True)
+        from .script import execute_script
+
+        conn = get_connection()
+        return execute_script(script_text, conn, continue_on_error=continue_on_error)
+
+    # ── 11b. ue_async_run ────────────────────────────────────────────
     if name == "ue_async_run":
         action = args.get("action", "")
 
@@ -942,7 +1013,9 @@ def _handle_tool(name: str, args: dict) -> Any:
                 return {"success": False, "error": "action_id is required for submit"}
             params = args.get("params")
             # Resolve action_id to C++ command
-            command, final_params, error = _resolve_action_to_cpp_command(action_id, params)
+            command, final_params, error = _resolve_action_to_cpp_command(
+                action_id, params
+            )
             if error:
                 return {"success": False, "error": error}
             result = _send_command(
