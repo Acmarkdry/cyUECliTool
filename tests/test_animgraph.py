@@ -105,6 +105,7 @@ def _get_animgraph_actions():
 # Feature: animation-graph-read, Property 1: ActionDef 结构正确性
 # ---------------------------------------------------------------------------
 
+
 def test_property1_actiondef_structure():
     """All animgraph.* ActionDefs must have correct structure."""
     actions = _get_animgraph_actions()
@@ -113,38 +114,39 @@ def test_property1_actiondef_structure():
     for action in actions:
         aid = action.id
         # id matches animgraph.\w+ pattern
-        assert _ANIMGRAPH_ID_PATTERN.match(aid), (
-            f"Action id '{aid}' does not match animgraph.\\w+ pattern"
-        )
+        assert _ANIMGRAPH_ID_PATTERN.match(
+            aid
+        ), f"Action id '{aid}' does not match animgraph.\\w+ pattern"
         # command is non-empty string
-        assert isinstance(action.command, str) and action.command, (
-            f"Action '{aid}' has empty command"
-        )
+        assert (
+            isinstance(action.command, str) and action.command
+        ), f"Action '{aid}' has empty command"
         # tags contains "animgraph"
-        assert "animgraph" in action.tags, (
-            f"Action '{aid}' tags do not contain 'animgraph': {action.tags}"
-        )
+        assert (
+            "animgraph" in action.tags
+        ), f"Action '{aid}' tags do not contain 'animgraph': {action.tags}"
         # description is non-empty
-        assert isinstance(action.description, str) and action.description, (
-            f"Action '{aid}' has empty description"
-        )
+        assert (
+            isinstance(action.description, str) and action.description
+        ), f"Action '{aid}' has empty description"
         # input_schema contains "type": "object"
-        assert isinstance(action.input_schema, dict), (
-            f"Action '{aid}' input_schema is not a dict"
-        )
-        assert action.input_schema.get("type") == "object", (
-            f"Action '{aid}' input_schema missing 'type': 'object'"
-        )
+        assert isinstance(
+            action.input_schema, dict
+        ), f"Action '{aid}' input_schema is not a dict"
+        assert (
+            action.input_schema.get("type") == "object"
+        ), f"Action '{aid}' input_schema missing 'type': 'object'"
         # examples is non-empty
-        assert action.examples and len(action.examples) > 0, (
-            f"Action '{aid}' has no examples"
-        )
+        assert (
+            action.examples and len(action.examples) > 0
+        ), f"Action '{aid}' has no examples"
 
 
 # ---------------------------------------------------------------------------
 # Property 2: Capabilities 分类正确性
 # Feature: animation-graph-read, Property 2: Capabilities 分类正确性
 # ---------------------------------------------------------------------------
+
 
 def test_property2_capabilities_classification():
     """Read-only, write, and destructive actions must have correct capabilities."""
@@ -156,23 +158,24 @@ def test_property2_capabilities_classification():
         caps = action.capabilities
 
         if aid in _READ_ONLY_IDS:
-            assert caps == ("read",), (
-                f"Read-only action '{aid}' should have capabilities=('read',), got {caps}"
-            )
+            assert caps == (
+                "read",
+            ), f"Read-only action '{aid}' should have capabilities=('read',), got {caps}"
         elif aid in _DESTRUCTIVE_IDS:
-            assert "write" in caps and "destructive" in caps, (
-                f"Destructive action '{aid}' should have 'write' and 'destructive' in capabilities, got {caps}"
-            )
+            assert (
+                "write" in caps and "destructive" in caps
+            ), f"Destructive action '{aid}' should have 'write' and 'destructive' in capabilities, got {caps}"
         else:
-            assert "write" in caps, (
-                f"Write action '{aid}' should have 'write' in capabilities, got {caps}"
-            )
+            assert (
+                "write" in caps
+            ), f"Write action '{aid}' should have 'write' in capabilities, got {caps}"
 
 
 # ---------------------------------------------------------------------------
 # Property 3: input_schema JSON 序列化 round-trip
 # Feature: animation-graph-read, Property 3: input_schema JSON 序列化 round-trip
 # ---------------------------------------------------------------------------
+
 
 def test_property3_input_schema_json_roundtrip():
     """input_schema must survive a JSON round-trip unchanged."""
@@ -193,18 +196,18 @@ def test_property3_input_schema_json_roundtrip():
 # Unit test: all animgraph action_ids exist in registry
 # ---------------------------------------------------------------------------
 
+
 def test_all_animgraph_action_ids_in_registry():
     """Every expected animgraph action_id must be registered."""
     registry = get_registry()
     for aid in _ALL_ANIMGRAPH_IDS:
-        assert registry.get(aid) is not None, (
-            f"Action '{aid}' not found in registry"
-        )
+        assert registry.get(aid) is not None, f"Action '{aid}' not found in registry"
 
 
 # ---------------------------------------------------------------------------
 # Unit test: animgraph skill loads and contains all action_ids
 # ---------------------------------------------------------------------------
+
 
 def test_animgraph_skill_loads_with_all_actions():
     """animgraph skill must load successfully and contain all animgraph action_ids."""
@@ -213,19 +216,16 @@ def test_animgraph_skill_loads_with_all_actions():
 
     loaded_ids = {a["id"] for a in skill_data.get("actions", [])}
     for aid in _ALL_ANIMGRAPH_IDS:
-        assert aid in loaded_ids, (
-            f"animgraph skill is missing action '{aid}'"
-        )
+        assert aid in loaded_ids, f"animgraph skill is missing action '{aid}'"
 
 
 # ---------------------------------------------------------------------------
 # Unit test: animgraph.md workflow file exists
 # ---------------------------------------------------------------------------
 
+
 def test_animgraph_workflow_file_exists():
     """animgraph.md workflow file must exist in the skills directory."""
     workflow_path = _WORKFLOWS_DIR / "animgraph.md"
-    assert workflow_path.exists(), (
-        f"Workflow file not found: {workflow_path}"
-    )
+    assert workflow_path.exists(), f"Workflow file not found: {workflow_path}"
     assert workflow_path.stat().st_size > 0, "animgraph.md is empty"

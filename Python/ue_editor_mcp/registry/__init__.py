@@ -18,14 +18,15 @@ from typing import Any
 @dataclass(frozen=True)
 class ActionDef:
     """Immutable definition of a single action."""
-    id: str                           # e.g. "blueprint.create"
-    command: str                      # C++ command type
-    tags: tuple[str, ...]             # search tags
-    description: str                  # one-line English description
-    input_schema: dict[str, Any]      # JSON Schema
-    examples: tuple[dict, ...] = ()   # minimal usage examples
+
+    id: str  # e.g. "blueprint.create"
+    command: str  # C++ command type
+    tags: tuple[str, ...]  # search tags
+    description: str  # one-line English description
+    input_schema: dict[str, Any]  # JSON Schema
+    examples: tuple[dict, ...] = ()  # minimal usage examples
     capabilities: tuple[str, ...] = ("write",)  # "read" | "write" | "destructive"
-    risk: str = "safe"                # "safe" | "moderate" | "destructive"
+    risk: str = "safe"  # "safe" | "moderate" | "destructive"
 
     # ── search helpers ──────────────────────────────────────────────
     _search_text: str = field(default="", repr=False, compare=False)
@@ -45,8 +46,8 @@ class ActionRegistry:
     """Registry of all available actions with keyword search."""
 
     def __init__(self) -> None:
-        self._actions: dict[str, ActionDef] = {}      # id → ActionDef
-        self._by_command: dict[str, ActionDef] = {}    # command → ActionDef
+        self._actions: dict[str, ActionDef] = {}  # id → ActionDef
+        self._by_command: dict[str, ActionDef] = {}  # command → ActionDef
 
     # ── registration ────────────────────────────────────────────────
 
@@ -95,8 +96,8 @@ class ActionRegistry:
         if not keywords and not tags:
             # No query — return all actions (limited)
             return [
-                _action_summary(a) for a in
-                sorted(self._actions.values(), key=lambda a: a.id)[:top_k]
+                _action_summary(a)
+                for a in sorted(self._actions.values(), key=lambda a: a.id)[:top_k]
             ]
 
         tag_set = set(t.lower() for t in tags) if tags else None
@@ -128,10 +129,7 @@ class ActionRegistry:
         # Sort by score descending, then by id
         scored.sort(key=lambda x: (-x[0], x[1].id))
 
-        return [
-            {**_action_summary(a), "score": round(s, 1)}
-            for s, a in scored[:top_k]
-        ]
+        return [{**_action_summary(a), "score": round(s, 1)} for s, a in scored[:top_k]]
 
     # ── schema export ───────────────────────────────────────────────
 
@@ -182,5 +180,6 @@ def get_registry() -> ActionRegistry:
     if _registry is None:
         _registry = ActionRegistry()
         from .actions import register_all_actions
+
         register_all_actions(_registry)
     return _registry

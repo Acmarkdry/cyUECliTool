@@ -14,32 +14,35 @@ from . import nodes as _nodes
 
 # ── Tool name whitelist (16 tools) ──────────────────────────────────────────
 
-TOOL_NAMES: frozenset[str] = frozenset({
-    # Graph operations (4)
-    "connect_blueprint_nodes",
-    "find_blueprint_nodes",
-    "delete_blueprint_node",
-    "get_node_pins",
-    # Graph enhancements — P2 (3)
-    "disconnect_blueprint_pin",
-    "move_node",
-    "add_reroute_node",
-    # Comments (1)
-    "add_blueprint_comment",
-    # Local variables (1)
-    "add_function_local_variable",
-    # Pin / value defaults (3)
-    "set_node_pin_default",
-    "set_object_property",
-    "set_blueprint_variable_default",
-    # Variable & function management — P1 (4)
-    "delete_blueprint_variable",
-    "rename_blueprint_variable",
-    "set_variable_metadata",
-    "delete_blueprint_function",
-})
+TOOL_NAMES: frozenset[str] = frozenset(
+    {
+        # Graph operations (4)
+        "connect_blueprint_nodes",
+        "find_blueprint_nodes",
+        "delete_blueprint_node",
+        "get_node_pins",
+        # Graph enhancements — P2 (3)
+        "disconnect_blueprint_pin",
+        "move_node",
+        "add_reroute_node",
+        # Comments (1)
+        "add_blueprint_comment",
+        # Local variables (1)
+        "add_function_local_variable",
+        # Pin / value defaults (3)
+        "set_node_pin_default",
+        "set_object_property",
+        "set_blueprint_variable_default",
+        # Variable & function management — P1 (4)
+        "delete_blueprint_variable",
+        "rename_blueprint_variable",
+        "set_variable_metadata",
+        "delete_blueprint_function",
+    }
+)
 
 # ── Public API (same interface as every tools/*.py module) ──────────────────
+
 
 def get_tools():
     """Return the subset of node tools that *manipulate* the graph."""

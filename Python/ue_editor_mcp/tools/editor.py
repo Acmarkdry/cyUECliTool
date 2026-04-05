@@ -25,7 +25,7 @@ def get_tools() -> list[Tool]:
         Tool(
             name="get_actors_in_level",
             description="Get a list of all actors in the current level.",
-            inputSchema={"type": "object", "properties": {}}
+            inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
             name="find_actors_by_name",
@@ -33,10 +33,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "pattern": {"type": "string", "description": "Name pattern to search for"}
+                    "pattern": {
+                        "type": "string",
+                        "description": "Name pattern to search for",
+                    }
                 },
-                "required": ["pattern"]
-            }
+                "required": ["pattern"],
+            },
         ),
         Tool(
             name="spawn_actor",
@@ -44,21 +47,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Name to give the new actor (must be unique)"},
-                    "type": {"type": "string", "description": "Type of actor (e.g. StaticMeshActor, PointLight)"},
+                    "name": {
+                        "type": "string",
+                        "description": "Name to give the new actor (must be unique)",
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of actor (e.g. StaticMeshActor, PointLight)",
+                    },
                     "location": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[x, y, z] world location"
+                        "description": "[x, y, z] world location",
                     },
                     "rotation": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[pitch, yaw, roll] in degrees"
-                    }
+                        "description": "[pitch, yaw, roll] in degrees",
+                    },
                 },
-                "required": ["name", "type"]
-            }
+                "required": ["name", "type"],
+            },
         ),
         Tool(
             name="spawn_blueprint_actor",
@@ -66,21 +75,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint to spawn from"},
-                    "actor_name": {"type": "string", "description": "Name to give the spawned actor"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint to spawn from",
+                    },
+                    "actor_name": {
+                        "type": "string",
+                        "description": "Name to give the spawned actor",
+                    },
                     "location": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[x, y, z] world location"
+                        "description": "[x, y, z] world location",
                     },
                     "rotation": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[pitch, yaw, roll] in degrees"
-                    }
+                        "description": "[pitch, yaw, roll] in degrees",
+                    },
                 },
-                "required": ["blueprint_name", "actor_name"]
-            }
+                "required": ["blueprint_name", "actor_name"],
+            },
         ),
         Tool(
             name="delete_actor",
@@ -88,10 +103,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Name of the actor to delete"}
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the actor to delete",
+                    }
                 },
-                "required": ["name"]
-            }
+                "required": ["name"],
+            },
         ),
         Tool(
             name="set_actor_transform",
@@ -100,12 +118,24 @@ def get_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {
                     "name": {"type": "string", "description": "Name of the actor"},
-                    "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"},
-                    "scale": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"}
+                    "location": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "rotation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[pitch, yaw, roll]",
+                    },
+                    "scale": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
                 },
-                "required": ["name"]
-            }
+                "required": ["name"],
+            },
         ),
         Tool(
             name="get_actor_properties",
@@ -115,8 +145,8 @@ def get_tools() -> list[Tool]:
                 "properties": {
                     "name": {"type": "string", "description": "Name of the actor"}
                 },
-                "required": ["name"]
-            }
+                "required": ["name"],
+            },
         ),
         Tool(
             name="set_actor_property",
@@ -125,13 +155,15 @@ def get_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {
                     "name": {"type": "string", "description": "Name of the actor"},
-                    "property_name": {"type": "string", "description": "Name of the property"},
-                    "property_value": {"type": "string", "description": "Value to set"}
+                    "property_name": {
+                        "type": "string",
+                        "description": "Name of the property",
+                    },
+                    "property_value": {"type": "string", "description": "Value to set"},
                 },
-                "required": ["name", "property_name", "property_value"]
-            }
+                "required": ["name", "property_name", "property_value"],
+            },
         ),
-
         # Viewport
         Tool(
             name="focus_viewport",
@@ -139,17 +171,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "target": {"type": "string", "description": "Name of actor to focus on"},
-                    "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "distance": {"type": "number", "description": "Distance from target"},
-                    "orientation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
-                }
-            }
+                    "target": {
+                        "type": "string",
+                        "description": "Name of actor to focus on",
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "distance": {
+                        "type": "number",
+                        "description": "Distance from target",
+                    },
+                    "orientation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[pitch, yaw, roll]",
+                    },
+                },
+            },
         ),
         Tool(
             name="get_viewport_transform",
             description="Get the current viewport camera location and rotation.",
-            inputSchema={"type": "object", "properties": {}}
+            inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
             name="set_viewport_transform",
@@ -157,19 +203,25 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
-                }
-            }
+                    "location": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "rotation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[pitch, yaw, roll]",
+                    },
+                },
+            },
         ),
-
         # Utility
         Tool(
             name="save_all",
             description="Save all dirty packages (blueprints, levels, assets).",
-            inputSchema={"type": "object", "properties": {}}
+            inputSchema={"type": "object", "properties": {}},
         ),
-
         # Asset discovery
         Tool(
             name="list_assets",
@@ -179,29 +231,28 @@ def get_tools() -> list[Tool]:
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Content path to search (e.g. /Game/UI, /Game/Blueprints)"
+                        "description": "Content path to search (e.g. /Game/UI, /Game/Blueprints)",
                     },
                     "recursive": {
                         "type": "boolean",
-                        "description": "Search sub-folders recursively (default: true)"
+                        "description": "Search sub-folders recursively (default: true)",
                     },
                     "class_filter": {
                         "type": "string",
-                        "description": "Filter by asset class (e.g. Blueprint, Material, Texture2D, WidgetBlueprint, SoundWave)"
+                        "description": "Filter by asset class (e.g. Blueprint, Material, Texture2D, WidgetBlueprint, SoundWave)",
                     },
                     "name_contains": {
                         "type": "string",
-                        "description": "Filter assets whose name contains this substring"
+                        "description": "Filter assets whose name contains this substring",
                     },
                     "max_results": {
                         "type": "integer",
-                        "description": "Maximum number of results to return (default: 500)"
-                    }
+                        "description": "Maximum number of results to return (default: 500)",
+                    },
                 },
-                "required": ["path"]
-            }
+                "required": ["path"],
+            },
         ),
-
         # Blueprint introspection
         Tool(
             name="get_blueprint_summary",
@@ -211,16 +262,15 @@ def get_tools() -> list[Tool]:
                 "properties": {
                     "blueprint_name": {
                         "type": "string",
-                        "description": "Name of the Blueprint (e.g. BP_Player, WBP_HUD)"
+                        "description": "Name of the Blueprint (e.g. BP_Player, WBP_HUD)",
                     },
                     "asset_path": {
                         "type": "string",
-                        "description": "Full asset path (e.g. /Game/Blueprints/BP_Player.BP_Player). Use this if blueprint_name is ambiguous."
-                    }
-                }
-            }
+                        "description": "Full asset path (e.g. /Game/Blueprints/BP_Player.BP_Player). Use this if blueprint_name is ambiguous.",
+                    },
+                },
+            },
         ),
-
         # ---- Layout Tools ----
         Tool(
             name="auto_layout_selected",
@@ -231,31 +281,31 @@ def get_tools() -> list[Tool]:
                     "mode": {
                         "type": "string",
                         "enum": ["selected", "graph", "all"],
-                        "description": "Layout granularity: 'selected' (selected/specified nodes), 'graph' (entire focused graph), 'all' (all graphs in BP)"
+                        "description": "Layout granularity: 'selected' (selected/specified nodes), 'graph' (entire focused graph), 'all' (all graphs in BP)",
                     },
                     "blueprint_name": {
                         "type": "string",
-                        "description": "Blueprint name (optional, defaults to focused editor)"
+                        "description": "Blueprint name (optional, defaults to focused editor)",
                     },
                     "graph_name": {
                         "type": "string",
-                        "description": "Graph name (optional, defaults to focused graph)"
+                        "description": "Graph name (optional, defaults to focused graph)",
                     },
                     "node_ids": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Array of node GUIDs to layout (for 'selected' mode)"
+                        "description": "Array of node GUIDs to layout (for 'selected' mode)",
                     },
                     "layer_spacing": {
                         "type": "number",
-                        "description": "Horizontal spacing between exec layers (default: 500)"
+                        "description": "Horizontal spacing between exec layers (default: 500)",
                     },
                     "row_spacing": {
                         "type": "number",
-                        "description": "Vertical spacing between rows (default: 140)"
-                    }
-                }
-            }
+                        "description": "Vertical spacing between rows (default: 140)",
+                    },
+                },
+            },
         ),
         Tool(
             name="auto_layout_subtree",
@@ -265,30 +315,30 @@ def get_tools() -> list[Tool]:
                 "properties": {
                     "root_node_id": {
                         "type": "string",
-                        "description": "GUID of the root node to start subtree traversal from"
+                        "description": "GUID of the root node to start subtree traversal from",
                     },
                     "blueprint_name": {
                         "type": "string",
-                        "description": "Blueprint name (optional, defaults to focused editor)"
+                        "description": "Blueprint name (optional, defaults to focused editor)",
                     },
                     "graph_name": {
                         "type": "string",
-                        "description": "Graph name (optional, defaults to focused graph)"
+                        "description": "Graph name (optional, defaults to focused graph)",
                     },
                     "max_pure_depth": {
                         "type": "integer",
-                        "description": "Max depth for collecting pure node dependencies (default: 3)"
+                        "description": "Max depth for collecting pure node dependencies (default: 3)",
                     },
                     "layer_spacing": {
                         "type": "number",
-                        "description": "Horizontal spacing between exec layers (default: 500)"
+                        "description": "Horizontal spacing between exec layers (default: 500)",
                     },
                     "row_spacing": {
                         "type": "number",
-                        "description": "Vertical spacing between rows (default: 140)"
-                    }
-                }
-            }
+                        "description": "Vertical spacing between rows (default: 140)",
+                    },
+                },
+            },
         ),
     ]
 
@@ -318,6 +368,11 @@ async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]
     """Handle an editor tool call."""
     command_type = TOOL_HANDLERS.get(name)
     if not command_type:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     return _send_command(command_type, arguments if arguments else None)

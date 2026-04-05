@@ -25,17 +25,30 @@ _noop_decorator = lambda f=None: (lambda fn: fn) if f is None else f
 
 
 class _StubServer:
-    def __init__(self, *a, **kw): pass
-    def list_tools(self): return _noop_decorator
-    def call_tool(self): return _noop_decorator
-    def create_initialization_options(self): return {}
-    async def run(self, *a, **kw): pass
+    def __init__(self, *a, **kw):
+        pass
+
+    def list_tools(self):
+        return _noop_decorator
+
+    def call_tool(self):
+        return _noop_decorator
+
+    def create_initialization_options(self):
+        return {}
+
+    async def run(self, *a, **kw):
+        pass
 
 
 sys.modules["mcp.server"].Server = _StubServer
 sys.modules["mcp.server.stdio"].stdio_server = None
 for attr in ("Tool", "TextContent", "ImageContent"):
-    setattr(sys.modules["mcp.types"], attr, type(attr, (), {"__init__": lambda self, **kw: None}))
+    setattr(
+        sys.modules["mcp.types"],
+        attr,
+        type(attr, (), {"__init__": lambda self, **kw: None}),
+    )
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -67,6 +80,7 @@ SEARCH_KEYWORDS = [
 # **Validates: Requirements 7.1, 7.4**
 # ---------------------------------------------------------------------------
 
+
 @given(action_id=st.sampled_from(NEW_ACTION_IDS))
 @settings(max_examples=50)
 def test_actiondef_registration_completeness(action_id: str):
@@ -92,6 +106,7 @@ def test_actiondef_registration_completeness(action_id: str):
 # **Validates: Requirements 7.2, 7.3**
 # ---------------------------------------------------------------------------
 
+
 @given(keyword=st.sampled_from(SEARCH_KEYWORDS))
 @settings(max_examples=50)
 def test_action_search_returns_subset(keyword: str):
@@ -104,15 +119,16 @@ def test_action_search_returns_subset(keyword: str):
     results = registry.search(keyword)
     result_ids = {r["id"] for r in results}
 
-    assert result_ids.issubset(all_ids), (
-        f"Search '{keyword}' returned IDs not in registry: {result_ids - all_ids}"
-    )
+    assert result_ids.issubset(
+        all_ids
+    ), f"Search '{keyword}' returned IDs not in registry: {result_ids - all_ids}"
 
 
 # ---------------------------------------------------------------------------
 # Property 3: All action IDs in _MATERIAL_ACTIONS are unique
 # **Validates: Requirements 7.1**
 # ---------------------------------------------------------------------------
+
 
 def test_action_ids_are_unique():
     """All action IDs in _MATERIAL_ACTIONS are unique (no duplicates).
@@ -131,6 +147,7 @@ def test_action_ids_are_unique():
 # **Validates: Requirements 7.4**
 # ---------------------------------------------------------------------------
 
+
 @given(action_id=st.sampled_from(NEW_ACTION_IDS))
 @settings(max_examples=50)
 def test_new_action_tags_contain_material(action_id: str):
@@ -142,9 +159,9 @@ def test_new_action_tags_contain_material(action_id: str):
     action = registry.get(action_id)
 
     assert action is not None, f"Action '{action_id}' not found in registry"
-    assert "material" in action.tags, (
-        f"'{action_id}': 'material' not found in tags {action.tags}"
-    )
+    assert (
+        "material" in action.tags
+    ), f"'{action_id}': 'material' not found in tags {action.tags}"
 
 
 if __name__ == "__main__":

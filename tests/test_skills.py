@@ -13,16 +13,33 @@ for mod_name in ("mcp", "mcp.server", "mcp.server.stdio", "mcp.types"):
         sys.modules[mod_name] = types.ModuleType(mod_name)
 # Provide minimal stubs for names used at import time
 _noop_decorator = lambda f=None: (lambda fn: fn) if f is None else f
+
+
 class _StubServer:
-    def __init__(self, *a, **kw): pass
-    def list_tools(self): return _noop_decorator
-    def call_tool(self): return _noop_decorator
-    def create_initialization_options(self): return {}
-    async def run(self, *a, **kw): pass
+    def __init__(self, *a, **kw):
+        pass
+
+    def list_tools(self):
+        return _noop_decorator
+
+    def call_tool(self):
+        return _noop_decorator
+
+    def create_initialization_options(self):
+        return {}
+
+    async def run(self, *a, **kw):
+        pass
+
+
 sys.modules["mcp.server"].Server = _StubServer
 sys.modules["mcp.server.stdio"].stdio_server = None
 for attr in ("Tool", "TextContent", "ImageContent"):
-    setattr(sys.modules["mcp.types"], attr, type(attr, (), {"__init__": lambda self, **kw: None}))
+    setattr(
+        sys.modules["mcp.types"],
+        attr,
+        type(attr, (), {"__init__": lambda self, **kw: None}),
+    )
 
 from ue_editor_mcp.registry import get_registry
 from ue_editor_mcp.skills import get_skill_list, load_skill, SKILL_DEFS, _WORKFLOWS_DIR
@@ -72,36 +89,58 @@ def test_all_skill_action_ids_exist_in_registry():
         for aid in skill_def.action_ids:
             if registry.get(aid) is None:
                 missing.append((skill_def.id, aid))
-    assert not missing, f"Actions referenced by skills but missing from registry: {missing}"
+    assert (
+        not missing
+    ), f"Actions referenced by skills but missing from registry: {missing}"
 
 
 # Actions whose C++ handlers were removed (replaced by ue_python_exec)
 # but whose ActionDefs still exist in registry for error-message clarity.
 _DEPRECATED_ACTION_IDS = {
-    "blueprint.create", "blueprint.compile", "blueprint.set_property",
-    "blueprint.spawn_actor", "blueprint.set_parent_class",
-    "blueprint.add_interface", "blueprint.remove_interface",
-    "blueprint.add_component", "blueprint.create_colored_material",
-    "component.set_property", "component.set_static_mesh",
+    "blueprint.create",
+    "blueprint.compile",
+    "blueprint.set_property",
+    "blueprint.spawn_actor",
+    "blueprint.set_parent_class",
+    "blueprint.add_interface",
+    "blueprint.remove_interface",
+    "blueprint.add_component",
+    "blueprint.create_colored_material",
+    "component.set_property",
+    "component.set_static_mesh",
     "component.set_physics",
-    "editor.get_actors", "editor.find_actors",
-    "editor.spawn_actor", "editor.delete_actor",
-    "editor.set_actor_transform", "editor.get_actor_properties",
+    "editor.get_actors",
+    "editor.find_actors",
+    "editor.spawn_actor",
+    "editor.delete_actor",
+    "editor.set_actor_transform",
+    "editor.get_actor_properties",
     "editor.set_actor_property",
-    "editor.focus_viewport", "editor.get_viewport_transform",
+    "editor.focus_viewport",
+    "editor.get_viewport_transform",
     "editor.set_viewport_transform",
-    "editor.save_all", "editor.list_assets",
-    "editor.rename_assets", "editor.get_selected_assets",
-    "editor.rename_actor_label", "editor.set_actor_folder",
-    "editor.select_actors", "editor.get_outliner_tree",
+    "editor.save_all",
+    "editor.list_assets",
+    "editor.rename_assets",
+    "editor.get_selected_assets",
+    "editor.rename_actor_label",
+    "editor.set_actor_folder",
+    "editor.select_actors",
+    "editor.get_outliner_tree",
     "editor.open_asset_editor",
-    "editor.start_pie", "editor.stop_pie", "editor.get_pie_state",
-    "material.create", "material.add_expression",
-    "material.connect_expressions", "material.connect_to_output",
-    "material.set_expression_property", "material.compile",
+    "editor.start_pie",
+    "editor.stop_pie",
+    "editor.get_pie_state",
+    "material.create",
+    "material.add_expression",
+    "material.connect_expressions",
+    "material.connect_to_output",
+    "material.set_expression_property",
+    "material.compile",
     "material.create_instance",
     "material.create_post_process_volume",
-    "material.apply_to_component", "material.apply_to_actor",
+    "material.apply_to_component",
+    "material.apply_to_actor",
     "batch.execute",
 }
 

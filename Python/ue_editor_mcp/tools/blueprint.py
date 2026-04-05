@@ -29,11 +29,17 @@ def get_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {
                     "name": {"type": "string", "description": "Name of the Blueprint"},
-                    "parent_class": {"type": "string", "description": "Parent class (Actor, Pawn, GameStateBase, etc.)"},
-                    "path": {"type": "string", "description": "Content path (default: /Game/Blueprints)"}
+                    "parent_class": {
+                        "type": "string",
+                        "description": "Parent class (Actor, Pawn, GameStateBase, etc.)",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Content path (default: /Game/Blueprints)",
+                    },
                 },
-                "required": ["name", "parent_class"]
-            }
+                "required": ["name", "parent_class"],
+            },
         ),
         Tool(
             name="compile_blueprint",
@@ -41,10 +47,13 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint to compile"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint to compile",
+                    }
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
         Tool(
             name="set_blueprint_property",
@@ -52,14 +61,19 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "property_name": {"type": "string", "description": "Name of the property"},
-                    "property_value": {"type": "string", "description": "Value to set"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "property_name": {
+                        "type": "string",
+                        "description": "Name of the property",
+                    },
+                    "property_value": {"type": "string", "description": "Value to set"},
                 },
-                "required": ["blueprint_name", "property_name", "property_value"]
-            }
+                "required": ["blueprint_name", "property_name", "property_value"],
+            },
         ),
-
         # Components
         Tool(
             name="add_component_to_blueprint",
@@ -67,16 +81,40 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "component_type": {"type": "string", "description": "Type of component (StaticMeshComponent, BoxComponent, etc.)"},
-                    "component_name": {"type": "string", "description": "Name for the component"},
-                    "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"},
-                    "scale": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "component_properties": {"type": "object", "description": "Additional properties to set"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "component_type": {
+                        "type": "string",
+                        "description": "Type of component (StaticMeshComponent, BoxComponent, etc.)",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name for the component",
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "rotation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[pitch, yaw, roll]",
+                    },
+                    "scale": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "component_properties": {
+                        "type": "object",
+                        "description": "Additional properties to set",
+                    },
                 },
-                "required": ["blueprint_name", "component_type", "component_name"]
-            }
+                "required": ["blueprint_name", "component_type", "component_name"],
+            },
         ),
         Tool(
             name="set_static_mesh_properties",
@@ -84,14 +122,29 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "component_name": {"type": "string", "description": "Name of the component"},
-                    "static_mesh": {"type": "string", "description": "Path to static mesh asset"},
-                    "material": {"type": "string", "description": "Path to material asset"},
-                    "overlay_material": {"type": "string", "description": "Path to overlay material (for outline effects)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name of the component",
+                    },
+                    "static_mesh": {
+                        "type": "string",
+                        "description": "Path to static mesh asset",
+                    },
+                    "material": {
+                        "type": "string",
+                        "description": "Path to material asset",
+                    },
+                    "overlay_material": {
+                        "type": "string",
+                        "description": "Path to overlay material (for outline effects)",
+                    },
                 },
-                "required": ["blueprint_name", "component_name"]
-            }
+                "required": ["blueprint_name", "component_name"],
+            },
         ),
         Tool(
             name="set_component_property",
@@ -99,13 +152,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "component_name": {"type": "string", "description": "Name of the component"},
-                    "property_name": {"type": "string", "description": "Name of the property"},
-                    "property_value": {"type": "string", "description": "Value to set"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name of the component",
+                    },
+                    "property_name": {
+                        "type": "string",
+                        "description": "Name of the property",
+                    },
+                    "property_value": {"type": "string", "description": "Value to set"},
                 },
-                "required": ["blueprint_name", "component_name", "property_name", "property_value"]
-            }
+                "required": [
+                    "blueprint_name",
+                    "component_name",
+                    "property_name",
+                    "property_value",
+                ],
+            },
         ),
         Tool(
             name="set_physics_properties",
@@ -113,18 +180,35 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "component_name": {"type": "string", "description": "Name of the component"},
-                    "simulate_physics": {"type": "boolean", "description": "Enable physics simulation"},
-                    "gravity_enabled": {"type": "boolean", "description": "Enable gravity"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "component_name": {
+                        "type": "string",
+                        "description": "Name of the component",
+                    },
+                    "simulate_physics": {
+                        "type": "boolean",
+                        "description": "Enable physics simulation",
+                    },
+                    "gravity_enabled": {
+                        "type": "boolean",
+                        "description": "Enable gravity",
+                    },
                     "mass": {"type": "number", "description": "Mass in kg"},
-                    "linear_damping": {"type": "number", "description": "Linear damping"},
-                    "angular_damping": {"type": "number", "description": "Angular damping"}
+                    "linear_damping": {
+                        "type": "number",
+                        "description": "Linear damping",
+                    },
+                    "angular_damping": {
+                        "type": "number",
+                        "description": "Angular damping",
+                    },
                 },
-                "required": ["blueprint_name", "component_name"]
-            }
+                "required": ["blueprint_name", "component_name"],
+            },
         ),
-
         # Spawning
         Tool(
             name="spawn_blueprint_actor",
@@ -132,15 +216,28 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint to spawn"},
-                    "actor_name": {"type": "string", "description": "Name for the spawned actor"},
-                    "location": {"type": "array", "items": {"type": "number"}, "description": "[x, y, z]"},
-                    "rotation": {"type": "array", "items": {"type": "number"}, "description": "[pitch, yaw, roll]"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint to spawn",
+                    },
+                    "actor_name": {
+                        "type": "string",
+                        "description": "Name for the spawned actor",
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[x, y, z]",
+                    },
+                    "rotation": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[pitch, yaw, roll]",
+                    },
                 },
-                "required": ["blueprint_name", "actor_name"]
-            }
+                "required": ["blueprint_name", "actor_name"],
+            },
         ),
-
         # Materials
         Tool(
             name="create_colored_material",
@@ -148,14 +245,23 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "material_name": {"type": "string", "description": "Name for the material"},
-                    "color": {"type": "array", "items": {"type": "number"}, "description": "[R, G, B] values 0.0-1.0"},
-                    "path": {"type": "string", "description": "Content path (default: /Game/Materials)"}
+                    "material_name": {
+                        "type": "string",
+                        "description": "Name for the material",
+                    },
+                    "color": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "description": "[R, G, B] values 0.0-1.0",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Content path (default: /Game/Materials)",
+                    },
                 },
-                "required": ["material_name"]
-            }
+                "required": ["material_name"],
+            },
         ),
-
         # =====================================================================
         # Parent Class & Interfaces
         # =====================================================================
@@ -165,11 +271,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "parent_class": {"type": "string", "description": "New parent class name (Actor, Pawn, Character, PlayerController, GameModeBase, etc.) or full path"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "parent_class": {
+                        "type": "string",
+                        "description": "New parent class name (Actor, Pawn, Character, PlayerController, GameModeBase, etc.) or full path",
+                    },
                 },
-                "required": ["blueprint_name", "parent_class"]
-            }
+                "required": ["blueprint_name", "parent_class"],
+            },
         ),
         Tool(
             name="add_blueprint_interface",
@@ -177,11 +289,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "interface_name": {"type": "string", "description": "Interface class name or full path (e.g., /Game/Interfaces/BPI_Interactable)"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "interface_name": {
+                        "type": "string",
+                        "description": "Interface class name or full path (e.g., /Game/Interfaces/BPI_Interactable)",
+                    },
                 },
-                "required": ["blueprint_name", "interface_name"]
-            }
+                "required": ["blueprint_name", "interface_name"],
+            },
         ),
         Tool(
             name="remove_blueprint_interface",
@@ -189,11 +307,17 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
-                    "interface_name": {"type": "string", "description": "Interface class name or path to remove"}
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
+                    "interface_name": {
+                        "type": "string",
+                        "description": "Interface class name or path to remove",
+                    },
                 },
-                "required": ["blueprint_name", "interface_name"]
-            }
+                "required": ["blueprint_name", "interface_name"],
+            },
         ),
     ]
 
@@ -218,6 +342,11 @@ async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]
     """Handle a blueprint tool call."""
     command_type = TOOL_HANDLERS.get(name)
     if not command_type:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     return _send_command(command_type, arguments if arguments else None)

@@ -23,17 +23,30 @@ _noop_decorator = lambda f=None: (lambda fn: fn) if f is None else f
 
 
 class _StubServer:
-    def __init__(self, *a, **kw): pass
-    def list_tools(self): return _noop_decorator
-    def call_tool(self): return _noop_decorator
-    def create_initialization_options(self): return {}
-    async def run(self, *a, **kw): pass
+    def __init__(self, *a, **kw):
+        pass
+
+    def list_tools(self):
+        return _noop_decorator
+
+    def call_tool(self):
+        return _noop_decorator
+
+    def create_initialization_options(self):
+        return {}
+
+    async def run(self, *a, **kw):
+        pass
 
 
 sys.modules["mcp.server"].Server = _StubServer
 sys.modules["mcp.server.stdio"].stdio_server = None
 for attr in ("Tool", "TextContent", "ImageContent"):
-    setattr(sys.modules["mcp.types"], attr, type(attr, (), {"__init__": lambda self, **kw: None}))
+    setattr(
+        sys.modules["mcp.types"],
+        attr,
+        type(attr, (), {"__init__": lambda self, **kw: None}),
+    )
 
 from ue_editor_mcp.registry import get_registry
 from ue_editor_mcp.skills import load_skill
@@ -61,12 +74,13 @@ def _search(query: str) -> list[str]:
 # Search discoverability tests
 # ---------------------------------------------------------------------------
 
+
 def test_action_search_material_analyze():
     """ue_actions_search('material analyze') must include material.analyze_complexity."""
     ids = _search("material analyze")
-    assert "material.analyze_complexity" in ids, (
-        f"'material.analyze_complexity' not found in search results for 'material analyze': {ids}"
-    )
+    assert (
+        "material.analyze_complexity" in ids
+    ), f"'material.analyze_complexity' not found in search results for 'material analyze': {ids}"
 
 
 def test_action_search_material_analysis():
@@ -79,9 +93,9 @@ def test_action_search_material_analysis():
         "material.diff",
     }
     found = analysis_actions & set(ids)
-    assert found, (
-        f"No analysis actions found in search results for 'material analysis': {ids}"
-    )
+    assert (
+        found
+    ), f"No analysis actions found in search results for 'material analysis': {ids}"
 
 
 def test_action_search_material_create():
@@ -93,14 +107,15 @@ def test_action_search_material_create():
         "material.create_instance",
     }
     found = creation_actions & set(ids)
-    assert found, (
-        f"No creation actions found in search results for 'material create': {ids}"
-    )
+    assert (
+        found
+    ), f"No creation actions found in search results for 'material create': {ids}"
 
 
 # ---------------------------------------------------------------------------
 # ActionDef completeness tests
 # ---------------------------------------------------------------------------
+
 
 def test_actiondef_completeness():
     """All 7 new action IDs must have non-empty id, command, tags, description,
@@ -114,7 +129,9 @@ def test_actiondef_completeness():
         assert action.tags, f"'{action_id}': tags is empty"
         assert action.description, f"'{action_id}': description is empty"
         assert action.input_schema, f"'{action_id}': input_schema is empty"
-        assert action.examples, f"'{action_id}': examples is empty (must have at least 1)"
+        assert (
+            action.examples
+        ), f"'{action_id}': examples is empty (must have at least 1)"
 
 
 def test_action_schema_has_required_fields():
@@ -124,17 +141,18 @@ def test_action_schema_has_required_fields():
         action = registry.get(action_id)
         assert action is not None, f"Action '{action_id}' not found in registry"
         schema = action.input_schema
-        assert "properties" in schema, (
-            f"'{action_id}': input_schema missing 'properties' key"
-        )
-        assert "required" in schema, (
-            f"'{action_id}': input_schema missing 'required' key"
-        )
+        assert (
+            "properties" in schema
+        ), f"'{action_id}': input_schema missing 'properties' key"
+        assert (
+            "required" in schema
+        ), f"'{action_id}': input_schema missing 'required' key"
 
 
 # ---------------------------------------------------------------------------
 # Skills loading test
 # ---------------------------------------------------------------------------
+
 
 def test_skills_materials_contains_new_actions():
     """Loading skills/materials.md content must contain keywords for new actions."""
@@ -144,11 +162,15 @@ def test_skills_materials_contains_new_actions():
     workflows: str = skill_data.get("workflows", "")
     assert workflows, "materials skill has no workflow content"
 
-    required_keywords = ["analyze_material_complexity", "diagnose_material", "batch_create_material_instances"]
+    required_keywords = [
+        "analyze_material_complexity",
+        "diagnose_material",
+        "batch_create_material_instances",
+    ]
     for keyword in required_keywords:
-        assert keyword in workflows, (
-            f"Keyword '{keyword}' not found in materials.md workflow content"
-        )
+        assert (
+            keyword in workflows
+        ), f"Keyword '{keyword}' not found in materials.md workflow content"
 
 
 if __name__ == "__main__":

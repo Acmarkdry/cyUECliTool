@@ -31,6 +31,7 @@ def _to_serializable(obj: Any) -> Any:
         return [_to_serializable(item) for item in obj]
     return obj
 
+
 _DEFAULT_TAIL_LINES = 200
 _DEFAULT_MAX_BYTES = 65536
 _MIN_TAIL_LINES = 20
@@ -48,7 +49,11 @@ class LogFilter:
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return (
+        datetime.now(timezone.utc)
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z")
+    )
 
 
 def _clamp_int(value: Any, default_value: int, min_value: int, max_value: int) -> int:
@@ -59,7 +64,9 @@ def _clamp_int(value: Any, default_value: int, min_value: int, max_value: int) -
     return max(min_value, min(max_value, parsed))
 
 
-def _is_ue_reachable(host: str = "127.0.0.1", port: int = 55558, timeout: float = 0.35) -> bool:
+def _is_ue_reachable(
+    host: str = "127.0.0.1", port: int = 55558, timeout: float = 0.35
+) -> bool:
     try:
         with socket.create_connection((host, port), timeout=timeout):
             return True
@@ -78,7 +85,9 @@ def _parse_filter(raw_filter: Any) -> LogFilter:
     if isinstance(category_value, str) and category_value:
         categories.append(category_value)
     elif isinstance(category_value, list):
-        categories.extend([str(item) for item in category_value if isinstance(item, str) and item])
+        categories.extend(
+            [str(item) for item in category_value if isinstance(item, str) and item]
+        )
 
     contains = raw_filter.get("contains")
     if not isinstance(contains, str):
@@ -130,7 +139,14 @@ def _decode_log_bytes(data: bytes) -> str:
     if not data:
         return ""
 
-    for encoding in ("utf-8", "utf-8-sig", "utf-16", "utf-16-le", "utf-16-be", "cp1252"):
+    for encoding in (
+        "utf-8",
+        "utf-8-sig",
+        "utf-16",
+        "utf-16-le",
+        "utf-16-be",
+        "cp1252",
+    ):
         try:
             return data.decode(encoding)
         except UnicodeDecodeError:
@@ -139,7 +155,9 @@ def _decode_log_bytes(data: bytes) -> str:
     return data.decode("utf-8", errors="replace")
 
 
-def _parse_cursor(cursor: str | None) -> tuple[str | None, int | None, int | None, int | None]:
+def _parse_cursor(
+    cursor: str | None,
+) -> tuple[str | None, int | None, int | None, int | None]:
     if not cursor or not cursor.startswith("file:"):
         return None, None, None, None
 
@@ -223,7 +241,9 @@ def _extract_saved_line_meta(line: str) -> tuple[str, str]:
 
 
 def _apply_saved_filters(lines: list[str], log_filter: LogFilter) -> list[str]:
-    min_rank = _severity_rank(log_filter.min_verbosity) if log_filter.min_verbosity else None
+    min_rank = (
+        _severity_rank(log_filter.min_verbosity) if log_filter.min_verbosity else None
+    )
     categories_lower = [c.lower() for c in (log_filter.categories or []) if c]
     contains_lower = log_filter.contains.lower() if log_filter.contains else None
 
@@ -247,7 +267,9 @@ def _apply_saved_filters(lines: list[str], log_filter: LogFilter) -> list[str]:
     return result
 
 
-def _tail_latest_text(file_path: Path, tail_lines: int, max_bytes: int) -> tuple[str, int, int, bool]:
+def _tail_latest_text(
+    file_path: Path, tail_lines: int, max_bytes: int
+) -> tuple[str, int, int, bool]:
     with file_path.open("rb") as handle:
         handle.seek(0, os.SEEK_END)
         file_size = handle.tell()
@@ -286,7 +308,12 @@ def _tail_latest_text(file_path: Path, tail_lines: int, max_bytes: int) -> tuple
         content = encoded.decode("utf-8", errors="ignore")
         truncated = True
 
-    return content, len(content.encode("utf-8")), len(content.splitlines()) if content else 0, truncated
+    return (
+        content,
+        len(content.encode("utf-8")),
+        len(content.splitlines()) if content else 0,
+        truncated,
+    )
 
 
 def _read_saved_logs(
@@ -317,13 +344,20 @@ def _read_saved_logs(
 
     stat = log_file.stat()
     digest, offset, cursor_mtime_ns, cursor_size = _parse_cursor(cursor)
-    current_digest = hashlib.sha1(str(log_file).lower().encode("utf-8")).hexdigest()[:12]
+    current_digest = hashlib.sha1(str(log_file).lower().encode("utf-8")).hexdigest()[
+        :12
+    ]
 
     incremental = False
     data_bytes: bytes = b""
     truncated = False
 
-    if digest and offset is not None and cursor_mtime_ns is not None and cursor_size is not None:
+    if (
+        digest
+        and offset is not None
+        and cursor_mtime_ns is not None
+        and cursor_size is not None
+    ):
         if digest != current_digest:
             notes.append("cursor 指向旧日志文件，已重置到最新文件")
         elif stat.st_size < offset:
@@ -339,7 +373,9 @@ def _read_saved_logs(
                     truncated = True
 
     if not incremental:
-        tail_text, _, _, tail_truncated = _tail_latest_text(log_file, tail_lines, max_bytes)
+        tail_text, _, _, tail_truncated = _tail_latest_text(
+            log_file, tail_lines, max_bytes
+        )
         data_bytes = tail_text.encode("utf-8")
         truncated = truncated or tail_truncated
 
@@ -358,7 +394,11 @@ def _read_saved_logs(
         content = content_bytes.decode("utf-8", errors="ignore")
         truncated = True
 
-    next_offset = stat.st_size if not incremental else min(stat.st_size, (offset or 0) + len(data_bytes))
+    next_offset = (
+        stat.st_size
+        if not incremental
+        else min(stat.st_size, (offset or 0) + len(data_bytes))
+    )
     next_cursor = _build_file_cursor(log_file, next_offset)
 
     return {
@@ -371,7 +411,9 @@ def _read_saved_logs(
         "truncated": truncated,
         "linesReturned": len(content.splitlines()) if content else 0,
         "bytesReturned": len(content.encode("utf-8")),
-        "lastUpdateUtc": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+        "lastUpdateUtc": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z"),
         "content": content,
         "notes": notes,
     }
@@ -422,11 +464,17 @@ def _handle_unreal_logs_get(args: dict[str, Any]) -> dict[str, Any]:
     if mode not in {"auto", "live", "saved"}:
         mode = "auto"
 
-    tail_lines = _clamp_int(args.get("tailLines"), _DEFAULT_TAIL_LINES, _MIN_TAIL_LINES, _MAX_TAIL_LINES)
-    max_bytes = _clamp_int(args.get("maxBytes"), _DEFAULT_MAX_BYTES, _MIN_MAX_BYTES, _MAX_MAX_BYTES)
+    tail_lines = _clamp_int(
+        args.get("tailLines"), _DEFAULT_TAIL_LINES, _MIN_TAIL_LINES, _MAX_TAIL_LINES
+    )
+    max_bytes = _clamp_int(
+        args.get("maxBytes"), _DEFAULT_MAX_BYTES, _MIN_MAX_BYTES, _MAX_MAX_BYTES
+    )
     cursor = args.get("cursor") if isinstance(args.get("cursor"), str) else None
     include_meta = bool(args.get("includeMeta", True))
-    project_name = args.get("projectName") if isinstance(args.get("projectName"), str) else None
+    project_name = (
+        args.get("projectName") if isinstance(args.get("projectName"), str) else None
+    )
     workspace_root = _resolve_workspace_root(args.get("workspaceRoot"))
     log_filter = _parse_filter(args.get("filter"))
 
@@ -465,7 +513,9 @@ def _handle_unreal_logs_get(args: dict[str, Any]) -> dict[str, Any]:
             notes.extend(live_result.get("notes", []))
             live_result["notes"] = notes
             return live_result
-        notes.append(f"live 不可用，回退到 Saved/Logs: {live_result.get('error', 'unknown')}" )
+        notes.append(
+            f"live 不可用，回退到 Saved/Logs: {live_result.get('error', 'unknown')}"
+        )
 
     if workspace_root is None:
         return {
@@ -493,7 +543,9 @@ def _handle_asset_diff_get(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": False,
             "error": "UE 不可达，无法执行 Diff Against Depot",
-            "notes": ["请先启动 Unreal Editor 并确保 UEEditorMCP 连接可用，且 Source Control 已连接"],
+            "notes": [
+                "请先启动 Unreal Editor 并确保 UEEditorMCP 连接可用，且 Source Control 已连接"
+            ],
         }
 
     asset_path = args.get("assetPath")
@@ -501,7 +553,9 @@ def _handle_asset_diff_get(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": False,
             "error": "缺少必填参数 assetPath",
-            "notes": ["请提供完整资产路径，如 /Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"],
+            "notes": [
+                "请提供完整资产路径，如 /Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"
+            ],
         }
 
     params: dict[str, Any] = {"asset_path": asset_path.strip()}
@@ -522,7 +576,9 @@ def _handle_asset_history_get(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": False,
             "error": "UE 不可达，无法获取资产历史",
-            "notes": ["请先启动 Unreal Editor 并确保 UEEditorMCP 连接可用，且 Source Control 已连接"],
+            "notes": [
+                "请先启动 Unreal Editor 并确保 UEEditorMCP 连接可用，且 Source Control 已连接"
+            ],
         }
 
     asset_path = args.get("assetPath")
@@ -530,7 +586,9 @@ def _handle_asset_history_get(args: dict[str, Any]) -> dict[str, Any]:
         return {
             "success": False,
             "error": "缺少必填参数 assetPath",
-            "notes": ["请提供完整资产路径，如 /Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"],
+            "notes": [
+                "请提供完整资产路径，如 /Game/P110_2/Blueprints/Character/Player/BP_SideScrollingCharacter"
+            ],
         }
 
     params: dict[str, Any] = {"asset_path": asset_path.strip()}
@@ -561,19 +619,27 @@ def _handle_asset_thumbnail_get(args: dict[str, Any]) -> dict[str, Any]:
 
     asset_paths = args.get("assetPaths")
     if isinstance(asset_paths, list):
-        normalized_paths = [item.strip() for item in asset_paths if isinstance(item, str) and item.strip()]
+        normalized_paths = [
+            item.strip()
+            for item in asset_paths
+            if isinstance(item, str) and item.strip()
+        ]
         if normalized_paths:
             params["asset_paths"] = normalized_paths
 
     asset_ids = args.get("assetIds")
     if isinstance(asset_ids, list):
-        normalized_ids = [item.strip() for item in asset_ids if isinstance(item, str) and item.strip()]
+        normalized_ids = [
+            item.strip() for item in asset_ids if isinstance(item, str) and item.strip()
+        ]
         if normalized_ids:
             params["asset_ids"] = normalized_ids
 
     ids = args.get("ids")
     if isinstance(ids, list):
-        normalized_raw_ids = [item.strip() for item in ids if isinstance(item, str) and item.strip()]
+        normalized_raw_ids = [
+            item.strip() for item in ids if isinstance(item, str) and item.strip()
+        ]
         if normalized_raw_ids:
             params["ids"] = normalized_raw_ids
 
@@ -581,7 +647,11 @@ def _handle_asset_thumbnail_get(args: dict[str, Any]) -> dict[str, Any]:
     if isinstance(size, int):
         params["size"] = size
 
-    result = get_connection().send_command("get_selected_asset_thumbnail", params or None).to_dict()
+    result = (
+        get_connection()
+        .send_command("get_selected_asset_thumbnail", params or None)
+        .to_dict()
+    )
     if result.get("success") and "notes" not in result:
         result["notes"] = []
     return result
@@ -722,9 +792,18 @@ async def list_tools() -> list[Tool]:
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | ImageContent]:
-    if name not in {"unreal.logs.get", "unreal.asset_thumbnail.get", "unreal.asset_diff.get", "unreal.asset_history.get"}:
-        text = json.dumps({"success": False, "error": f"Unknown tool: {name}"}, ensure_ascii=False)
+async def call_tool(
+    name: str, arguments: dict[str, Any]
+) -> list[TextContent | ImageContent]:
+    if name not in {
+        "unreal.logs.get",
+        "unreal.asset_thumbnail.get",
+        "unreal.asset_diff.get",
+        "unreal.asset_history.get",
+    }:
+        text = json.dumps(
+            {"success": False, "error": f"Unknown tool: {name}"}, ensure_ascii=False
+        )
         return [TextContent(type="text", text=text)]
 
     try:
@@ -738,7 +817,11 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
             result = _handle_asset_thumbnail_get(arguments or {})
     except Exception as exc:
         logger.exception("%s failed", name)
-        result = {"success": False, "error": str(exc), "notes": ["unexpected exception"]}
+        result = {
+            "success": False,
+            "error": str(exc),
+            "notes": ["unexpected exception"],
+        }
 
     contents: list[TextContent | ImageContent] = []
     image_blocks_count = 0
@@ -756,13 +839,20 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
                         base64_data = base64_data.split(",", 1)[1]
                     image_key = (mime_type, base64_data)
                     if image_key not in seen_images:
-                        contents.append(ImageContent(type="image", data=base64_data, mimeType=mime_type))
+                        contents.append(
+                            ImageContent(
+                                type="image", data=base64_data, mimeType=mime_type
+                            )
+                        )
                         seen_images.add(image_key)
                         nonlocal image_blocks_count
                         image_blocks_count += 1
                 item["image_base64"] = "<base64_data_extracted_to_image_content>"
 
-        has_thumbnail_list = isinstance(result.get("thumbnails"), list) and len(result.get("thumbnails", [])) > 0
+        has_thumbnail_list = (
+            isinstance(result.get("thumbnails"), list)
+            and len(result.get("thumbnails", [])) > 0
+        )
         if has_thumbnail_list:
             for thumb in result.get("thumbnails", []):
                 if isinstance(thumb, dict):
@@ -779,7 +869,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent | 
     safe_result = _to_serializable(result)
     text = json.dumps(safe_result, indent=2, ensure_ascii=False)
     contents.append(TextContent(type="text", text=text))
-    
+
     return contents
 
 

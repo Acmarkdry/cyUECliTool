@@ -30,24 +30,30 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "struct_type": {
                         "type": "string",
-                        "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color"
+                        "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color",
                     },
                     "pin_defaults": {
                         "type": "object",
-                        "description": "Optional default values for pins (e.g., {'X': '1920', 'Y': '1080'})"
+                        "description": "Optional default values for pins (e.g., {'X': '1920', 'Y': '1080'})",
                     },
                     "node_position": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[X, Y] position in graph"
+                        "description": "[X, Y] position in graph",
                     },
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "struct_type"]
-            }
+                "required": ["blueprint_name", "struct_type"],
+            },
         ),
         Tool(
             name="add_break_struct_node",
@@ -55,22 +61,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "struct_type": {
                         "type": "string",
-                        "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color"
+                        "description": "Struct type: IntPoint, Vector, Vector2D, Rotator, Transform, LinearColor, Color",
                     },
                     "node_position": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[X, Y] position in graph"
+                        "description": "[X, Y] position in graph",
                     },
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name", "struct_type"]
-            }
+                "required": ["blueprint_name", "struct_type"],
+            },
         ),
-
         # =====================================================================
         # Switch Nodes
         # =====================================================================
@@ -80,21 +91,27 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "cases": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "List of string cases (e.g., ['Low', 'Medium', 'High'])"
+                        "description": "List of string cases (e.g., ['Low', 'Medium', 'High'])",
                     },
                     "node_position": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[X, Y] position in graph"
+                        "description": "[X, Y] position in graph",
                     },
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
         Tool(
             name="add_switch_on_int_node",
@@ -102,25 +119,31 @@ def get_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "blueprint_name": {"type": "string", "description": "Name of the Blueprint"},
+                    "blueprint_name": {
+                        "type": "string",
+                        "description": "Name of the Blueprint",
+                    },
                     "start_index": {
                         "type": "integer",
-                        "description": "Starting index for cases (default: 0)"
+                        "description": "Starting index for cases (default: 0)",
                     },
                     "cases": {
                         "type": "array",
                         "items": {"type": "integer"},
-                        "description": "Number of cases to create"
+                        "description": "Number of cases to create",
                     },
                     "node_position": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "description": "[X, Y] position in graph"
+                        "description": "[X, Y] position in graph",
                     },
-                    "graph_name": {"type": "string", "description": "Optional function graph name (defaults to event graph)"}
+                    "graph_name": {
+                        "type": "string",
+                        "description": "Optional function graph name (defaults to event graph)",
+                    },
                 },
-                "required": ["blueprint_name"]
-            }
+                "required": ["blueprint_name"],
+            },
         ),
     ]
 
@@ -137,6 +160,11 @@ async def handle_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]
     """Handle a struct/switch node tool call."""
     command_type = TOOL_HANDLERS.get(name)
     if not command_type:
-        return [TextContent(type="text", text=f'{{"success": false, "error": "Unknown tool: {name}"}}')]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     return _send_command(command_type, arguments if arguments else None)

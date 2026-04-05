@@ -65,7 +65,9 @@ def create_mcp_server(
             tools.extend(mod.get_tools())
         return tools
 
-    def _send_command(command_type: str, params: dict | None = None) -> list[TextContent]:
+    def _send_command(
+        command_type: str, params: dict | None = None
+    ) -> list[TextContent]:
         conn = get_connection()
         if not conn.is_connected:
             conn.connect()
@@ -88,10 +90,12 @@ def create_mcp_server(
             if not conn.is_connected:
                 conn.connect()
             ok = conn.ping()
-            return [TextContent(
-                type="text",
-                text=f'{{"success": {str(ok).lower()}, "pong": {str(ok).lower()}}}',
-            )]
+            return [
+                TextContent(
+                    type="text",
+                    text=f'{{"success": {str(ok).lower()}, "pong": {str(ok).lower()}}}',
+                )
+            ]
 
         if name == "get_context":
             return _send_command("get_context")
@@ -101,10 +105,12 @@ def create_mcp_server(
             if name in mod.TOOL_HANDLERS:
                 return await mod.handle_tool(name, arguments)
 
-        return [TextContent(
-            type="text",
-            text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
-        )]
+        return [
+            TextContent(
+                type="text",
+                text=f'{{"success": false, "error": "Unknown tool: {name}"}}',
+            )
+        ]
 
     # ── lifecycle ───────────────────────────────────────────────────────
 
