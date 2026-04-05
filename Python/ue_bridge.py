@@ -217,13 +217,19 @@ class UEBridge:
 
     # ── Blueprint CRUD ──────────────────────────────────────────────
 
-    def create_blueprint(self, name: str, parent_class: str, *, path: str = None) -> dict:
-        return self.call("create_blueprint", name=name, parent_class=parent_class, path=path)
+    def create_blueprint(
+        self, name: str, parent_class: str, *, path: str = None
+    ) -> dict:
+        return self.call(
+            "create_blueprint", name=name, parent_class=parent_class, path=path
+        )
 
     def compile_blueprint(self, blueprint_name: str) -> dict:
         return self.call("compile_blueprint", blueprint_name=blueprint_name)
 
-    def get_blueprint_summary(self, *, blueprint_name: str = None, asset_path: str = None) -> dict:
+    def get_blueprint_summary(
+        self, *, blueprint_name: str = None, asset_path: str = None
+    ) -> dict:
         return self.call(
             "get_blueprint_summary",
             blueprint_name=blueprint_name,
@@ -352,7 +358,9 @@ class UEBridge:
             event_type=event_type,
         )
 
-    def get_node_pins(self, blueprint_name: str, node_id: str, *, graph_name: str = None) -> dict:
+    def get_node_pins(
+        self, blueprint_name: str, node_id: str, *, graph_name: str = None
+    ) -> dict:
         return self.call(
             "get_node_pins",
             blueprint_name=blueprint_name,
@@ -407,7 +415,9 @@ class UEBridge:
         location: List[float] = None,
         rotation: List[float] = None,
     ) -> dict:
-        return self.call("spawn_actor", name=name, type=type, location=location, rotation=rotation)
+        return self.call(
+            "spawn_actor", name=name, type=type, location=location, rotation=rotation
+        )
 
     # ── Materials ───────────────────────────────────────────────────
 
@@ -487,7 +497,9 @@ class UEBridge:
         )
 
     def set_widget_properties(self, widget_name: str, target: str, **kwargs) -> dict:
-        return self.call("set_widget_properties", widget_name=widget_name, target=target, **kwargs)
+        return self.call(
+            "set_widget_properties", widget_name=widget_name, target=target, **kwargs
+        )
 
     # ── Assets ──────────────────────────────────────────────────────
 

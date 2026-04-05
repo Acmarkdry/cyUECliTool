@@ -71,4 +71,6 @@ class RequestTracer:
             )
             duration_ms = (end - start) * 1000
             if duration_ms > 5000:
-                logger.warning(f"Slow request: {command} took {duration_ms:.0f}ms (id={rid})")
+                logger.warning(
+                    f"Slow request: {command} took {duration_ms:.0f}ms (id={rid})"
+                )

@@ -150,7 +150,8 @@ class CircuitBreaker:
         with self._lock:
             if (
                 self._state == CircuitState.OPEN
-                and time.time() - self._last_failure_time >= self._config.recovery_timeout
+                and time.time() - self._last_failure_time
+                >= self._config.recovery_timeout
             ):
                 self._state = CircuitState.HALF_OPEN
                 self._consecutive_successes = 0
@@ -254,7 +255,9 @@ class PersistentUnrealConnection:
         # Optional callback: (new_state: str, old_state: str, timestamp: str) -> None
         self.on_state_change: Optional[Callable[[str, str, str], None]] = None
         # Optional metrics callback: (command, duration_ms, success, error) -> None
-        self.on_request_complete: Optional[Callable[[str, float, bool, Optional[str]], None]] = None
+        self.on_request_complete: Optional[
+            Callable[[str, float, bool, Optional[str]], None]
+        ] = None
 
     @property
     def state(self) -> ConnectionState:
@@ -292,7 +295,9 @@ class PersistentUnrealConnection:
                 # Start heartbeat thread
                 self._start_heartbeat()
 
-                logger.info(f"Connected to Unreal at {self.config.host}:{self.config.port}")
+                logger.info(
+                    f"Connected to Unreal at {self.config.host}:{self.config.port}"
+                )
                 self._fire_state_change("alive", old_state.value)
                 return True
 
@@ -417,7 +422,9 @@ class PersistentUnrealConnection:
             self._circuit.record_success()
 
         # Fire metrics hook
-        self._fire_request_complete(command_type, elapsed_ms, result.success, result.error)
+        self._fire_request_complete(
+            command_type, elapsed_ms, result.success, result.error
+        )
 
         return result
 
@@ -449,7 +456,9 @@ class PersistentUnrealConnection:
             try:
                 # Log outgoing command (truncate large params)
                 params_preview = json.dumps(params)[:200] if params else "none"
-                logger.debug(f">>> Sending command '{command_type}' with params: {params_preview}")
+                logger.debug(
+                    f">>> Sending command '{command_type}' with params: {params_preview}"
+                )
 
                 # Send command
                 self._send_raw(command)
@@ -481,7 +490,9 @@ class PersistentUnrealConnection:
                 return self._parse_response(command_type, response)
 
             except socket.timeout:
-                logger.warning(f"Command '{command_type}' timed out after {effective_timeout}s")
+                logger.warning(
+                    f"Command '{command_type}' timed out after {effective_timeout}s"
+                )
                 return CommandResult(
                     success=False,
                     error=f"Command '{command_type}' timed out after {effective_timeout}s",
@@ -533,16 +544,22 @@ class PersistentUnrealConnection:
                 data = {k: v for k, v in response.items() if k != "success"}
                 return CommandResult(success=True, data=data)
             else:
-                error_msg = response.get("error", "Unknown error (no error message in response)")
+                error_msg = response.get(
+                    "error", "Unknown error (no error message in response)"
+                )
                 error_type = response.get("error_type", "unknown")
-                error_details = {k: response[k] for k in _ERROR_DETAIL_KEYS if k in response}
+                error_details = {
+                    k: response[k] for k in _ERROR_DETAIL_KEYS if k in response
+                }
                 detail_str = ""
                 if error_details:
                     detail_str = f" | DETAILS: {json.dumps(error_details)}"
                 full_error = f"[{error_type}] {error_msg}{detail_str}"
                 logger.error(f"Command '{command_type}' failed: {full_error}")
                 data = {
-                    k: v for k, v in response.items() if k not in ("success", "error", "error_type")
+                    k: v
+                    for k, v in response.items()
+                    if k not in ("success", "error", "error_type")
                 }
                 return CommandResult(
                     success=False,
@@ -556,16 +573,22 @@ class PersistentUnrealConnection:
             if response.get("status") == "success":
                 return CommandResult(success=True, data=response.get("result", {}))
             else:
-                error_msg = response.get("error", "Unknown error (no error message in response)")
+                error_msg = response.get(
+                    "error", "Unknown error (no error message in response)"
+                )
                 error_type = response.get("error_type", "unknown")
-                error_details = {k: response[k] for k in _ERROR_DETAIL_KEYS if k in response}
+                error_details = {
+                    k: response[k] for k in _ERROR_DETAIL_KEYS if k in response
+                }
                 detail_str = ""
                 if error_details:
                     detail_str = f" | DETAILS: {json.dumps(error_details)}"
                 full_error = f"[{error_type}] {error_msg}{detail_str}"
                 logger.error(f"Command '{command_type}' failed: {full_error}")
                 data = {
-                    k: v for k, v in response.items() if k not in ("status", "error", "error_type")
+                    k: v
+                    for k, v in response.items()
+                    if k not in ("status", "error", "error_type")
                 }
                 return CommandResult(
                     success=False,
@@ -599,7 +622,9 @@ class PersistentUnrealConnection:
         Convenience wrapper for SDK consumers (UEBridge, CLI) that prefer
         working with raw dicts instead of CommandResult objects.
         """
-        return self.send_command(command_type, params, timeout_tier=timeout_tier).to_dict()
+        return self.send_command(
+            command_type, params, timeout_tier=timeout_tier
+        ).to_dict()
 
     # ── Health diagnostics ──────────────────────────────────────────
 
@@ -723,7 +748,8 @@ class PersistentUnrealConnection:
 
             # Calculate delay with exponential backoff
             delay = min(
-                self.config.reconnect_base_delay * (2 ** (self._reconnect_attempts - 1)),
+                self.config.reconnect_base_delay
+                * (2 ** (self._reconnect_attempts - 1)),
                 self.config.reconnect_max_delay,
             )
 
@@ -736,13 +762,17 @@ class PersistentUnrealConnection:
                 return True
 
         self._state = ConnectionState.ERROR
-        logger.error(f"Failed to reconnect after {self.config.max_reconnect_attempts} attempts")
+        logger.error(
+            f"Failed to reconnect after {self.config.max_reconnect_attempts} attempts"
+        )
         return False
 
     def _start_heartbeat(self):
         """Start the heartbeat thread."""
         self._stop_heartbeat.clear()
-        self._heartbeat_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._heartbeat_thread = threading.Thread(
+            target=self._heartbeat_loop, daemon=True
+        )
         self._heartbeat_thread.start()
 
     def _heartbeat_loop(self):
@@ -758,7 +788,9 @@ class PersistentUnrealConnection:
             if elapsed >= self.config.heartbeat_interval:
                 try:
                     if not self.ping():
-                        logger.warning("Heartbeat ping returned false, marking connection stale")
+                        logger.warning(
+                            "Heartbeat ping returned false, marking connection stale"
+                        )
                         # Don't reconnect from heartbeat thread - let the next
                         # send_command handle reconnection to avoid blocking
                         with self._lock:
