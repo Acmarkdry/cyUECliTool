@@ -162,6 +162,7 @@ SKILL_DEFS: list[SkillDef] = [
             "widget.delete",
             "widget.add_component",
             "widget.bind_event",
+            "component.bind_event",
             "widget.add_to_viewport",
             "widget.set_text_binding",
             "widget.list_components",
