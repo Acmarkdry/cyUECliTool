@@ -3,26 +3,22 @@
 ## Blueprint Graph Layout
 
 ```
+@BP_Player
 # Layout only selected nodes
-ue_actions_run(action_id="layout.auto_selected", params={blueprint_name: "BP_Player"})
+layout_auto_selected
 
 # Layout a subtree from a root node
-ue_actions_run(action_id="layout.auto_subtree", params={blueprint_name: "BP_Player", root_node_id: "<GUID>"})
+layout_auto_subtree --root_node_id <GUID>
 
 # Layout entire blueprint (all graphs)
-ue_actions_run(action_id="layout.auto_blueprint", params={blueprint_name: "BP_Player"})
+layout_auto_blueprint
 ```
 
 ## Layout + Comment in One Call
 
 ```
-ue_actions_run(action_id="layout.layout_and_comment", params={
-  blueprint_name: "BP_Player",
-  groups: [
-    {node_ids: ["GUID1", "GUID2"], comment_text: "Init Logic", color: [0.15, 0.35, 0.65, 1]},
-    {node_ids: ["GUID3", "GUID4"], comment_text: "Movement", color: [0.15, 0.55, 0.25, 1]}
-  ]
-})
+@BP_Player
+layout_and_comment --groups [{"node_ids":["GUID1","GUID2"],"comment_text":"Init Logic","color":[0.15,0.35,0.65,1]},{"node_ids":["GUID3","GUID4"],"comment_text":"Movement","color":[0.15,0.55,0.25,1]}]
 ```
 
 ## Spacing Parameters
@@ -35,10 +31,10 @@ ue_actions_run(action_id="layout.layout_and_comment", params={
 
 ## Material Graph Layout
 
-Use `material.auto_layout` (in materials skill) for material expression graphs.
+Use `material_auto_layout` (in materials skill) for material expression graphs.
 
 ## Key Patterns
 
 - Run layout AFTER all node creation and wiring is complete
-- `layout.auto_selected` respects current editor selection — use `graph.set_selected_nodes` first if needed
+- `layout_auto_selected` respects current editor selection — use `graph_set_selected_nodes` first if needed
 - Enhanced Sugiyama algorithm: longest-path layering, barycenter crossing optimization, width-aware spacing

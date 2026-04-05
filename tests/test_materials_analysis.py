@@ -163,9 +163,9 @@ def test_skills_materials_contains_new_actions():
     assert workflows, "materials skill has no workflow content"
 
     required_keywords = [
-        "material.analyze_complexity",
-        "material.diagnose",
-        "material.batch_create_instances",
+        "material_analyze_complexity",
+        "material_diagnose",
+        "material_batch_create_instances",
     ]
     for keyword in required_keywords:
         assert (

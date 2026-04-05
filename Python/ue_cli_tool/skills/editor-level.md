@@ -31,11 +31,9 @@ unreal.AutomationLibrary.end_play_map()
 ## Log-Based Testing
 
 ```
-ue_batch(actions=[
-  {action_id: "editor.clear_logs"},
-  // Start PIE via ue_python_exec, wait, then stop
-  {action_id: "editor.assert_log", params: {pattern: "Player spawned", category: "LogGame", should_exist: true}}
-])
+editor_clear_logs
+# Start PIE via ue_python_exec, wait, then stop
+editor_assert_log --pattern "Player spawned" --category LogGame --should_exist true
 ```
 
 ## Outliner Management (via ue_python_exec)
@@ -51,17 +49,15 @@ _result = [{"name": a.get_name(), "class": a.get_class().get_name(),
 ## Source Control Diff (retained C++ action)
 
 ```
-ue_actions_run(action_id="editor.diff_against_depot", params={
-  asset_path: "/Game/Blueprints/BP_Player"
-})
+editor_diff_against_depot --asset_path /Game/Blueprints/BP_Player
 # Returns: hasDifferences, summary, diffs[] with node-level changes
 ```
 
 ## Key Patterns
 
 - Actor/viewport/PIE operations → use `ue_python_exec` with `import unreal`
-- `editor.get_selected_asset_thumbnail` returns PNG base64 for Content Browser selection
-- `editor.is_ready` to check if editor is fully initialized before operations
-- `editor.get_logs` / `editor.clear_logs` / `editor.assert_log` for log inspection
-- `editor.diff_against_depot` and `editor.get_asset_history` for source control
-- For long-running operations, use `ue_async_run` with `action="submit"`
+- `editor_get_selected_asset_thumbnail` returns PNG base64 for Content Browser selection
+- `editor_is_ready` to check if editor is fully initialized before operations
+- `editor_get_logs` / `editor_clear_logs` / `editor_assert_log` for log inspection
+- `editor_diff_against_depot` and `editor_get_asset_history` for source control
+- For long-running operations, use async execution

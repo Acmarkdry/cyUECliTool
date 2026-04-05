@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Runtime End-to-End Functional Test Suite
 =========================================
@@ -46,7 +46,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-# 鈹€鈹€鈹€ Connection layer (standalone, no dependency on plugin Python code) 鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Connection layer (standalone, no dependency on plugin Python code) ──────
 
 _HOST = "127.0.0.1"
 _PORT = 55558
@@ -54,7 +54,7 @@ _TIMEOUT = 120.0
 
 
 class TestConnection:
-    """Minimal TCP connection for testing 鈥?no heartbeat, no reconnect."""
+    """Minimal TCP connection for testing — no heartbeat, no reconnect."""
 
     def __init__(self, host: str = _HOST, port: int = _PORT, timeout: float = _TIMEOUT):
         self.host = host
@@ -69,7 +69,7 @@ class TestConnection:
             self._socket.connect((self.host, self.port))
             return True
         except Exception as e:
-            print(f"  鉁?Connection failed: {e}")
+            print(f"  ✗ Connection failed: {e}")
             self._socket = None
             return False
 
@@ -126,7 +126,7 @@ class TestConnection:
         self.disconnect()
 
 
-# 鈹€鈹€鈹€ Test framework 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Test framework ─────────────────────────────────────────────────────────
 
 
 class TestResult(Enum):
@@ -181,7 +181,7 @@ class TestSuite:
         return self.end_time - self.start_time
 
 
-# 鈹€鈹€鈹€ Test helpers 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Test helpers ───────────────────────────────────────────────────────────
 
 
 def _ok(resp: dict) -> bool:
@@ -200,7 +200,7 @@ def _has_field(resp: dict, *fields: str) -> bool:
     return all(f in r for f in fields)
 
 
-# 鈹€鈹€鈹€ Test definitions 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Test definitions ───────────────────────────────────────────────────────
 # Each test is: (name, category, command, params_or_None, validator_func)
 
 TestDef = tuple[str, str, str, Optional[dict], Optional[Callable[[dict], str]]]
@@ -244,28 +244,28 @@ def _v_has(*fields):
 
 
 def _v_any(r: dict) -> str:
-    """Always passes 鈥?just verifies no crash/timeout."""
+    """Always passes — just verifies no crash/timeout."""
     return ""
 
 
-# 鈹€鈹€鈹€ Unique names for test assets 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Unique names for test assets ───────────────────────────────────────────
 _TS = str(int(time.time()))[-6:]  # Timestamp suffix for unique names
 _TEST_BP_NAME = f"TestBP_{_TS}"
 _TEST_BP_PATH = f"/Game/TestBP_{_TS}"
 _TEST_WIDGET_NAME = f"TestWidget_{_TS}"
 _TEST_MATERIAL_NAME = f"TestMat_{_TS}"
 
-# 鈹€鈹€鈹€ All test definitions 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── All test definitions ──────────────────────────────────────────────────
 
 ALL_TESTS: list[TestDef] = [
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: ping 鈥?Connection health
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: ping — Connection health
+    # ═══════════════════════════════════════════════════════════════════════
     ("ping", "ping", "ping", None, _v_pong),
     ("get_context", "ping", "get_context", None, _v_any),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: editor 鈥?Editor state queries
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: editor — Editor state queries
+    # ═══════════════════════════════════════════════════════════════════════
     ("is_ready", "editor", "is_ready", None, _v_ok),
     ("get_editor_logs", "editor", "get_editor_logs", {"count": 5}, _v_ok),
     ("get_unreal_logs", "editor", "get_unreal_logs", {"count": 5}, _v_ok),
@@ -277,15 +277,15 @@ ALL_TESTS: list[TestDef] = [
         {"category": "LogMCP", "pattern": ".*"},
         _v_any,
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p7_undo 鈥?Undo/Redo/History
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p7_undo — Undo/Redo/History
+    # ═══════════════════════════════════════════════════════════════════════
     ("get_undo_history", "p7_undo", "get_undo_history", {"limit": 5}, _v_ok),
     ("undo", "p7_undo", "undo", None, _v_any),  # may fail if nothing to undo
     ("redo", "p7_undo", "redo", None, _v_any),  # may fail if nothing to redo
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p7_screenshot 鈥?Viewport Screenshot
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p7_screenshot — Viewport Screenshot
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "take_screenshot",
         "p7_screenshot",
@@ -300,9 +300,9 @@ ALL_TESTS: list[TestDef] = [
         {"width": 256},
         _v_ok_or_expected_error(["PIE", "not running", "not available", "commandlet"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: editor_extra 鈥?Thumbnails, summaries
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: editor_extra — Thumbnails, summaries
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "get_selected_asset_thumbnail",
         "editor_extra",
@@ -310,9 +310,9 @@ ALL_TESTS: list[TestDef] = [
         None,
         _v_ok_or_expected_error(["no asset", "no selection", "not found"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: layout 鈥?Auto-layout
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: layout — Auto-layout
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "auto_layout_selected",
         "layout",
@@ -343,9 +343,9 @@ ALL_TESTS: list[TestDef] = [
         None,
         _v_ok_or_expected_error(["no blueprint", "not found", "missing"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: node_query 鈥?Node read operations
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: node_query — Node read operations
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "find_blueprint_nodes",
         "node_query",
@@ -374,9 +374,9 @@ ALL_TESTS: list[TestDef] = [
         None,
         _v_ok_or_expected_error(["no blueprint", "no graph", "not found", "missing"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: project 鈥?Project/Input actions
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: project — Project/Input actions
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "create_input_action",
         "project",
@@ -391,9 +391,9 @@ ALL_TESTS: list[TestDef] = [
         {"context_name": f"IMC_Test_{_TS}"},
         _v_ok_or_expected_error(["already exists", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: diff 鈥?Source control diff
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: diff — Source control diff
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "diff_against_depot",
         "diff",
@@ -412,9 +412,9 @@ ALL_TESTS: list[TestDef] = [
             ["not found", "source control", "failed", "no source", "not connected"]
         ),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: python 鈥?Python execution
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: python — Python execution
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "exec_python_simple",
         "python",
@@ -431,9 +431,9 @@ ALL_TESTS: list[TestDef] = [
         },
         _v_ok,
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p8_niagara 鈥?Niagara Particle System
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p8_niagara — Niagara Particle System
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "create_niagara_system",
         "p8_niagara",
@@ -462,9 +462,9 @@ ALL_TESTS: list[TestDef] = [
         {"system_path": f"/Game/NS_Test_{_TS}"},
         _v_ok_or_expected_error(["not found", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p8_datatable 鈥?DataTable
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p8_datatable — DataTable
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "create_datatable",
         "p8_datatable",
@@ -492,9 +492,9 @@ ALL_TESTS: list[TestDef] = [
         {"table_path": f"/Game/DT_Test_{_TS}"},
         _v_ok_or_expected_error(["not found", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p8_sequencer 鈥?Sequencer
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p8_sequencer — Sequencer
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "create_level_sequence",
         "p8_sequencer",
@@ -516,9 +516,9 @@ ALL_TESTS: list[TestDef] = [
         {"sequence_path": f"/Game/LS_Test_{_TS}", "start_frame": 0, "end_frame": 300},
         _v_ok_or_expected_error(["not found", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p10_testing 鈥?Automation Testing
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p10_testing — Automation Testing
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "list_automation_tests",
         "p10_testing",
@@ -533,19 +533,19 @@ ALL_TESTS: list[TestDef] = [
         {"test_filter": "NonExistentTest"},
         _v_ok_or_expected_error(["no tests", "not found", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p10_level 鈥?Level Design
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p10_level — Level Design
+    # ═══════════════════════════════════════════════════════════════════════
     ("list_sublevels", "p10_level", "list_sublevels", None, _v_ok),
     ("get_world_settings", "p10_level", "get_world_settings", None, _v_ok),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: p10_profiler 鈥?Performance profiler
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: p10_profiler — Performance profiler
+    # ═══════════════════════════════════════════════════════════════════════
     ("get_frame_stats", "p10_profiler", "get_frame_stats", None, _v_ok),
     ("get_memory_stats", "p10_profiler", "get_memory_stats", None, _v_ok),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: animgraph 鈥?Animation Blueprint (read-only queries)
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: animgraph — Animation Blueprint (read-only queries)
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "create_anim_blueprint",
         "animgraph",
@@ -559,9 +559,9 @@ ALL_TESTS: list[TestDef] = [
             ["skeleton", "not found", "failed", "invalid", "missing"]
         ),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: material 鈥?Material operations
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: material — Material operations
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "get_material_summary",
         "material",
@@ -597,9 +597,9 @@ ALL_TESTS: list[TestDef] = [
         {"material_path": "/Engine/BasicShapes/BasicShapeMaterial"},
         _v_ok_or_expected_error(["not found", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: batch 鈥?Batch execution
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: batch — Batch execution
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "batch_execute_mixed",
         "batch",
@@ -614,9 +614,9 @@ ALL_TESTS: list[TestDef] = [
         },
         _v_ok_or_expected_error(["unknown", "failed"]),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: async 鈥?Async execution
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: async — Async execution
+    # ═══════════════════════════════════════════════════════════════════════
     (
         "async_submit",
         "async",
@@ -624,9 +624,9 @@ ALL_TESTS: list[TestDef] = [
         {"command": "is_ready", "params": {}},
         _v_has("task_id"),
     ),
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    # CATEGORY: events 鈥?P9 Event Push System
-    # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    # ═══════════════════════════════════════════════════════════════════════
+    # CATEGORY: events — P9 Event Push System
+    # ═══════════════════════════════════════════════════════════════════════
     ("subscribe_events_all", "events", "subscribe_events", None, _v_ok),
     ("poll_events_empty", "events", "poll_events", {"max_events": 10}, _v_ok),
     ("unsubscribe_events", "events", "unsubscribe_events", None, _v_ok),
@@ -642,7 +642,7 @@ ALL_TESTS: list[TestDef] = [
 ]
 
 
-# 鈹€鈹€鈹€ Test runner 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Test runner ────────────────────────────────────────────────────────────
 
 
 def run_tests(
@@ -689,10 +689,10 @@ def run_tests(
 
         # Print progress
         icon = {
-            TestResult.PASS: "鉁?,
-            TestResult.FAIL: "鉁?,
-            TestResult.SKIP: "鈼?,
-            TestResult.ERROR: "鈿?,
+            TestResult.PASS: "✓",
+            TestResult.FAIL: "✗",
+            TestResult.SKIP: "○",
+            TestResult.ERROR: "⚠",
         }[tc.result]
 
         color_code = {
@@ -705,7 +705,7 @@ def run_tests(
 
         status = f"{color_code}{icon} {tc.result.value}{reset}"
         timing = f"({tc.elapsed_ms:.0f}ms)"
-        msg_suffix = f" 鈥?{tc.message}" if tc.message else ""
+        msg_suffix = f" — {tc.message}" if tc.message else ""
         print(f"  {status}  [{category:16s}] {name:40s} {timing}{msg_suffix}")
 
         if verbose and tc.response and tc.result == TestResult.FAIL:
@@ -741,14 +741,14 @@ def print_summary(suite: TestSuite):
         p = sum(1 for c in cases if c.result == TestResult.PASS)
         t = len(cases)
         pct = (p / t * 100) if t > 0 else 0
-        bar = "鈻? * int(pct / 5) + "鈻? * (20 - int(pct / 5))
+        bar = "█" * int(pct / 5) + "░" * (20 - int(pct / 5))
         color = "\033[32m" if p == t else "\033[33m" if p > 0 else "\033[31m"
         print(f"    {color}{cat:20s} {bar} {p}/{t} ({pct:.0f}%)\033[0m")
 
     print()
 
     if suite.failed > 0 or suite.errors > 0:
-        print("  \033[31m鉁?SOME TESTS FAILED\033[0m")
+        print("  \033[31m✗ SOME TESTS FAILED\033[0m")
         print()
         print("  Failed/Error details:")
         for tc in suite.cases:
@@ -756,7 +756,7 @@ def print_summary(suite: TestSuite):
                 print(f"    [{tc.category}] {tc.name}: {tc.message[:200]}")
         print()
     else:
-        print("  \033[32m鉁?ALL TESTS PASSED\033[0m")
+        print("  \033[32m✓ ALL TESTS PASSED\033[0m")
         print()
 
     # Rate
@@ -775,7 +775,7 @@ def list_categories():
         print(f"  {cat:20s} ({count} tests)")
 
 
-# 鈹€鈹€鈹€ Main 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ─── Main ───────────────────────────────────────────────────────────────────
 
 
 def main():
@@ -804,7 +804,7 @@ def main():
     if args.dry_run:
         print(f"Would run {len(tests_to_run)} tests:")
         for name, cat, cmd, params, _ in tests_to_run:
-            print(f"  [{cat:16s}] {name:40s} 鈫?{cmd}")
+            print(f"  [{cat:16s}] {name:40s} → {cmd}")
         return 0
 
     print()
@@ -820,12 +820,12 @@ def main():
     print(f"  Connecting to UE Editor at {args.host}:{args.port}...")
     if not conn.connect():
         print()
-        print("  \033[31m鉁?FATAL: Cannot connect to UE Editor.\033[0m")
+        print("  \033[31m✗ FATAL: Cannot connect to UE Editor.\033[0m")
         print("    Make sure Unreal Editor is running with UEEditorMCP plugin enabled.")
         print(f"    Expected TCP server on {args.host}:{args.port}")
         return 2
 
-    print(f"  \033[32m鉁?Connected\033[0m")
+    print(f"  \033[32m✓ Connected\033[0m")
     print()
 
     try:
