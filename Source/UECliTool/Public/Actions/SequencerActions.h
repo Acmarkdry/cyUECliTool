@@ -12,14 +12,14 @@ class UMovieScene;
 // P8: Sequencer Actions
 // ============================================================================
 
-class UEEDITORMCP_API FSequencerAction : public FEditorAction
+class UECLITOOL_API FSequencerAction : public FEditorAction
 {
 protected:
 	ULevelSequence* FindLevelSequence(const FString& Name, FString& OutError) const;
 };
 
 /** Create a new LevelSequence asset. */
-class UEEDITORMCP_API FCreateLevelSequenceAction : public FSequencerAction
+class UECLITOOL_API FCreateLevelSequenceAction : public FSequencerAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -29,7 +29,7 @@ protected:
 };
 
 /** Describe a LevelSequence structure (bindings, tracks, sections). */
-class UEEDITORMCP_API FDescribeLevelSequenceAction : public FSequencerAction
+class UECLITOOL_API FDescribeLevelSequenceAction : public FSequencerAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -40,7 +40,7 @@ protected:
 };
 
 /** Add a possessable binding (bind a level actor to the sequence). */
-class UEEDITORMCP_API FAddSequencerPossessableAction : public FSequencerAction
+class UECLITOOL_API FAddSequencerPossessableAction : public FSequencerAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -50,7 +50,7 @@ protected:
 };
 
 /** Add a track to a binding. */
-class UEEDITORMCP_API FAddSequencerTrackAction : public FSequencerAction
+class UECLITOOL_API FAddSequencerTrackAction : public FSequencerAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -60,7 +60,7 @@ protected:
 };
 
 /** Set the playback range of a sequence. */
-class UEEDITORMCP_API FSetSequencerRangeAction : public FSequencerAction
+class UECLITOOL_API FSetSequencerRangeAction : public FSequencerAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

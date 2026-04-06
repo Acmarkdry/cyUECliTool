@@ -334,22 +334,39 @@ _BLUEPRINT_ACTIONS = [
         id="blueprint.get_summary",
         command="get_blueprint_summary",
         tags=("blueprint", "summary", "introspect", "info", "read"),
-        description="Get a comprehensive summary of a Blueprint: variables, functions, event graphs, components, parent class, compile status, and interfaces",
+        description=(
+            "Get a summary of a Blueprint. When blueprint_name/asset_path are omitted, "
+            "auto-detects from Content Browser selection or the currently open editor. "
+            "Use detail_level to control response size: brief (~150 tokens), normal (~500), full (~2000+)."
+        ),
         input_schema={
             "type": "object",
             "properties": {
                 "blueprint_name": {
                     "type": "string",
-                    "description": "Name of the Blueprint (e.g. BP_Player)",
+                    "description": "Name of the Blueprint (e.g. BP_Player). Optional — omit to auto-detect from selection.",
                 },
                 "asset_path": {
                     "type": "string",
-                    "description": "Full asset path if name is ambiguous",
+                    "description": "Full asset path if name is ambiguous.",
+                },
+                "detail_level": {
+                    "type": "string",
+                    "enum": ["brief", "normal", "full"],
+                    "description": (
+                        "brief (default): basic info + variable category counts + function name list. "
+                        "normal: + variable name/type, function parameters. "
+                        "full: all fields including editability, defaults, sub_types, event graph stats."
+                    ),
                 },
             },
         },
         capabilities=("read",),
-        examples=({"blueprint_name": "BP_Player"},),
+        examples=(
+            {},
+            {"detail_level": "brief"},
+            {"blueprint_name": "BP_Player", "detail_level": "normal"},
+        ),
     ),
     ActionDef(
         id="blueprint.describe_full",

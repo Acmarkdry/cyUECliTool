@@ -8,7 +8,7 @@
 /**
  * Create legacy input mapping (Action or Axis)
  */
-class UEEDITORMCP_API FCreateInputMappingAction : public FEditorAction
+class UECLITOOL_API FCreateInputMappingAction : public FEditorAction
 {
 public:
 	virtual FString GetActionName() const override { return TEXT("CreateInputMapping"); }
@@ -21,7 +21,7 @@ protected:
 /**
  * Create Enhanced Input Action asset
  */
-class UEEDITORMCP_API FCreateInputActionAction : public FEditorAction
+class UECLITOOL_API FCreateInputActionAction : public FEditorAction
 {
 public:
 	virtual FString GetActionName() const override { return TEXT("CreateInputAction"); }
@@ -34,7 +34,7 @@ protected:
 /**
  * Create Enhanced Input Mapping Context asset
  */
-class UEEDITORMCP_API FCreateInputMappingContextAction : public FEditorAction
+class UECLITOOL_API FCreateInputMappingContextAction : public FEditorAction
 {
 public:
 	virtual FString GetActionName() const override { return TEXT("CreateInputMappingContext"); }
@@ -47,7 +47,7 @@ protected:
 /**
  * Add key mapping to Input Mapping Context with optional modifiers
  */
-class UEEDITORMCP_API FAddKeyMappingToContextAction : public FEditorAction
+class UECLITOOL_API FAddKeyMappingToContextAction : public FEditorAction
 {
 public:
 	virtual FString GetActionName() const override { return TEXT("AddKeyMappingToContext"); }

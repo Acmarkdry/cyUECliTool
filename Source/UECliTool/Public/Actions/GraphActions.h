@@ -11,7 +11,7 @@ class UEdGraphPin;
 class UBlueprint;
 
 // ============================================================================
-// P3.1 â€” Enhanced Graph Description
+// P3.1 â€?Enhanced Graph Description
 // ============================================================================
 
 /**
@@ -27,7 +27,7 @@ class UBlueprint;
  * Command: describe_graph_enhanced
  * Action ID: graph.describe_enhanced
  */
-class UEEDITORMCP_API FGraphDescribeEnhancedAction : public FBlueprintNodeAction
+class UECLITOOL_API FGraphDescribeEnhancedAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -56,7 +56,7 @@ private:
 
 
 // ============================================================================
-// P3.2 â€” Patch Operations
+// P3.2 â€?Patch Operations
 // ============================================================================
 
 /**
@@ -79,9 +79,9 @@ enum class EPatchOpType : uint8
 /**
  * FPatchOp
  * A single operation within a patch document.
- * Parsed from JSON â€” each op has a type and type-specific parameters.
+ * Parsed from JSON â€?each op has a type and type-specific parameters.
  */
-struct UEEDITORMCP_API FPatchOp
+struct UECLITOOL_API FPatchOp
 {
 	/** Operation type */
 	EPatchOpType OpType = EPatchOpType::Invalid;
@@ -103,20 +103,20 @@ struct UEEDITORMCP_API FPatchOp
  * FPatchOpResult
  * Result of executing or validating a single patch op.
  */
-struct UEEDITORMCP_API FPatchOpResult
+struct UECLITOOL_API FPatchOpResult
 {
 	int32 OpIndex = -1;
 	FString OpType;
 	bool bSuccess = false;
 	FString Message;
-	FString NodeId; // For add_node ops â€” the created node's GUID
+	FString NodeId; // For add_node ops â€?the created node's GUID
 
 	TSharedPtr<FJsonObject> ToJson() const;
 };
 
 
 // ============================================================================
-// P3.3 â€” Apply Patch
+// P3.3 â€?Apply Patch
 // ============================================================================
 
 /**
@@ -134,7 +134,7 @@ struct UEEDITORMCP_API FPatchOpResult
  * Command: apply_graph_patch
  * Action ID: graph.apply_patch
  */
-class UEEDITORMCP_API FApplyPatchAction : public FBlueprintNodeAction
+class UECLITOOL_API FApplyPatchAction : public FBlueprintNodeAction
 {
 	friend class FValidatePatchAction;
 
@@ -173,7 +173,7 @@ private:
 	FPatchOpResult ExecuteSetPinDefault(const FPatchOp& Op, UEdGraph* Graph,
 		const TMap<FString, FGuid>& TempIdMap) const;
 
-	/** Resolve node reference â€” supports temp IDs, $last_node, and real GUIDs */
+	/** Resolve node reference â€?supports temp IDs, $last_node, and real GUIDs */
 	UEdGraphNode* ResolveNodeRef(const FString& NodeRef, UEdGraph* Graph,
 		const TMap<FString, FGuid>& TempIdMap) const;
 
@@ -183,7 +183,7 @@ private:
 
 
 // ============================================================================
-// P3.4 â€” Validate Patch (dry-run)
+// P3.4 â€?Validate Patch (dry-run)
 // ============================================================================
 
 /**
@@ -195,7 +195,7 @@ private:
  * Command: validate_graph_patch
  * Action ID: graph.validate_patch
  */
-class UEEDITORMCP_API FValidatePatchAction : public FBlueprintNodeAction
+class UECLITOOL_API FValidatePatchAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -208,7 +208,7 @@ protected:
 
 
 // ============================================================================
-// P4 â€” Cross-Graph Node Transfer (Export / Import)
+// P4 â€?Cross-Graph Node Transfer (Export / Import)
 // ============================================================================
 
 /**
@@ -219,14 +219,14 @@ protected:
  * imported into any compatible graph via ImportNodesFromText.
  *
  * This enables cross-graph node transfer workflows:
- *   1. export_nodes_to_text  â†’ capture nodes as text
- *   2. delete_blueprint_node â†’ remove from source graph
- *   3. import_nodes_from_text â†’ paste into target graph
+ *   1. export_nodes_to_text  â†?capture nodes as text
+ *   2. delete_blueprint_node â†?remove from source graph
+ *   3. import_nodes_from_text â†?paste into target graph
  *
  * Command: export_nodes_to_text
  * Action ID: graph.export_nodes
  */
-class UEEDITORMCP_API FExportNodesToTextAction : public FBlueprintNodeAction
+class UECLITOOL_API FExportNodesToTextAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -249,7 +249,7 @@ protected:
  * Command: import_nodes_from_text
  * Action ID: graph.import_nodes
  */
-class UEEDITORMCP_API FImportNodesFromTextAction : public FBlueprintNodeAction
+class UECLITOOL_API FImportNodesFromTextAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

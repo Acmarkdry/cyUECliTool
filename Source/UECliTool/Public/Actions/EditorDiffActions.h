@@ -8,21 +8,21 @@
 /**
  * FDiffAgainstDepotAction
  *
- * Programmatic "Diff Against Depot" â€” compares a local asset against
+ * Programmatic "Diff Against Depot" â€?compares a local asset against
  * the latest source-control revision and returns structured diff data
  * as JSON (no UI).
  *
  * For Blueprints the diff walks every graph and produces per-node
- * results (added / removed / modified / moved â€¦).
+ * results (added / removed / modified / moved â€?.
  * For generic assets it falls back to object-property comparison.
  *
  * Params:
- *   asset_path  (string, required)  â€” e.g. "/Game/P110_2/Blueprints/BP_Foo"
- *   revision    (int, optional)     â€” specific revision number (default: latest)
+ *   asset_path  (string, required)  â€?e.g. "/Game/P110_2/Blueprints/BP_Foo"
+ *   revision    (int, optional)     â€?specific revision number (default: latest)
  *
  * Command type: diff_against_depot
  */
-class UEEDITORMCP_API FDiffAgainstDepotAction : public FEditorAction
+class UECLITOOL_API FDiffAgainstDepotAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -50,12 +50,12 @@ private:
  * (up to the provider limit, typically 100 for SVN).
  *
  * Params:
- *   asset_path  (string, required)  â€” e.g. "/Game/P110_2/Blueprints/BP_Foo"
- *   max_count   (int, optional)     â€” max revisions to return (default: all available)
+ *   asset_path  (string, required)  â€?e.g. "/Game/P110_2/Blueprints/BP_Foo"
+ *   max_count   (int, optional)     â€?max revisions to return (default: all available)
  *
  * Command type: get_asset_history
  */
-class UEEDITORMCP_API FGetAssetHistoryAction : public FEditorAction
+class UECLITOOL_API FGetAssetHistoryAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

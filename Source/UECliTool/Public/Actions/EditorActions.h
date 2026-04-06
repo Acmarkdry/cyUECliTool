@@ -11,7 +11,7 @@ class AActor;
  * FGetActorsInLevelAction
  * Returns all actors in the current level.
  */
-class UEEDITORMCP_API FGetActorsInLevelAction : public FEditorAction
+class UECLITOOL_API FGetActorsInLevelAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -27,7 +27,7 @@ protected:
  * FFindActorsByNameAction
  * Finds actors matching a name pattern.
  */
-class UEEDITORMCP_API FFindActorsByNameAction : public FEditorAction
+class UECLITOOL_API FFindActorsByNameAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -43,7 +43,7 @@ protected:
  * FSpawnActorAction
  * Spawns a basic actor type in the level.
  */
-class UEEDITORMCP_API FSpawnActorAction : public FEditorAction
+class UECLITOOL_API FSpawnActorAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -61,7 +61,7 @@ private:
  * FDeleteActorAction
  * Deletes an actor from the level.
  */
-class UEEDITORMCP_API FDeleteActorAction : public FEditorAction
+class UECLITOOL_API FDeleteActorAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -76,7 +76,7 @@ protected:
  * FSetActorTransformAction
  * Sets the transform (location/rotation/scale) of an actor.
  */
-class UEEDITORMCP_API FSetActorTransformAction : public FEditorAction
+class UECLITOOL_API FSetActorTransformAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -93,7 +93,7 @@ protected:
  * Params: name (string), detailed (bool, default false), editable_only (bool, default false), category (string)
  * When detailed=true, enumerates ALL FProperty fields including Blueprint variables.
  */
-class UEEDITORMCP_API FGetActorPropertiesAction : public FEditorAction
+class UECLITOOL_API FGetActorPropertiesAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -116,7 +116,7 @@ private:
  * FSetActorPropertyAction
  * Sets a property on an actor.
  */
-class UEEDITORMCP_API FSetActorPropertyAction : public FEditorAction
+class UECLITOOL_API FSetActorPropertyAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -131,7 +131,7 @@ protected:
  * FFocusViewportAction
  * Focuses the viewport on an actor or location.
  */
-class UEEDITORMCP_API FFocusViewportAction : public FEditorAction
+class UECLITOOL_API FFocusViewportAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -147,7 +147,7 @@ protected:
  * FGetViewportTransformAction
  * Gets the current viewport camera location and rotation.
  */
-class UEEDITORMCP_API FGetViewportTransformAction : public FEditorAction
+class UECLITOOL_API FGetViewportTransformAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -163,7 +163,7 @@ protected:
  * FSetViewportTransformAction
  * Sets the viewport camera location and/or rotation.
  */
-class UEEDITORMCP_API FSetViewportTransformAction : public FEditorAction
+class UECLITOOL_API FSetViewportTransformAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -179,7 +179,7 @@ protected:
  * FSaveAllAction
  * Saves all dirty packages (blueprints, levels, assets).
  */
-class UEEDITORMCP_API FSaveAllAction : public FEditorAction
+class UECLITOOL_API FSaveAllAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -197,7 +197,7 @@ protected:
  * Params: path (e.g. "/Game/UI"), recursive (bool), class_filter (string),
  *         name_contains (string), max_results (int)
  */
-class UEEDITORMCP_API FListAssetsAction : public FEditorAction
+class UECLITOOL_API FListAssetsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -225,7 +225,7 @@ protected:
  *    fixup_mode (string: "delete" | "leave" | "prompt", default "delete")
  *    checkout_dialog_prompt (bool, default false; ignored when allow_ui_prompts=false)
  */
-class UEEDITORMCP_API FRenameAssetsAction : public FEditorAction
+class UECLITOOL_API FRenameAssetsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -247,7 +247,7 @@ protected:
  *   ids (string[], optional) - alias of asset_paths
  *   size (int, optional, default 256, clamp 1..256)
  */
-class UEEDITORMCP_API FGetSelectedAssetThumbnailAction : public FEditorAction
+class UECLITOOL_API FGetSelectedAssetThumbnailAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -262,11 +262,11 @@ protected:
 /**
  * FGetSelectedAssetsAction
  * Returns a list of currently selected assets in the Content Browser.
- * No parameters required — returns paths, names, class info, and package paths
+ * No parameters required �?returns paths, names, class info, and package paths
  * of all assets selected in Content Browser at the time of the call.
  * Action ID: editor.get_selected_assets
  */
-class UEEDITORMCP_API FGetSelectedAssetsAction : public FEditorAction
+class UECLITOOL_API FGetSelectedAssetsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -280,11 +280,18 @@ protected:
 
 /**
  * FGetBlueprintSummaryAction
- * Get a comprehensive summary of a Blueprint's internal implementation:
+ * Get a summary of a Blueprint's internal implementation:
  * variables, functions, event graphs, components, parent class, compile status, etc.
- * Params: blueprint_name (string) or asset_path (string)
+ *
+ * Params:
+ *   blueprint_name (string, optional) - if omitted, auto-detects from Content Browser selection / open editor
+ *   asset_path     (string, optional) - full asset path for disambiguation
+ *   detail_level   (string, default "brief") - "brief" | "normal" | "full"
+ *     brief:  basic info + variable category counts + function name list (minimal tokens)
+ *     normal: + variable name/type per entry, function name/node_count/parameters
+ *     full:   all fields including editability, read-only, default values, sub_types, event graph stats
  */
-class UEEDITORMCP_API FGetBlueprintSummaryAction : public FEditorAction
+class UECLITOOL_API FGetBlueprintSummaryAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -305,7 +312,7 @@ protected:
  * Returns recent editor log entries from the MCPLogCapture ring buffer.
  * Params: count (int, default 100), category (string), min_verbosity (string)
  */
-class UEEDITORMCP_API FGetEditorLogsAction : public FEditorAction
+class UECLITOOL_API FGetEditorLogsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -331,7 +338,7 @@ protected:
  *   filter_contains (string)
  *   filter_category (string) / filter_categories (string[])
  */
-class UEEDITORMCP_API FGetUnrealLogsAction : public FEditorAction
+class UECLITOOL_API FGetUnrealLogsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -348,7 +355,7 @@ protected:
  * Executes multiple commands in sequence within a single TCP request.
  * Params: commands (array of {type, params}), stop_on_error (bool, default true)
  */
-class UEEDITORMCP_API FBatchExecuteAction : public FEditorAction
+class UECLITOOL_API FBatchExecuteAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -369,7 +376,7 @@ private:
  * Returns: ready (bool), details about startup state.
  * No params required.
  */
-class UEEDITORMCP_API FEditorIsReadyAction : public FEditorAction
+class UECLITOOL_API FEditorIsReadyAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -386,7 +393,7 @@ protected:
  * Requests the editor to shut down gracefully via FGenericPlatformMisc::RequestExit.
  * Params: force (bool, default false) - if true, force-exits without save prompts.
  */
-class UEEDITORMCP_API FRequestEditorShutdownAction : public FEditorAction
+class UECLITOOL_API FRequestEditorShutdownAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -415,7 +422,7 @@ protected:
  * Command: describe_blueprint_full
  * Action ID: blueprint.describe_full
  */
-class UEEDITORMCP_API FDescribeFullAction : public FEditorAction
+class UECLITOOL_API FDescribeFullAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -445,7 +452,7 @@ private:
  * Params: mode (string: SelectedViewport|NewWindow|Simulate, default SelectedViewport)
  * Action ID: editor.start_pie
  */
-class UEEDITORMCP_API FStartPIEAction : public FEditorAction
+class UECLITOOL_API FStartPIEAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -462,7 +469,7 @@ protected:
  * Stops the current PIE session without closing the editor.
  * Action ID: editor.stop_pie
  */
-class UEEDITORMCP_API FStopPIEAction : public FEditorAction
+class UECLITOOL_API FStopPIEAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -479,7 +486,7 @@ protected:
  * Queries the current PIE session state: Running/Stopped, world name, duration, paused.
  * Action ID: editor.get_pie_state
  */
-class UEEDITORMCP_API FGetPIEStateAction : public FEditorAction
+class UECLITOOL_API FGetPIEStateAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -501,7 +508,7 @@ protected:
  * Params: tag (string, optional)
  * Action ID: editor.clear_logs
  */
-class UEEDITORMCP_API FClearLogsAction : public FEditorAction
+class UECLITOOL_API FClearLogsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -521,7 +528,7 @@ protected:
  *         since_cursor (string, optional "live:<seq>")
  * Action ID: editor.assert_log
  */
-class UEEDITORMCP_API FAssertLogAction : public FEditorAction
+class UECLITOOL_API FAssertLogAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -540,10 +547,10 @@ protected:
 /**
  * FRenameActorLabelAction
  * Renames an actor's display label in the World Outliner.
- * Params: actor_name (string), new_label (string) — or items[] for batch.
+ * Params: actor_name (string), new_label (string) �?or items[] for batch.
  * Action ID: editor.rename_actor_label
  */
-class UEEDITORMCP_API FRenameActorLabelAction : public FEditorAction
+class UECLITOOL_API FRenameActorLabelAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -561,10 +568,10 @@ private:
 /**
  * FSetActorFolderAction
  * Moves actors into Outliner folders (creates folders automatically).
- * Params: actor_name (string), folder_path (string) — or items[] for batch.
+ * Params: actor_name (string), folder_path (string) �?or items[] for batch.
  * Action ID: editor.set_actor_folder
  */
-class UEEDITORMCP_API FSetActorFolderAction : public FEditorAction
+class UECLITOOL_API FSetActorFolderAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -584,7 +591,7 @@ private:
  * Params: actor_names (string[]), mode (set|add|remove|toggle, default set)
  * Action ID: editor.select_actors
  */
-class UEEDITORMCP_API FSelectActorsAction : public FEditorAction
+class UECLITOOL_API FSelectActorsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -605,7 +612,7 @@ private:
  * Params: class_filter (string, optional), folder_filter (string, optional)
  * Action ID: editor.get_outliner_tree
  */
-class UEEDITORMCP_API FGetOutlinerTreeAction : public FEditorAction
+class UECLITOOL_API FGetOutlinerTreeAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -629,7 +636,7 @@ protected:
  *   focus (bool, default true) - Whether to focus the editor window after opening
  * Action ID: editor.open_asset_editor
  */
-class UEEDITORMCP_API FOpenAssetEditorAction : public FEditorAction
+class UECLITOOL_API FOpenAssetEditorAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -650,7 +657,7 @@ protected:
  * Undoes the last editor transaction (equivalent to Ctrl+Z).
  * Action ID: editor.undo
  */
-class UEEDITORMCP_API FUndoAction : public FEditorAction
+class UECLITOOL_API FUndoAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -668,7 +675,7 @@ protected:
  * Redoes the last undone transaction (equivalent to Ctrl+Y).
  * Action ID: editor.redo
  */
-class UEEDITORMCP_API FRedoAction : public FEditorAction
+class UECLITOOL_API FRedoAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -687,7 +694,7 @@ protected:
  * Params: limit (int, default 20)
  * Action ID: editor.get_undo_history
  */
-class UEEDITORMCP_API FGetUndoHistoryAction : public FEditorAction
+class UECLITOOL_API FGetUndoHistoryAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -711,7 +718,7 @@ protected:
  *   height (int, default 512, max 1024)
  * Action ID: editor.take_screenshot
  */
-class UEEDITORMCP_API FTakeViewportScreenshotAction : public FEditorAction
+class UECLITOOL_API FTakeViewportScreenshotAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -732,7 +739,7 @@ protected:
  *   height (int, default 512, max 1024)
  * Action ID: editor.take_pie_screenshot
  */
-class UEEDITORMCP_API FTakePIEScreenshotAction : public FEditorAction
+class UECLITOOL_API FTakePIEScreenshotAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

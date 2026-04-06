@@ -26,7 +26,7 @@ class USCS_Node;
  * Common utility functions for MCP commands.
  * These are shared across all action handlers.
  */
-class UEEDITORMCP_API FMCPCommonUtils
+class UECLITOOL_API FMCPCommonUtils
 {
 public:
 	// =========================================================================
@@ -149,9 +149,9 @@ public:
 	 *
 	 * Uses layered heuristics to correctly resolve the active editor when
 	 * multiple Blueprint editor tabs are open:
-	 *   1. SDockTab::IsActive()           â€” global active tab (synchronous)
-	 *   2. SDockTab::IsForeground()       â€” dock-area foreground (Slate tick)
-	 *   3. SWidget::HasFocusedDescendants()â€” keyboard focus (synchronous)
+	 *   1. SDockTab::IsActive()           â€?global active tab (synchronous)
+	 *   2. SDockTab::IsForeground()       â€?dock-area foreground (Slate tick)
+	 *   3. SWidget::HasFocusedDescendants()â€?keyboard focus (synchronous)
 	 *   4. Fallback to first candidate with warning log
 	 */
 	static FBlueprintEditor* GetActiveBlueprintEditor(const FString& BlueprintName = TEXT(""));

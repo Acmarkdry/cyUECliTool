@@ -23,7 +23,7 @@ class UBlueprintFactory;
  *   - name: Created Blueprint name
  *   - path: Asset path
  */
-class UEEDITORMCP_API FCreateBlueprintAction : public FBlueprintAction
+class UECLITOOL_API FCreateBlueprintAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -58,7 +58,7 @@ private:
  *   - errors: Array of error details (if any)
  *   - warnings: Array of warning details (if any)
  */
-class UEEDITORMCP_API FCompileBlueprintAction : public FBlueprintAction
+class UECLITOOL_API FCompileBlueprintAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -93,7 +93,7 @@ private:
  *   - component_name: Created component name
  *   - component_type: Component type
  */
-class UEEDITORMCP_API FAddComponentToBlueprintAction : public FBlueprintAction
+class UECLITOOL_API FAddComponentToBlueprintAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -131,7 +131,7 @@ private:
  *   - location: [X, Y, Z]
  *   - rotation: [Pitch, Yaw, Roll]
  */
-class UEEDITORMCP_API FSpawnBlueprintActorAction : public FBlueprintAction
+class UECLITOOL_API FSpawnBlueprintActorAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -168,7 +168,7 @@ private:
  *   - property: Property name
  *   - success: Whether property was set
  */
-class UEEDITORMCP_API FSetComponentPropertyAction : public FBlueprintAction
+class UECLITOOL_API FSetComponentPropertyAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -194,7 +194,7 @@ protected:
  * Returns:
  *   - component: Component name
  */
-class UEEDITORMCP_API FSetStaticMeshPropertiesAction : public FBlueprintAction
+class UECLITOOL_API FSetStaticMeshPropertiesAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -221,7 +221,7 @@ protected:
  * Returns:
  *   - component: Component name
  */
-class UEEDITORMCP_API FSetPhysicsPropertiesAction : public FBlueprintAction
+class UECLITOOL_API FSetPhysicsPropertiesAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -246,7 +246,7 @@ protected:
  *   - property: Property name
  *   - success: Whether property was set
  */
-class UEEDITORMCP_API FSetBlueprintPropertyAction : public FBlueprintAction
+class UECLITOOL_API FSetBlueprintPropertyAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -271,7 +271,7 @@ protected:
  *   - path: Asset path
  *   - success: Whether material was created
  */
-class UEEDITORMCP_API FCreateColoredMaterialAction : public FEditorAction
+class UECLITOOL_API FCreateColoredMaterialAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -298,7 +298,7 @@ protected:
  * Returns:
  *   - blueprint_name, old_parent_class, new_parent_class
  */
-class UEEDITORMCP_API FSetBlueprintParentClassAction : public FBlueprintAction
+class UECLITOOL_API FSetBlueprintParentClassAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -324,7 +324,7 @@ private:
  * Returns:
  *   - blueprint_name, interface_name
  */
-class UEEDITORMCP_API FAddBlueprintInterfaceAction : public FBlueprintAction
+class UECLITOOL_API FAddBlueprintInterfaceAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -347,7 +347,7 @@ protected:
  * Returns:
  *   - blueprint_name, interface_name
  */
-class UEEDITORMCP_API FRemoveBlueprintInterfaceAction : public FBlueprintAction
+class UECLITOOL_API FRemoveBlueprintInterfaceAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

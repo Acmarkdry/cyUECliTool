@@ -14,7 +14,7 @@ class UEdGraphPin;
 // ============================================================================
 
 /** Connect two nodes in a Blueprint graph */
-class UEEDITORMCP_API FConnectBlueprintNodesAction : public FBlueprintNodeAction
+class UECLITOOL_API FConnectBlueprintNodesAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -25,7 +25,7 @@ protected:
 
 
 /** Find nodes in a Blueprint graph */
-class UEEDITORMCP_API FFindBlueprintNodesAction : public FBlueprintNodeAction
+class UECLITOOL_API FFindBlueprintNodesAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -37,7 +37,7 @@ protected:
 
 
 /** Delete a node from a Blueprint graph */
-class UEEDITORMCP_API FDeleteBlueprintNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FDeleteBlueprintNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -48,7 +48,7 @@ protected:
 
 
 /** Get all pins on a node (for debugging connections) */
-class UEEDITORMCP_API FGetNodePinsAction : public FBlueprintNodeAction
+class UECLITOOL_API FGetNodePinsAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -64,7 +64,7 @@ protected:
 // ============================================================================
 
 /** Add an event node (ReceiveBeginPlay, ReceiveTick, etc.) */
-class UEEDITORMCP_API FAddBlueprintEventNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintEventNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -75,7 +75,7 @@ protected:
 
 
 /** Add an input action event node (legacy input) */
-class UEEDITORMCP_API FAddBlueprintInputActionNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintInputActionNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -86,7 +86,7 @@ protected:
 
 
 /** Add an Enhanced Input action event node */
-class UEEDITORMCP_API FAddEnhancedInputActionNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddEnhancedInputActionNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -97,7 +97,7 @@ protected:
 
 
 /** Add a custom event node */
-class UEEDITORMCP_API FAddBlueprintCustomEventAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintCustomEventAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -109,10 +109,10 @@ protected:
 
 /** Add a custom event whose signature automatically matches a delegate.
  *  Supports two delegate source modes:
- *  - Class property mode: delegate_class + delegate_name â†’ finds the multicast delegate property
- *  - Node pin mode: source_node_id + source_pin_name â†’ resolves from an existing node's delegate pin
+ *  - Class property mode: delegate_class + delegate_name â†?finds the multicast delegate property
+ *  - Node pin mode: source_node_id + source_pin_name â†?resolves from an existing node's delegate pin
  *  The resulting custom event will have its pins locked to the delegate signature. */
-class UEEDITORMCP_API FAddCustomEventForDelegateAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddCustomEventForDelegateAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -129,7 +129,7 @@ private:
 // ============================================================================
 
 /** Add a variable to a Blueprint */
-class UEEDITORMCP_API FAddBlueprintVariableAction : public FBlueprintAction
+class UECLITOOL_API FAddBlueprintVariableAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -140,7 +140,7 @@ protected:
 
 
 /** Add a variable get node */
-class UEEDITORMCP_API FAddBlueprintVariableGetAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintVariableGetAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -151,7 +151,7 @@ protected:
 
 
 /** Add a variable set node */
-class UEEDITORMCP_API FAddBlueprintVariableSetAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintVariableSetAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -162,7 +162,7 @@ protected:
 
 
 /** Set the default value of a pin */
-class UEEDITORMCP_API FSetNodePinDefaultAction : public FBlueprintNodeAction
+class UECLITOOL_API FSetNodePinDefaultAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -177,7 +177,7 @@ protected:
 // ============================================================================
 
 /** Add a function call node */
-class UEEDITORMCP_API FAddBlueprintFunctionNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintFunctionNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -188,7 +188,7 @@ protected:
 
 
 /** Add a self reference node */
-class UEEDITORMCP_API FAddBlueprintSelfReferenceAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintSelfReferenceAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -199,7 +199,7 @@ protected:
 
 
 /** Add a component reference node */
-class UEEDITORMCP_API FAddBlueprintGetSelfComponentReferenceAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintGetSelfComponentReferenceAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -210,7 +210,7 @@ protected:
 
 
 /** Add a branch (if/then/else) node */
-class UEEDITORMCP_API FAddBlueprintBranchNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintBranchNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -221,7 +221,7 @@ protected:
 
 
 /** Add a cast node */
-class UEEDITORMCP_API FAddBlueprintCastNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintCastNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -232,7 +232,7 @@ protected:
 
 
 /** Add a subsystem getter node (e.g., EnhancedInputLocalPlayerSubsystem) */
-class UEEDITORMCP_API FAddBlueprintGetSubsystemNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintGetSubsystemNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -247,7 +247,7 @@ protected:
 // ============================================================================
 
 /** Create a new function in a Blueprint */
-class UEEDITORMCP_API FCreateBlueprintFunctionAction : public FBlueprintAction
+class UECLITOOL_API FCreateBlueprintFunctionAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -262,7 +262,7 @@ protected:
 // ============================================================================
 
 /** Add an event dispatcher to a Blueprint */
-class UEEDITORMCP_API FAddEventDispatcherAction : public FBlueprintAction
+class UECLITOOL_API FAddEventDispatcherAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -273,7 +273,7 @@ protected:
 
 
 /** Add a call node for an event dispatcher */
-class UEEDITORMCP_API FCallEventDispatcherAction : public FBlueprintNodeAction
+class UECLITOOL_API FCallEventDispatcherAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -284,7 +284,7 @@ protected:
 
 
 /** Add a bind node for an event dispatcher */
-class UEEDITORMCP_API FBindEventDispatcherAction : public FBlueprintNodeAction
+class UECLITOOL_API FBindEventDispatcherAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -296,7 +296,7 @@ protected:
 
 /** Create a "Create Event" (K2Node_CreateDelegate) node that binds a function to a delegate pin.
  *  Works inside function graphs where CustomEvent is not available. */
-class UEEDITORMCP_API FCreateEventDelegateAction : public FBlueprintNodeAction
+class UECLITOOL_API FCreateEventDelegateAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -310,7 +310,7 @@ protected:
  *  Creates a UK2Node_ComponentBoundEvent in the Blueprint event graph.
  *  The component must exist as a UPROPERTY on the Blueprint's GeneratedClass
  *  (i.e., added via SCS or declared in C++ parent). */
-class UEEDITORMCP_API FBindComponentEventAction : public FBlueprintNodeAction
+class UECLITOOL_API FBindComponentEventAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -325,7 +325,7 @@ protected:
 // ============================================================================
 
 /** Add a SpawnActorFromClass node */
-class UEEDITORMCP_API FAddSpawnActorFromClassNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddSpawnActorFromClassNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -336,7 +336,7 @@ protected:
 
 
 /** Call a Blueprint function */
-class UEEDITORMCP_API FCallBlueprintFunctionAction : public FBlueprintNodeAction
+class UECLITOOL_API FCallBlueprintFunctionAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -351,7 +351,7 @@ protected:
 // ============================================================================
 
 /** Set a property on an external object reference (e.g., bShowMouseCursor on PlayerController) */
-class UEEDITORMCP_API FSetObjectPropertyAction : public FBlueprintNodeAction
+class UECLITOOL_API FSetObjectPropertyAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -366,7 +366,7 @@ protected:
 // ============================================================================
 
 /** Add an Execution Sequence node (native K2 node, NOT a macro) */
-class UEEDITORMCP_API FAddSequenceNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddSequenceNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -381,7 +381,7 @@ protected:
 // ============================================================================
 
 /** Add a macro instance node (ForEachLoop, ForLoop, WhileLoop, etc.) */
-class UEEDITORMCP_API FAddMacroInstanceNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddMacroInstanceNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -398,7 +398,7 @@ private:
 // ============================================================================
 
 /** Add a Make Struct node (e.g., Make IntPoint, Make Vector, Make LinearColor) */
-class UEEDITORMCP_API FAddMakeStructNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddMakeStructNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -409,7 +409,7 @@ protected:
 
 
 /** Add a Break Struct node (e.g., Break IntPoint, Break Vector) */
-class UEEDITORMCP_API FAddBreakStructNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBreakStructNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -424,7 +424,7 @@ protected:
 // ============================================================================
 
 /** Add a Switch on String node */
-class UEEDITORMCP_API FAddSwitchOnStringNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddSwitchOnStringNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -435,7 +435,7 @@ protected:
 
 
 /** Add a Switch on Int node */
-class UEEDITORMCP_API FAddSwitchOnIntNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddSwitchOnIntNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -450,7 +450,7 @@ protected:
 // ============================================================================
 
 /** Add a local variable to a Blueprint function graph */
-class UEEDITORMCP_API FAddFunctionLocalVariableAction : public FBlueprintAction
+class UECLITOOL_API FAddFunctionLocalVariableAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -465,7 +465,7 @@ protected:
 // ============================================================================
 
 /** Set the default value of a Blueprint member variable */
-class UEEDITORMCP_API FSetBlueprintVariableDefaultAction : public FBlueprintAction
+class UECLITOOL_API FSetBlueprintVariableDefaultAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -480,7 +480,7 @@ protected:
 // ============================================================================
 
 /** Add a comment node to a Blueprint graph */
-class UEEDITORMCP_API FAddBlueprintCommentAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddBlueprintCommentAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -503,7 +503,7 @@ protected:
  *   padding         (optional)  Extra padding in px around nodes (default: 40)
  *   title_height    (optional)  Space reserved for comment title text (default: 36)
  */
-class UEEDITORMCP_API FAutoCommentAction : public FBlueprintNodeAction
+class UECLITOOL_API FAutoCommentAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -514,11 +514,11 @@ protected:
 
 
 // ============================================================================
-// P1 â€” Variable & Function Management
+// P1 â€?Variable & Function Management
 // ============================================================================
 
 /** Delete a Blueprint member variable */
-class UEEDITORMCP_API FDeleteBlueprintVariableAction : public FBlueprintAction
+class UECLITOOL_API FDeleteBlueprintVariableAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -529,7 +529,7 @@ protected:
 
 
 /** Rename a Blueprint member variable */
-class UEEDITORMCP_API FRenameBlueprintVariableAction : public FBlueprintAction
+class UECLITOOL_API FRenameBlueprintVariableAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -543,7 +543,7 @@ protected:
  *  After setting flags, the Blueprint is automatically recompiled so that
  *  CPF_Edit / CPF_ExposeOnSpawn etc. take effect on the Generated Class.
  */
-class UEEDITORMCP_API FSetVariableMetadataAction : public FBlueprintAction
+class UECLITOOL_API FSetVariableMetadataAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -554,7 +554,7 @@ protected:
 
 
 /** Delete a Blueprint custom function graph */
-class UEEDITORMCP_API FDeleteBlueprintFunctionAction : public FBlueprintAction
+class UECLITOOL_API FDeleteBlueprintFunctionAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -565,7 +565,7 @@ protected:
 
 
 /** Rename a custom function graph in a Blueprint */
-class UEEDITORMCP_API FRenameBlueprintFunctionAction : public FBlueprintAction
+class UECLITOOL_API FRenameBlueprintFunctionAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -576,7 +576,7 @@ protected:
 
 
 /** Rename a custom macro graph in a Blueprint */
-class UEEDITORMCP_API FRenameBlueprintMacroAction : public FBlueprintAction
+class UECLITOOL_API FRenameBlueprintMacroAction : public FBlueprintAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -587,11 +587,11 @@ protected:
 
 
 // ============================================================================
-// P2 â€” Graph Operation Enhancements
+// P2 â€?Graph Operation Enhancements
 // ============================================================================
 
 /** Disconnect all connections on a specific pin */
-class UEEDITORMCP_API FDisconnectBlueprintPinAction : public FBlueprintNodeAction
+class UECLITOOL_API FDisconnectBlueprintPinAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -602,7 +602,7 @@ protected:
 
 
 /** Move (reposition) a node in a Blueprint graph */
-class UEEDITORMCP_API FMoveNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FMoveNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -613,7 +613,7 @@ protected:
 
 
 /** Add a Reroute node to a Blueprint graph */
-class UEEDITORMCP_API FAddRerouteNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddRerouteNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -632,9 +632,9 @@ protected:
  * Returns information about the currently selected nodes in the focused
  * Blueprint graph editor.  Accepts optional blueprint_name/graph_name;
  * falls back to the active editor when omitted.
- * Pure read-only â€“ does not modify any asset.
+ * Pure read-only â€?does not modify any asset.
  */
-class UEEDITORMCP_API FGetSelectedNodesAction : public FBlueprintNodeAction
+class UECLITOOL_API FGetSelectedNodesAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -650,7 +650,7 @@ protected:
  * Collapse current Blueprint graph selection to a new function.
  * Uses Unreal's native Blueprint editor flow (same behavior as context menu).
  */
-class UEEDITORMCP_API FCollapseSelectionToFunctionAction : public FBlueprintNodeAction
+class UECLITOOL_API FCollapseSelectionToFunctionAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -663,7 +663,7 @@ protected:
 /**
  * Collapse current Blueprint graph selection to a new macro.
  * Uses Unreal's native Blueprint editor CollapseSelectionToMacro flow
- * (same behavior as right-click context menu â†’ "Collapse to Macro").
+ * (same behavior as right-click context menu â†?"Collapse to Macro").
  *
  * Parameters:
  *   - blueprint_name (optional): target a specific open Blueprint editor
@@ -675,7 +675,7 @@ protected:
  *   - created_macros: array of new macro graph names
  *   - created_macro:  name of the (most recently) created macro
  */
-class UEEDITORMCP_API FCollapseSelectionToMacroAction : public FBlueprintNodeAction
+class UECLITOOL_API FCollapseSelectionToMacroAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -687,7 +687,7 @@ protected:
 
 
 // ============================================================================
-// Graph Selection Write â€” Programmatic selection by node ID
+// Graph Selection Write â€?Programmatic selection by node ID
 // ============================================================================
 
 /**
@@ -705,7 +705,7 @@ protected:
  *
  * Returns: selected_count, node_ids (actually selected), missing_ids (not found)
  */
-class UEEDITORMCP_API FSetSelectedNodesAction : public FBlueprintNodeAction
+class UECLITOOL_API FSetSelectedNodesAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -738,7 +738,7 @@ protected:
  *
  * Returns: results array with per-group outcomes
  */
-class UEEDITORMCP_API FBatchSelectAndActAction : public FBlueprintNodeAction
+class UECLITOOL_API FBatchSelectAndActAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -760,7 +760,7 @@ protected:
  * a de-duplicated edge list.  Complements get_blueprint_summary (macro view)
  * with a precise, AI-parseable graph map.
  */
-class UEEDITORMCP_API FDescribeGraphAction : public FBlueprintNodeAction
+class UECLITOOL_API FDescribeGraphAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

@@ -11,14 +11,14 @@ class UDataTable;
 // P8: DataTable Actions
 // ============================================================================
 
-class UEEDITORMCP_API FDataTableAction : public FEditorAction
+class UECLITOOL_API FDataTableAction : public FEditorAction
 {
 protected:
 	UDataTable* FindDataTable(const FString& TableName, FString& OutError) const;
 };
 
 /** Create a DataTable asset. */
-class UEEDITORMCP_API FCreateDataTableAction : public FDataTableAction
+class UECLITOOL_API FCreateDataTableAction : public FDataTableAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -28,7 +28,7 @@ protected:
 };
 
 /** Describe a DataTable (row struct, fields, row count, preview). */
-class UEEDITORMCP_API FDescribeDataTableAction : public FDataTableAction
+class UECLITOOL_API FDescribeDataTableAction : public FDataTableAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -39,7 +39,7 @@ protected:
 };
 
 /** Add a row to a DataTable. */
-class UEEDITORMCP_API FAddDataTableRowAction : public FDataTableAction
+class UECLITOOL_API FAddDataTableRowAction : public FDataTableAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -49,7 +49,7 @@ protected:
 };
 
 /** Delete a row from a DataTable. */
-class UEEDITORMCP_API FDeleteDataTableRowAction : public FDataTableAction
+class UECLITOOL_API FDeleteDataTableRowAction : public FDataTableAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -59,7 +59,7 @@ protected:
 };
 
 /** Export a DataTable to JSON. */
-class UEEDITORMCP_API FExportDataTableJsonAction : public FDataTableAction
+class UECLITOOL_API FExportDataTableJsonAction : public FDataTableAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

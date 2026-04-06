@@ -25,7 +25,7 @@ class FBlueprintEditor;
  * Usage from either MCP action or editor command:
  *   FBlueprintAutoLayout::LayoutNodes(Graph, NodesToLayout, Settings);
  */
-struct UEEDITORMCP_API FBlueprintLayoutSettings
+struct UECLITOOL_API FBlueprintLayoutSettings
 {
 	/** Horizontal spacing between layers. >0 = fixed px; <=0 = auto (width-aware) */
 	float LayerSpacing = 0.f;
@@ -74,7 +74,7 @@ struct UEEDITORMCP_API FBlueprintLayoutSettings
 };
 
 
-class UEEDITORMCP_API FBlueprintAutoLayout
+class UECLITOOL_API FBlueprintAutoLayout
 {
 public:
 	/**
@@ -143,7 +143,7 @@ private:
  *   crossing_passes      (optional) int, Barycenter optimization rounds
  *   surrounding_margin   (optional) float, obstacle margin px
  */
-class UEEDITORMCP_API FAutoLayoutSelectedAction : public FEditorAction
+class UECLITOOL_API FAutoLayoutSelectedAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -168,7 +168,7 @@ protected:
  *   row_spacing     (optional) float
  *   max_pure_depth  (optional) int, default 3
  */
-class UEEDITORMCP_API FAutoLayoutSubtreeAction : public FEditorAction
+class UECLITOOL_API FAutoLayoutSubtreeAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -197,7 +197,7 @@ protected:
  *   pin_align_pure       (optional) bool (default: true)
  *   preserve_comments    (optional) bool (default: true)
  */
-class UEEDITORMCP_API FAutoLayoutBlueprintAction : public FEditorAction
+class UECLITOOL_API FAutoLayoutBlueprintAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -232,7 +232,7 @@ protected:
  *   padding               (optional) float, comment box padding (default: 40)
  *   title_height          (optional) float, comment title height (default: 36)
  */
-class UEEDITORMCP_API FLayoutAndCommentAction : public FEditorAction
+class UECLITOOL_API FLayoutAndCommentAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

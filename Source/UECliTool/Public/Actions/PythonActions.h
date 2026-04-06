@@ -20,7 +20,7 @@
  *   - stdout: Captured standard output
  *   - stderr: Captured standard error
  */
-class UEEDITORMCP_API FExecPythonAction : public FEditorAction
+class UECLITOOL_API FExecPythonAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
