@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint (encoding + indent + syntax)
+    name: Lint (encoding + syntax)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,17 +41,10 @@ jobs:
           if [ "$FAIL" -eq 1 ]; then exit 1; fi
           echo "All encoding checks passed."
 
-      - name: Check tab indentation (reject leading spaces)
-        run: |
-          FAIL=0
-          while IFS= read -r -d '' pyfile; do
-            if grep -Pn '^ {4,}' "$pyfile" | head -5; then
-              echo "::error file=$pyfile::Uses space indentation (should be tabs)"
-              FAIL=1
-            fi
-          done < <(find Python/ -name '*.py' -not -path '*/\.venv/*' -print0)
-          if [ "$FAIL" -eq 1 ]; then exit 1; fi
-          echo "All files use tab indentation."
+      # Tab indentation is enforced by .editorconfig (editor-side).
+      # grep-based CI checks cannot distinguish code indentation from
+      # spaces inside multi-line strings (docstrings, help text), so
+      # we intentionally skip automated indent checking here.
 
       - name: Check Python syntax
         run: |
