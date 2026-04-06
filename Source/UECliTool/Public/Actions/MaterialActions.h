@@ -18,7 +18,7 @@ class UMaterialGraph;
  * Base class for Material-related actions.
  * Provides common utilities for material manipulation.
  */
-class UEEDITORMCP_API FMaterialAction : public FEditorAction
+class UECLITOOL_API FMaterialAction : public FEditorAction
 {
 protected:
 	/** Find Material by name */
@@ -56,7 +56,7 @@ protected:
  *   - domain: Material domain
  *   - blend_mode: Blend mode
  */
-class UEEDITORMCP_API FCreateMaterialAction : public FMaterialAction
+class UECLITOOL_API FCreateMaterialAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -93,7 +93,7 @@ private:
  *   - node_name: Registered node name
  *   - expression_class: Expression type
  */
-class UEEDITORMCP_API FAddMaterialExpressionAction : public FMaterialAction
+class UECLITOOL_API FAddMaterialExpressionAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -125,7 +125,7 @@ private:
  *   - target_node: Target node name
  *   - target_input: Input pin name
  */
-class UEEDITORMCP_API FConnectMaterialExpressionsAction : public FMaterialAction
+class UECLITOOL_API FConnectMaterialExpressionsAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -156,7 +156,7 @@ private:
  *   - source_node: Source node name
  *   - material_property: Connected property
  */
-class UEEDITORMCP_API FConnectToMaterialOutputAction : public FMaterialAction
+class UECLITOOL_API FConnectToMaterialOutputAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -187,7 +187,7 @@ private:
  *   - node_name: Node name
  *   - property_name: Property that was set
  */
-class UEEDITORMCP_API FSetMaterialExpressionPropertyAction : public FMaterialAction
+class UECLITOOL_API FSetMaterialExpressionPropertyAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -217,7 +217,7 @@ private:
  *   - error_count: Number of errors
  *   - warning_count: Number of warnings
  */
-class UEEDITORMCP_API FCompileMaterialAction : public FMaterialAction
+class UECLITOOL_API FCompileMaterialAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -246,7 +246,7 @@ protected:
  *   - path: Asset path
  *   - parent: Parent material name
  */
-class UEEDITORMCP_API FCreateMaterialInstanceAction : public FMaterialAction
+class UECLITOOL_API FCreateMaterialInstanceAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -280,7 +280,7 @@ protected:
  *   - material_name: Material name
  *   - property_name: Property that was set
  */
-class UEEDITORMCP_API FSetMaterialPropertyAction : public FMaterialAction
+class UECLITOOL_API FSetMaterialPropertyAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -313,7 +313,7 @@ private:
  *   - infinite_extent: Boolean
  *   - priority: Priority value
  */
-class UEEDITORMCP_API FCreatePostProcessVolumeAction : public FMaterialAction
+class UECLITOOL_API FCreatePostProcessVolumeAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -342,7 +342,7 @@ private:
  *   - expression_count, expressions (array of {node_name, class, pos_x, pos_y, properties})
  *   - connections (array of {source, source_output, target, target_input})
  */
-class UEEDITORMCP_API FGetMaterialSummaryAction : public FMaterialAction
+class UECLITOOL_API FGetMaterialSummaryAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -378,7 +378,7 @@ private:
  *   - removed: Array of removed node names
  *   - not_found: Array of names that were not found
  */
-class UEEDITORMCP_API FRemoveMaterialExpressionAction : public FMaterialAction
+class UECLITOOL_API FRemoveMaterialExpressionAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -404,7 +404,7 @@ protected:
  *   - nodes_moved: Number of nodes repositioned
  *   - layer_count: Number of layers in the layout
  */
-class UEEDITORMCP_API FAutoLayoutMaterialAction : public FMaterialAction
+class UECLITOOL_API FAutoLayoutMaterialAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -452,7 +452,7 @@ private:
  * Returns:
  *   - comment_text, position, size, nodes_wrapped, missing_nodes (if any)
  */
-class UEEDITORMCP_API FAutoCommentMaterialAction : public FMaterialAction
+class UECLITOOL_API FAutoCommentMaterialAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -467,7 +467,7 @@ protected:
  * FGetMaterialSelectedNodesAction (P5.5)
  *
  * Returns the currently selected material expression nodes in the open material editor.
- * Automatically detects the active material editor â€” no material_name required.
+ * Automatically detects the active material editor â€?no material_name required.
  *
  * Parameters:
  *   - material_name (optional): Name of the Material (auto-detected if omitted)
@@ -477,7 +477,7 @@ protected:
  *   - selected_count: Number of selected nodes
  *   - nodes: Array of { node_name, expression_class, pos_x, pos_y, index }
  */
-class UEEDITORMCP_API FGetMaterialSelectedNodesAction : public FMaterialAction
+class UECLITOOL_API FGetMaterialSelectedNodesAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -507,7 +507,7 @@ protected:
  *   - material_path: Applied material path
  *   - previous_material: Previously assigned material path (or "None")
  */
-class UEEDITORMCP_API FApplyMaterialToComponentAction : public FMaterialAction
+class UECLITOOL_API FApplyMaterialToComponentAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -534,7 +534,7 @@ protected:
  *   - components_updated: Number of components updated
  *   - component_names: Array of updated component names
  */
-class UEEDITORMCP_API FApplyMaterialToActorAction : public FMaterialAction
+class UECLITOOL_API FApplyMaterialToActorAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -562,7 +562,7 @@ protected:
  *   - graph_rebuilt: Whether the material graph was rebuilt
  *   - previews_refreshed: Whether expression previews were force-refreshed
  */
-class UEEDITORMCP_API FRefreshMaterialEditorAction : public FMaterialAction
+class UECLITOOL_API FRefreshMaterialEditorAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -587,7 +587,7 @@ protected:
  *   - material_name, node_count, node_type_distribution{}, connection_count,
  *     shader_instructions{vs, ps, compiled}, parameters[], texture_samples[]
  */
-class UEEDITORMCP_API FAnalyzeMaterialComplexityAction : public FMaterialAction
+class UECLITOOL_API FAnalyzeMaterialComplexityAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -612,7 +612,7 @@ protected:
  *   - material_name, external_assets[]{type, path, node_name},
  *     level_references[]{actor_name, component_name}, level_reference_count
  */
-class UEEDITORMCP_API FAnalyzeMaterialDependenciesAction : public FMaterialAction
+class UECLITOOL_API FAnalyzeMaterialDependenciesAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -637,7 +637,7 @@ protected:
  *   - material_name, status("healthy"|"has_issues"),
  *     diagnostics[]{severity, code, message, node_name?}
  */
-class UEEDITORMCP_API FDiagnoseMaterialAction : public FMaterialAction
+class UECLITOOL_API FDiagnoseMaterialAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -665,7 +665,7 @@ protected:
  *     property_diffs[]{property, value_a, value_b},
  *     parameters_only_in_a[], parameters_only_in_b[]
  */
-class UEEDITORMCP_API FDiffMaterialsAction : public FMaterialAction
+class UECLITOOL_API FDiffMaterialsAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -689,7 +689,7 @@ protected:
  * Returns:
  *   - material_name, parameters[]{name, type, default_value, group, sort_priority}
  */
-class UEEDITORMCP_API FExtractMaterialParametersAction : public FMaterialAction
+class UECLITOOL_API FExtractMaterialParametersAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -717,7 +717,7 @@ protected:
  *   - created_count, failed_count,
  *     results[]{name, path?, success, error?}
  */
-class UEEDITORMCP_API FBatchCreateMaterialInstancesAction : public FMaterialAction
+class UECLITOOL_API FBatchCreateMaterialInstancesAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -745,7 +745,7 @@ protected:
  *   - replaced_node, new_node, new_expression_class,
  *     migrated_connections[], failed_connections[], compile_result{}
  */
-class UEEDITORMCP_API FReplaceMaterialNodeAction : public FMaterialAction
+class UECLITOOL_API FReplaceMaterialNodeAction : public FMaterialAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

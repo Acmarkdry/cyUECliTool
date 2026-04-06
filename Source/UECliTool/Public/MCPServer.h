@@ -101,7 +101,7 @@ private:
  * - ping/close commands handled without game thread
  * - Timeout handling for stale connections
  */
-class UEEDITORMCP_API FMCPServer : public FRunnable
+class UECLITOOL_API FMCPServer : public FRunnable
 {
 public:
 	FMCPServer(UMCPBridge* InBridge, int32 InPort = 55558);

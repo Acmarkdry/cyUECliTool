@@ -10,7 +10,7 @@
 // ============================================================================
 
 /** Run UE automation tests by filter. */
-class UEEDITORMCP_API FRunAutomationTestAction : public FEditorAction
+class UECLITOOL_API FRunAutomationTestAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -21,7 +21,7 @@ protected:
 };
 
 /** List available automation tests. */
-class UEEDITORMCP_API FListAutomationTestsAction : public FEditorAction
+class UECLITOOL_API FListAutomationTestsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -36,7 +36,7 @@ protected:
 // ============================================================================
 
 /** List streaming sublevels and their load status. */
-class UEEDITORMCP_API FListSublevelsAction : public FEditorAction
+class UECLITOOL_API FListSublevelsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -47,7 +47,7 @@ protected:
 };
 
 /** Get current World Settings. */
-class UEEDITORMCP_API FGetWorldSettingsAction : public FEditorAction
+class UECLITOOL_API FGetWorldSettingsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -62,7 +62,7 @@ protected:
 // ============================================================================
 
 /** Get frame timing statistics. */
-class UEEDITORMCP_API FGetFrameStatsAction : public FEditorAction
+class UECLITOOL_API FGetFrameStatsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -73,7 +73,7 @@ protected:
 };
 
 /** Get memory statistics. */
-class UEEDITORMCP_API FGetMemoryStatsAction : public FEditorAction
+class UECLITOOL_API FGetMemoryStatsAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

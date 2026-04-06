@@ -22,7 +22,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogMCP, Log, All);
  * - GetActionName(): Return action identifier
  * - RequiresSave(): Whether to auto-save on success
  */
-class UEEDITORMCP_API FEditorAction
+class UECLITOOL_API FEditorAction
 {
 public:
 	virtual ~FEditorAction() = default;
@@ -149,7 +149,7 @@ private:
  * Base class for Blueprint-related actions.
  * Adds common Blueprint validation and utilities.
  */
-class UEEDITORMCP_API FBlueprintAction : public FEditorAction
+class UECLITOOL_API FBlueprintAction : public FEditorAction
 {
 protected:
 	/** Validate that Blueprint exists and is valid */
@@ -172,7 +172,7 @@ protected:
  * Base class for Blueprint graph node actions.
  * Adds graph-specific validation and utilities.
  */
-class UEEDITORMCP_API FBlueprintNodeAction : public FBlueprintAction
+class UECLITOOL_API FBlueprintNodeAction : public FBlueprintAction
 {
 protected:
 	/** Validate that graph exists */

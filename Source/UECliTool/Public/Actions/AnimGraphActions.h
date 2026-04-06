@@ -14,7 +14,7 @@ class UEdGraph;
 class UEdGraphNode;
 
 // ============================================================================
-// AnimGraphHelpers â€” Internal helper functions
+// AnimGraphHelpers â€?Internal helper functions
 // ============================================================================
 
 namespace AnimGraphHelpers
@@ -55,7 +55,7 @@ namespace AnimGraphHelpers
  * Command: list_animgraph_graphs
  * Action ID: animgraph.list_graphs
  */
-class UEEDITORMCP_API FListAnimGraphGraphsAction : public FBlueprintNodeAction
+class UECLITOOL_API FListAnimGraphGraphsAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -75,7 +75,7 @@ protected:
  * Command: describe_animgraph_topology
  * Action ID: animgraph.describe_topology
  */
-class UEEDITORMCP_API FDescribeAnimGraphTopologyAction : public FBlueprintNodeAction
+class UECLITOOL_API FDescribeAnimGraphTopologyAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -95,7 +95,7 @@ protected:
  * Command: get_state_machine_structure
  * Action ID: animgraph.get_state_machine
  */
-class UEEDITORMCP_API FGetStateMachineStructureAction : public FBlueprintNodeAction
+class UECLITOOL_API FGetStateMachineStructureAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -115,7 +115,7 @@ protected:
  * Command: get_state_subgraph
  * Action ID: animgraph.get_state_subgraph
  */
-class UEEDITORMCP_API FGetStateSubgraphAction : public FBlueprintNodeAction
+class UECLITOOL_API FGetStateSubgraphAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -135,7 +135,7 @@ protected:
  * Command: get_transition_rule
  * Action ID: animgraph.get_transition_rule
  */
-class UEEDITORMCP_API FGetTransitionRuleAction : public FBlueprintNodeAction
+class UECLITOOL_API FGetTransitionRuleAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -148,7 +148,7 @@ protected:
 
 
 // ============================================================================
-// Create Action (inherits FEditorAction â€” no existing blueprint required)
+// Create Action (inherits FEditorAction â€?no existing blueprint required)
 // ============================================================================
 
 /**
@@ -159,7 +159,7 @@ protected:
  * Command: create_anim_blueprint
  * Action ID: animgraph.create_blueprint
  */
-class UEEDITORMCP_API FCreateAnimBlueprintAction : public FEditorAction
+class UECLITOOL_API FCreateAnimBlueprintAction : public FEditorAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -182,7 +182,7 @@ protected:
  * Command: add_state_machine
  * Action ID: animgraph.add_state_machine
  */
-class UEEDITORMCP_API FAddStateMachineAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddStateMachineAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -201,7 +201,7 @@ protected:
  * Command: add_animgraph_state
  * Action ID: animgraph.add_state
  */
-class UEEDITORMCP_API FAddStateAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddStateAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -220,7 +220,7 @@ protected:
  * Command: remove_animgraph_state
  * Action ID: animgraph.remove_state
  */
-class UEEDITORMCP_API FRemoveStateAction : public FBlueprintNodeAction
+class UECLITOOL_API FRemoveStateAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -239,7 +239,7 @@ protected:
  * Command: add_transition_rule
  * Action ID: animgraph.add_transition
  */
-class UEEDITORMCP_API FAddTransitionRuleAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddTransitionRuleAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -258,7 +258,7 @@ protected:
  * Command: remove_transition_rule
  * Action ID: animgraph.remove_transition
  */
-class UEEDITORMCP_API FRemoveTransitionRuleAction : public FBlueprintNodeAction
+class UECLITOOL_API FRemoveTransitionRuleAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -277,7 +277,7 @@ protected:
  * Command: add_anim_node
  * Action ID: animgraph.add_node
  */
-class UEEDITORMCP_API FAddAnimNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FAddAnimNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -296,7 +296,7 @@ protected:
  * Command: set_anim_node_property
  * Action ID: animgraph.set_node_property
  */
-class UEEDITORMCP_API FSetAnimNodePropertyAction : public FBlueprintNodeAction
+class UECLITOOL_API FSetAnimNodePropertyAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -315,7 +315,7 @@ protected:
  * Command: connect_anim_nodes
  * Action ID: animgraph.connect_nodes
  */
-class UEEDITORMCP_API FConnectAnimNodesAction : public FBlueprintNodeAction
+class UECLITOOL_API FConnectAnimNodesAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -334,7 +334,7 @@ protected:
  * Command: disconnect_anim_node
  * Action ID: animgraph.disconnect_node
  */
-class UEEDITORMCP_API FDisconnectAnimNodeAction : public FBlueprintNodeAction
+class UECLITOOL_API FDisconnectAnimNodeAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -353,7 +353,7 @@ protected:
  * Command: rename_animgraph_state
  * Action ID: animgraph.rename_state
  */
-class UEEDITORMCP_API FRenameStateAction : public FBlueprintNodeAction
+class UECLITOOL_API FRenameStateAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -372,7 +372,7 @@ protected:
  * Command: set_transition_priority
  * Action ID: animgraph.set_transition_priority
  */
-class UEEDITORMCP_API FSetTransitionPriorityAction : public FBlueprintNodeAction
+class UECLITOOL_API FSetTransitionPriorityAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -391,7 +391,7 @@ protected:
  * Command: compile_anim_blueprint
  * Action ID: animgraph.compile
  */
-class UEEDITORMCP_API FCompileAnimBlueprintAction : public FBlueprintNodeAction
+class UECLITOOL_API FCompileAnimBlueprintAction : public FBlueprintNodeAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

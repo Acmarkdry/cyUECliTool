@@ -37,7 +37,7 @@ struct FAsyncTaskEntry
  * to appropriate action handlers.
  */
 UCLASS()
-class UEEDITORMCP_API UMCPBridge : public UEditorSubsystem
+class UECLITOOL_API UMCPBridge : public UEditorSubsystem
 {
 	GENERATED_BODY()
 

@@ -14,9 +14,9 @@ class UNiagaraEmitter;
 // ============================================================================
 
 /**
- * FNiagaraAction â€” Base class for Niagara actions with common helpers.
+ * FNiagaraAction â€?Base class for Niagara actions with common helpers.
  */
-class UEEDITORMCP_API FNiagaraAction : public FEditorAction
+class UECLITOOL_API FNiagaraAction : public FEditorAction
 {
 protected:
 	UNiagaraSystem* FindNiagaraSystem(const FString& SystemName, FString& OutError) const;
@@ -24,7 +24,7 @@ protected:
 
 
 /** Create a new Niagara System asset. */
-class UEEDITORMCP_API FCreateNiagaraSystemAction : public FNiagaraAction
+class UECLITOOL_API FCreateNiagaraSystemAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -34,7 +34,7 @@ protected:
 };
 
 /** Describe a Niagara System structure (emitters, modules, renderers). */
-class UEEDITORMCP_API FDescribeNiagaraSystemAction : public FNiagaraAction
+class UECLITOOL_API FDescribeNiagaraSystemAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -45,7 +45,7 @@ protected:
 };
 
 /** Add an emitter to a Niagara System. */
-class UEEDITORMCP_API FAddNiagaraEmitterAction : public FNiagaraAction
+class UECLITOOL_API FAddNiagaraEmitterAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -55,7 +55,7 @@ protected:
 };
 
 /** Remove an emitter from a Niagara System. */
-class UEEDITORMCP_API FRemoveNiagaraEmitterAction : public FNiagaraAction
+class UECLITOOL_API FRemoveNiagaraEmitterAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -65,7 +65,7 @@ protected:
 };
 
 /** Set a module parameter on a Niagara Emitter. */
-class UEEDITORMCP_API FSetNiagaraModuleParamAction : public FNiagaraAction
+class UECLITOOL_API FSetNiagaraModuleParamAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -75,7 +75,7 @@ protected:
 };
 
 /** Compile a Niagara System and return diagnostics. */
-class UEEDITORMCP_API FCompileNiagaraSystemAction : public FNiagaraAction
+class UECLITOOL_API FCompileNiagaraSystemAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
@@ -85,7 +85,7 @@ protected:
 };
 
 /** List available Niagara module/emitter templates. */
-class UEEDITORMCP_API FGetNiagaraModulesAction : public FNiagaraAction
+class UECLITOOL_API FGetNiagaraModulesAction : public FNiagaraAction
 {
 public:
 	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;

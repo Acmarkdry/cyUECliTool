@@ -15,16 +15,16 @@
  *
  * Thread-safe: Serialize() can be called from any thread; queries lock.
  */
-class UEEDITORMCP_API FMCPLogCapture : public FOutputDevice
+class UECLITOOL_API FMCPLogCapture : public FOutputDevice
 {
 public:
 	/** Singleton accessor */
 	static FMCPLogCapture& Get();
 
-	/** Start capturing â€” adds this device to GLog */
+	/** Start capturing â€?adds this device to GLog */
 	void Start();
 
-	/** Stop capturing â€” removes this device from GLog */
+	/** Stop capturing â€?removes this device from GLog */
 	void Stop();
 
 	/** Is capture currently active? */

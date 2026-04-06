@@ -15,7 +15,7 @@
  * This allows commands to reference the "current" blueprint/graph
  * without specifying it each time.
  */
-struct UEEDITORMCP_API FMCPEditorContext
+struct UECLITOOL_API FMCPEditorContext
 {
 public:
 	FMCPEditorContext();

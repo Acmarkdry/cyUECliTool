@@ -107,7 +107,7 @@ struct FMCPEventSubscription
  * Collects editor events and dispatches them to subscribed clients.
  *
  * Architecture:
- * - Editor delegates â†’ FMCPEventHub::EnqueueEvent (game thread)
+ * - Editor delegates â†?FMCPEventHub::EnqueueEvent (game thread)
  * - Client handlers poll their event queues periodically
  * - Events are serialized as JSON and sent via the existing TCP connection
  *
@@ -115,7 +115,7 @@ struct FMCPEventSubscription
  * - EnqueueEvent is thread-safe (uses a lock-free queue)
  * - Client subscriptions are protected by a critical section
  */
-class UEEDITORMCP_API FMCPEventHub
+class UECLITOOL_API FMCPEventHub
 {
 public:
 	FMCPEventHub();
@@ -175,7 +175,7 @@ private:
 		static constexpr int32 MaxQueueSize = 500;
 	};
 
-	/** Client queues (ClientId â†’ queue) */
+	/** Client queues (ClientId â†?queue) */
 	TMap<int32, FClientEventQueue> ClientQueues;
 	mutable FCriticalSection QueueLock;
 
