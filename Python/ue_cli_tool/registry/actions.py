@@ -93,6 +93,10 @@ def register_all_actions(registry: ActionRegistry) -> None:
 	registry.register_many(_SEQUENCER_ACTIONS)
 	# P10: Testing + Level + Profiler
 	registry.register_many(_EXTENDED_ACTIONS)
+	# v0.4.0: Widget analysis extensions
+	registry.register_many(_WIDGET_ANALYSIS_ACTIONS)
+	# v0.4.0: Animation analysis extensions
+	registry.register_many(_ANIM_ANALYSIS_ACTIONS)
 
 
 # =========================================================================
@@ -6318,5 +6322,411 @@ _EXTENDED_ACTIONS = [
 		description="Get memory statistics: physical/virtual memory usage, peak usage.",
 		input_schema={"type": "object", "properties": {}},
 		examples=({},),
+	),
+]
+
+
+# =========================================================================
+# v0.4.0: UMG Widget Analysis Extensions
+# Requirements: 5.1, 6.1, 7.1, 8.1
+# =========================================================================
+_WIDGET_ANALYSIS_ACTIONS = [
+	ActionDef(
+		id="widget.describe_full",
+		command="describe_widget_blueprint_full",
+		tags=("widget", "umg", "describe", "full", "snapshot", "introspect", "hierarchy", "read"),
+		description=(
+			"Single-call comprehensive Widget Blueprint snapshot: component hierarchy tree "
+			"(with type, name, visibility, slot), event bindings, UMG animations, "
+			"MVVM bindings, and variable list."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint (e.g. WBP_HUD)",
+				},
+			},
+			"required": ["widget_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"widget_name": "WBP_HUD"},
+			{"widget_name": "WBP_MainMenu"},
+		),
+	),
+	ActionDef(
+		id="widget.list_animations",
+		command="widget_list_animations",
+		tags=("widget", "umg", "animation", "list", "read"),
+		description=(
+			"List all UMG animations in a Widget Blueprint, including name, "
+			"duration, and bound property tracks."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+			},
+			"required": ["widget_name"],
+		},
+		capabilities=("read",),
+		examples=({"widget_name": "WBP_HUD"},),
+	),
+	ActionDef(
+		id="widget.create_animation",
+		command="widget_create_animation",
+		tags=("widget", "umg", "animation", "create"),
+		description=(
+			"Create a new UMG animation in a Widget Blueprint. "
+			"Returns an error if an animation with the same name already exists."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+				"animation_name": {
+					"type": "string",
+					"description": "Name for the new animation",
+				},
+				"duration": {
+					"type": "number",
+					"description": "Animation duration in seconds (default: 1.0)",
+				},
+			},
+			"required": ["widget_name", "animation_name"],
+		},
+		examples=(
+			{"widget_name": "WBP_HUD", "animation_name": "FadeIn", "duration": 0.5},
+		),
+	),
+	ActionDef(
+		id="widget.add_animation_track",
+		command="widget_add_animation_track",
+		tags=("widget", "umg", "animation", "track", "property"),
+		description=(
+			"Add a property track to an existing UMG animation. "
+			"Supports binding to component properties like Opacity, RenderTransform, ColorAndOpacity."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+				"animation_name": {
+					"type": "string",
+					"description": "Name of the target animation",
+				},
+				"component_name": {
+					"type": "string",
+					"description": "Name of the widget component to animate",
+				},
+				"property_name": {
+					"type": "string",
+					"description": "Animatable property name (e.g. Opacity, RenderTransform, ColorAndOpacity)",
+				},
+			},
+			"required": ["widget_name", "animation_name", "component_name", "property_name"],
+		},
+		examples=(
+			{
+				"widget_name": "WBP_HUD",
+				"animation_name": "FadeIn",
+				"component_name": "HealthBar",
+				"property_name": "Opacity",
+			},
+		),
+	),
+	ActionDef(
+		id="widget.get_references",
+		command="widget_get_references",
+		tags=("widget", "umg", "references", "children", "dependency", "read"),
+		description=(
+			"Query child Widget Blueprint references from a Widget Blueprint. "
+			"Returns the list of other Widget Blueprints referenced as sub-widgets."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+			},
+			"required": ["widget_name"],
+		},
+		capabilities=("read",),
+		examples=({"widget_name": "WBP_HUD"},),
+	),
+	ActionDef(
+		id="widget.get_referencers",
+		command="widget_get_referencers",
+		tags=("widget", "umg", "referencers", "dependency", "usage", "read"),
+		description=(
+			"Query assets that reference a given Widget Blueprint. "
+			"Returns the list of other assets (Blueprints, Widgets, etc.) that depend on this Widget."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+			},
+			"required": ["widget_name"],
+		},
+		capabilities=("read",),
+		examples=({"widget_name": "WBP_HUD"},),
+	),
+	ActionDef(
+		id="widget.batch_get_styles",
+		command="widget_batch_get_styles",
+		tags=("widget", "umg", "style", "font", "color", "padding", "batch", "read"),
+		description=(
+			"Batch query style properties (font size, color, padding, margin, opacity) "
+			"for all components in a Widget Blueprint. Use filter_type to limit results "
+			"to a specific component type (e.g. TextBlock)."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"widget_name": {
+					"type": "string",
+					"description": "Name of the Widget Blueprint",
+				},
+				"filter_type": {
+					"type": "string",
+					"description": "Optional component type filter (e.g. TextBlock, Image, Button)",
+				},
+			},
+			"required": ["widget_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"widget_name": "WBP_HUD"},
+			{"widget_name": "WBP_HUD", "filter_type": "TextBlock"},
+		),
+	),
+]
+
+
+# =========================================================================
+# v0.4.0: Animation Analysis Extensions
+# Requirements: 9.1, 10.1, 11.1, 12.1
+# =========================================================================
+_ANIM_ANALYSIS_ACTIONS = [
+	ActionDef(
+		id="anim.describe_blueprint_full",
+		command="describe_anim_blueprint_full",
+		tags=("animation", "anim", "blueprint", "describe", "full", "snapshot", "state-machine", "skeleton", "read"),
+		description=(
+			"Single-call comprehensive Animation Blueprint snapshot: state machines "
+			"(with state/transition counts and entry state), anim asset references, "
+			"variables, skeleton reference, and EventGraph summary."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"blueprint_name": {
+					"type": "string",
+					"description": "Name of the Animation Blueprint (e.g. ABP_Character)",
+				},
+			},
+			"required": ["blueprint_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"blueprint_name": "ABP_Character"},
+			{"blueprint_name": "ABP_Enemy"},
+		),
+	),
+	ActionDef(
+		id="anim.describe_montage",
+		command="anim_describe_montage",
+		tags=("animation", "anim", "montage", "describe", "sections", "notifies", "read"),
+		description=(
+			"Query the structure of an AnimMontage: sections (name, start/end time), "
+			"slot name, notify list, and referenced anim sequences."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Name or path of the AnimMontage asset (e.g. AM_Attack)",
+				},
+			},
+			"required": ["asset_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"asset_name": "AM_Attack"},
+			{"asset_name": "/Game/Animations/AM_Dodge"},
+		),
+	),
+	ActionDef(
+		id="anim.describe_blendspace",
+		command="anim_describe_blendspace",
+		tags=("animation", "anim", "blendspace", "describe", "axis", "samples", "read"),
+		description=(
+			"Query the structure of a BlendSpace: axis configuration (parameter name, min/max), "
+			"sample points (x, y, animation), and referenced anim sequences."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Name or path of the BlendSpace asset (e.g. BS_Locomotion)",
+				},
+			},
+			"required": ["asset_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"asset_name": "BS_Locomotion"},
+			{"asset_name": "/Game/Animations/BS_AimOffset"},
+		),
+	),
+	ActionDef(
+		id="anim.list_notifies",
+		command="anim_list_notifies",
+		tags=("animation", "anim", "notify", "list", "read"),
+		description=(
+			"List all AnimNotify and AnimNotifyState events in an animation asset "
+			"(AnimSequence, AnimMontage, etc.), including name, type, category, "
+			"trigger time, duration, and track index."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Name or path of the animation asset (e.g. Idle_Anim, AM_Attack)",
+				},
+			},
+			"required": ["asset_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"asset_name": "Idle_Anim"},
+			{"asset_name": "AM_Attack"},
+		),
+	),
+	ActionDef(
+		id="anim.add_notify",
+		command="anim_add_notify",
+		tags=("animation", "anim", "notify", "add", "create"),
+		description=(
+			"Add an AnimNotify at a specified time on an animation asset. "
+			"Optionally specify a notify class and track index."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Name or path of the animation asset",
+				},
+				"notify_name": {
+					"type": "string",
+					"description": "Display name for the notify event",
+				},
+				"time": {
+					"type": "number",
+					"description": "Trigger time in seconds (must be within asset duration)",
+				},
+				"notify_class": {
+					"type": "string",
+					"description": "Optional UAnimNotify subclass name (e.g. AnimNotify_PlaySound)",
+				},
+				"track_index": {
+					"type": "integer",
+					"description": "Notify track index (default: 0)",
+				},
+			},
+			"required": ["asset_name", "notify_name", "time"],
+		},
+		examples=(
+			{"asset_name": "AM_Attack", "notify_name": "HitNotify", "time": 0.5},
+			{
+				"asset_name": "Idle_Anim",
+				"notify_name": "FootstepNotify",
+				"time": 0.3,
+				"notify_class": "AnimNotify_PlaySound",
+				"track_index": 1,
+			},
+		),
+	),
+	ActionDef(
+		id="anim.remove_notify",
+		command="anim_remove_notify",
+		tags=("animation", "anim", "notify", "remove", "delete"),
+		description=(
+			"Remove an AnimNotify from an animation asset by name. "
+			"Optionally filter by trigger time to disambiguate duplicates."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Name or path of the animation asset",
+				},
+				"notify_name": {
+					"type": "string",
+					"description": "Name of the AnimNotify to remove",
+				},
+				"time": {
+					"type": "number",
+					"description": "Optional trigger time filter to disambiguate multiple notifies with the same name",
+				},
+			},
+			"required": ["asset_name", "notify_name"],
+		},
+		capabilities=("write", "destructive"),
+		risk="moderate",
+		examples=(
+			{"asset_name": "AM_Attack", "notify_name": "HitNotify"},
+			{"asset_name": "AM_Attack", "notify_name": "HitNotify", "time": 0.5},
+		),
+	),
+	ActionDef(
+		id="anim.get_skeleton_hierarchy",
+		command="anim_get_skeleton_hierarchy",
+		tags=("animation", "anim", "skeleton", "bones", "hierarchy", "read"),
+		description=(
+			"Query the bone hierarchy of a Skeleton asset. Returns bone name, index, "
+			"and parent index for each bone. Use compact mode to omit transform data."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"skeleton_name": {
+					"type": "string",
+					"description": "Name or path of the Skeleton asset (e.g. SK_Mannequin)",
+				},
+				"compact": {
+					"type": "boolean",
+					"description": "If true, return only bone names and parent relationships without transform data (default: false)",
+				},
+			},
+			"required": ["skeleton_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"skeleton_name": "SK_Mannequin"},
+			{"skeleton_name": "SK_Mannequin", "compact": True},
+		),
 	),
 ]
