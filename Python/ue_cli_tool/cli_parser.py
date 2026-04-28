@@ -141,7 +141,9 @@ class CliParser:
 					continue
 				# Check if next token exists and is not another flag
 				if i + 1 < len(remaining) and not remaining[i + 1].startswith("--"):
-					flag_params[flag_name] = self._coerce_value(remaining[i + 1])
+					flag_params[flag_name] = self._coerce_value_with_schema(
+						remaining[i + 1], flag_name, command
+					)
 					i += 2
 				else:
 					# --flag with no value →?treat as True
@@ -249,6 +251,113 @@ class CliParser:
 		except ValueError:
 			# Unbalanced quotes —?fallback to naive split
 			return line.split()
+
+	def _coerce_value_with_schema(
+		self, val: str, param_name: str, command: str
+	) -> Any:
+		"""Schema-aware value coercion.
+
+		Uses ActionRegistry type info to support shorthand syntax:
+		  - array type + comma-separated → parse as array
+		  - object type + key=value pairs → parse as object
+
+		Falls back to ``_coerce_value()`` when no schema info is available.
+
+		Parse priority:
+		  1. Value starts with ``[`` or ``{`` → existing JSON parsing (compatible)
+		  2. Schema type is ``array`` and value contains ``,`` → comma-separated
+		  3. Schema type is ``object`` and value contains ``=`` → key=value pairs
+		  4. Otherwise → ``_coerce_value()``
+		"""
+		# Priority 1: JSON literal syntax always takes precedence
+		if val.startswith("[") or val.startswith("{"):
+			return self._coerce_value(val)
+
+		# Look up schema type for this param
+		schema_type = self._get_param_schema_type(command, param_name)
+
+		# Priority 2: array shorthand (comma-separated)
+		if schema_type == "array" and "," in val:
+			return self._parse_comma_separated_array(val)
+
+		# Priority 3: object shorthand (key=value pairs)
+		if schema_type == "object" and "=" in val:
+			return self._parse_key_value_object(val)
+
+		# Priority 4: fall back to existing behavior
+		return self._coerce_value(val)
+
+	def _get_param_schema_type(self, command: str, param_name: str) -> str | None:
+		"""Look up the JSON Schema type for a parameter from ActionRegistry.
+
+		Returns the type string (e.g. "array", "object", "string") or None
+		if the command or parameter is not found.
+		"""
+		action = self._registry.get_by_command(command)
+		if action is None:
+			return None
+		properties = action.input_schema.get("properties", {})
+		param_schema = properties.get(param_name)
+		if param_schema is None:
+			return None
+		return param_schema.get("type")
+
+	@staticmethod
+	def _parse_comma_separated_array(val: str) -> list[Any]:
+		"""Parse a comma-separated string into an array.
+
+		Each element is coerced to a number if possible, otherwise kept as string.
+		"""
+		parts = val.split(",")
+		result: list[Any] = []
+		for part in parts:
+			stripped = part.strip()
+			# Try int
+			try:
+				result.append(int(stripped))
+				continue
+			except ValueError:
+				pass
+			# Try float
+			try:
+				result.append(float(stripped))
+				continue
+			except ValueError:
+				pass
+			# Keep as string
+			result.append(stripped)
+		return result
+
+	@staticmethod
+	def _parse_key_value_object(val: str) -> dict[str, Any]:
+		"""Parse a key=value,key=value string into a dict.
+
+		Splits on commas first, then splits each part on ``=``.
+		Values are coerced to numbers where possible.
+		"""
+		pairs = val.split(",")
+		result: dict[str, Any] = {}
+		for pair in pairs:
+			if "=" not in pair:
+				continue
+			key, _, value = pair.partition("=")
+			key = key.strip()
+			value = value.strip()
+			if not key:
+				continue
+			# Coerce value to number if possible
+			try:
+				result[key] = int(value)
+				continue
+			except ValueError:
+				pass
+			try:
+				result[key] = float(value)
+				continue
+			except ValueError:
+				pass
+			result[key] = value
+		return result
 
 	@staticmethod
 	def _coerce_value(val: str) -> Any:

@@ -23,6 +23,8 @@
 #include "Actions/ContentBrowserActions.h"
 #include "Actions/DebugActions.h"
 #include "Actions/LiveCodingActions.h"
+#include "Actions/UMGWidgetAnalysisActions.h"
+#include "Actions/AnimAnalysisActions.h"
 #include "Async/Async.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
@@ -48,15 +50,32 @@ void UMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
 	// Start the event hub (P9: Editor event push)
 	EventHub.StartListening();
 
+	// Determine listening port: command-line override (-MCPPort=<port>) takes priority,
+	// otherwise fall back to DefaultPort (55558).
+	int32 ConfiguredPort = DefaultPort;
+	int32 CmdLinePort = 0;
+	if (FParse::Value(FCommandLine::Get(), TEXT("-MCPPort="), CmdLinePort))
+	{
+		if (CmdLinePort > 0 && CmdLinePort <= 65535)
+		{
+			ConfiguredPort = CmdLinePort;
+			UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Using command-line port override: %d"), ConfiguredPort);
+		}
+		else
+		{
+			UE_LOG(LogMCP, Warning, TEXT("UEEditorMCP: Invalid -MCPPort value %d (must be 1-65535). Falling back to default port %d"), CmdLinePort, DefaultPort);
+		}
+	}
+
 	// Start the TCP server
-	Server = new FMCPServer(this, DefaultPort);
+	Server = new FMCPServer(this, ConfiguredPort);
 	if (Server->Start())
 	{
-		UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Server started on port %d"), DefaultPort);
+		UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Server started on port %d"), ConfiguredPort);
 	}
 	else
 	{
-		UE_LOG(LogMCP, Error, TEXT("UEEditorMCP: Failed to start server"));
+		UE_LOG(LogMCP, Error, TEXT("UEEditorMCP: Failed to start server on port %d"), ConfiguredPort);
 	}
 }
 
@@ -453,6 +472,28 @@ void UMCPBridge::RegisterActions()
 	ActionHandlers.Add(TEXT("trigger_live_coding"), MakeShared<FTriggerLiveCodingAction>());
 	ActionHandlers.Add(TEXT("get_live_coding_status"), MakeShared<FGetLiveCodingStatusAction>());
 	ActionHandlers.Add(TEXT("enable_live_coding"), MakeShared<FEnableLiveCodingAction>());
+
+	// =========================================================================
+	// v0.4.0: UMG Widget Analysis Actions
+	// =========================================================================
+	ActionHandlers.Add(TEXT("describe_widget_blueprint_full"), MakeShared<FDescribeWidgetBlueprintFullAction>());
+	ActionHandlers.Add(TEXT("widget_list_animations"),         MakeShared<FWidgetListAnimationsAction>());
+	ActionHandlers.Add(TEXT("widget_create_animation"),        MakeShared<FWidgetCreateAnimationAction>());
+	ActionHandlers.Add(TEXT("widget_add_animation_track"),     MakeShared<FWidgetAddAnimationTrackAction>());
+	ActionHandlers.Add(TEXT("widget_get_references"),          MakeShared<FWidgetGetReferencesAction>());
+	ActionHandlers.Add(TEXT("widget_get_referencers"),         MakeShared<FWidgetGetReferencersAction>());
+	ActionHandlers.Add(TEXT("widget_batch_get_styles"),        MakeShared<FWidgetBatchGetStylesAction>());
+
+	// =========================================================================
+	// v0.4.0: Animation Analysis Actions
+	// =========================================================================
+	ActionHandlers.Add(TEXT("describe_anim_blueprint_full"),   MakeShared<FDescribeAnimBlueprintFullAction>());
+	ActionHandlers.Add(TEXT("anim_describe_montage"),          MakeShared<FAnimDescribeMontageAction>());
+	ActionHandlers.Add(TEXT("anim_describe_blendspace"),       MakeShared<FAnimDescribeBlendSpaceAction>());
+	ActionHandlers.Add(TEXT("anim_list_notifies"),             MakeShared<FAnimListNotifiesAction>());
+	ActionHandlers.Add(TEXT("anim_add_notify"),                MakeShared<FAnimAddNotifyAction>());
+	ActionHandlers.Add(TEXT("anim_remove_notify"),             MakeShared<FAnimRemoveNotifyAction>());
+	ActionHandlers.Add(TEXT("anim_get_skeleton_hierarchy"),    MakeShared<FAnimGetSkeletonHierarchyAction>());
 
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Registered %d action handlers"), ActionHandlers.Num());
 }
