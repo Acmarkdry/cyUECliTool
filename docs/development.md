@@ -172,8 +172,14 @@ cd Plugins/UECliTool
 python -m pytest tests/ -v
 ```
 
-当前测试覆盖（91 项）：
+当前测试覆盖（108+ 项）：
 - `test_cli_parser.py` — CLI 解析器完整测试（41 用例）
+- `tests/test_cli_parser_v04.py` — v0.4.0 CLI 语法扩展（数组/对象简写，属性测试 + 单元测试，27 用例）
+- `tests/test_config.py` — ProjectConfig 加载/保存/合并（属性测试 + 单元测试，11 用例）
+- `tests/test_connection.py` — Circuit Breaker、重连、响应解析、超时分层（属性测试 + 单元测试，19 用例）
+- `tests/test_pipeline.py` — BatchContext、AsyncSubmitter（属性测试 + 单元测试，22 用例）
+- `tests/test_command_proxy.py` — CommandProxy 路由、缓存、错误处理（属性测试 + 单元测试，11 用例）
+- `tests/test_server.py` — Server 集成测试（Mock TCP，18 用例）
 - `test_animgraph.py` — AnimGraph ActionDef 结构、capabilities、JSON round-trip
 - `test_skills.py` — Skill 系统完整性
 - `test_schema_contract.py` — Python ↔ C++ 接口一致性

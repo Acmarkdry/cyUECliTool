@@ -27,9 +27,10 @@ _result = [a.get_name() for a in unreal.EditorLevelLibrary.get_all_level_actors(
 | `layout.*` | 4 | 节点自动布局 | `layout.auto_selected`、`layout.auto_subtree`、`layout.auto_blueprint` |
 | `macro.*` | 1 | 宏管理 | `macro.rename` |
 | `material.*` | 14 | 材质分析、诊断、布局（创建/编译→Python） | `material.get_summary`、`material.auto_layout`、`material.diagnose` |
-| `widget.*` | 21 | UMG 控件蓝图（24 种类型）+ MVVM | `widget.create`、`widget.add_component`、`widget.mvvm_add_viewmodel` |
+| `widget.*` | 28 | UMG 控件蓝图（24 种类型）+ MVVM + 分析 | `widget.create`、`widget.add_component`、`widget.describe_full`、`widget.batch_get_styles` |
 | `input.*` | 4 | 增强输入系统 | `input.create_action`、`input.create_mapping_context` |
 | `animgraph.*` | 18 | AnimGraph 读取/创建/修改/编译 | `animgraph.list_graphs`、`animgraph.create_blueprint`、`animgraph.compile` |
+| `anim.*` | 7 | 动画资产分析（Montage/BlendSpace/Notify/Skeleton） | `anim.describe_blueprint_full`、`anim.describe_montage`、`anim.get_skeleton_hierarchy` |
 | `editor.*` | 8 | 日志、缩略图、源码控制 diff（Actor/PIE→Python） | `editor.get_logs`、`editor.diff_against_depot`、`editor.is_ready` |
 
 ## AI 工作流

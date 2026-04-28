@@ -31,7 +31,7 @@ AI (Claude, GPT, etc.)
         │         │
         │         ├── 游戏线程分发
         │         │     ├── FExecPythonAction → IPythonScriptPlugin → Unreal Python API
-        │         │     ├── ~123 个 FEditorAction 子类 → 校验 → FScopedTransaction → 执行 → 自动保存
+        │         │     ├── ~137 个 FEditorAction 子类 → 校验 → FScopedTransaction → 执行 → 自动保存
         │         │     └── FBatchExecuteAction → 原子事务回滚（transactional 模式）
         │         │
         │         ├── 异步路径
@@ -61,7 +61,8 @@ AI (Claude, GPT, etc.)
 
 ## C++ 服务器（`FMCPServer`）
 
-- 监听 `127.0.0.1:55558`（仅限本地）
+- 监听 `127.0.0.1:55558`（仅限本地，可通过 `-MCPPort=<port>` 命令行参数覆盖）
+- 端口被占用时输出明确的冲突错误信息和建议解决方案
 - 每个连接派生独立的 `FMCPClientHandler` 线程，最多 8 路并发
 - **快速路径**：`ping`/`close`/`async_execute`/`get_task_result`/`subscribe_events`/`poll_events`/`unsubscribe_events` 直接在客户端线程处理
 - 其余命令通过 `AsyncTask + FEvent` 分发到游戏线程
@@ -124,14 +125,17 @@ AI (Claude, GPT, etc.)
 | `Python/ue_cli_tool/server.py` | 2-tool MCP 服务器（ue_cli + ue_query） |
 | `Python/ue_cli_tool/cli_parser.py` | CLI 语法解析器（@target、位置参数、--flags） |
 | `Python/ue_cli_tool/registry/__init__.py` | ActionRegistry 类，关键字搜索引擎 |
-| `Python/ue_cli_tool/registry/actions.py` | ~123 ActionDef 条目 + python.exec |
-| `Python/ue_cli_tool/context.py` | ContextStore（会话、历史、工作集、UE 连接监控） |
-| `Python/ue_cli_tool/connection.py` | PersistentUnrealConnection（TCP、心跳、自动重连） |
+| `Python/ue_cli_tool/registry/actions.py` | ~137 ActionDef 条目 + python.exec |
+| `Python/ue_cli_tool/config.py` | ProjectConfig（ue_mcp_config.yaml 加载/保存/合并） |
+| `Python/ue_cli_tool/context.py` | ContextStore（会话、历史、工作集、UE 连接监控、崩溃恢复） |
+| `Python/ue_cli_tool/connection.py` | PersistentUnrealConnection（TCP、心跳、自动重连、诊断增强） |
 | `Python/ue_cli_tool/skills/__init__.py` | Skill 系统（按域分组的 action 目录） |
 | `Source/UECliTool/Private/MCPServer.cpp` | TCP Accept + 快速路径 + 游戏线程分发 |
 | `Source/UECliTool/Private/MCPBridge.cpp` | 动作处理器注册表 + 异步任务管理 |
 | `Source/UECliTool/Private/MCPEventHub.cpp` | 事件推送系统（编辑器委托 → 客户端队列） |
 | `Source/UECliTool/Private/Actions/PythonActions.cpp` | FExecPythonAction（Python 执行引擎） |
 | `Source/UECliTool/Private/Actions/AnimGraphActions.cpp` | AnimGraph 全部 18 个 Action |
+| `Source/UECliTool/Private/Actions/UMGWidgetAnalysisActions.cpp` | Widget 分析 7 个 Action（全景快照、动画、引用、样式） |
+| `Source/UECliTool/Private/Actions/AnimAnalysisActions.cpp` | 动画资产分析 7 个 Action（Montage、BlendSpace、Notify、Skeleton） |
 | `tests/test_cli_parser.py` | CLI 解析器测试（41 用例） |
 | `tests/test_schema_contract.py` | Python ↔ C++ schema 一致性验证 |

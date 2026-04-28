@@ -3,6 +3,8 @@
 **CLI-native AI tool for controlling Unreal Engine Editor via MCP (Model Context Protocol).**
 
 > 12 JSON tools → 2 CLI tools. 73% fewer tokens. Zero new syntax to learn.
+>
+> **v0.4.0**: Project config, multi-instance ports, Widget/Anim analysis, CLI shorthand syntax, enhanced diagnostics.
 
 ## Quick Start
 
@@ -11,6 +13,7 @@
 # 2. Setup Python environment
 cd Plugins/UECliTool
 .\setup_mcp.ps1
+# → auto-detects UE engine path, writes ue_mcp_config.yaml, creates venv
 
 # 3. Open Unreal Editor → plugin starts TCP:55558 automatically
 #    AI client connects via MCP stdio → ready to go
@@ -38,7 +41,7 @@ See [docs/installation.md](docs/installation.md) for detailed setup instructions
 │    cli_parser.py  ← ActionRegistry (auto-derive params)     │
 │         │                                                    │
 │    connection.py  (CircuitBreaker + Metrics + Persistent)    │
-│         │  TCP 55558                                         │
+│         │  TCP 55558 (configurable via ue_mcp_config.yaml)   │
 ├─────────┼────────────────────────────────────────────────────┤
 │    C++ MCPServer → Game Thread → MCPBridge → EditorActions   │
 └─────────────────────────────────────────────────────────────┘
@@ -82,6 +85,35 @@ compile_material
 Mapped to `required` params in order from the command's schema.
 Context target fills the first matching param (`blueprint_name`, etc.),
 remaining positionals fill the rest.
+
+### Array & Object Shorthand (v0.4.0)
+
+When the command schema declares a parameter as `array` or `object`, you can use shorthand syntax instead of JSON:
+
+```bash
+# Array shorthand (comma-separated)
+--items a,b,c              # → ["a", "b", "c"]
+--values 1,2,3             # → [1, 2, 3]
+
+# Object shorthand (key=value pairs)
+--props name=Sword,damage=50   # → {"name": "Sword", "damage": 50}
+
+# JSON syntax still works
+--items [1,2,3]
+--props {"name":"Sword"}
+```
+
+## Project Configuration (v0.4.0)
+
+`setup_mcp.ps1` / `setup_mcp.bat` auto-generates `ue_mcp_config.yaml` in the project root:
+
+```yaml
+engine_root: "E:/EpicGame/UE_5.7"
+project_root: "E:/Projects/MyGame"
+tcp_port: 55558
+```
+
+The MCP server loads this at startup. To run multiple editor instances, set different `tcp_port` values per project. The C++ plugin also supports `-MCPPort=<port>` command-line override.
 
 ## Token Optimization: detail_level
 
@@ -165,7 +197,7 @@ See [docs/development.md](docs/development.md) for adding new actions and comman
 |----------|-------------|
 | [Installation](docs/installation.md) | Environment setup, Python config, MCP client setup |
 | [Architecture](docs/architecture.md) | Technical details, C++ server, event system, protocols |
-| [Actions](docs/actions.md) | Action domain reference (~120 commands) |
+| [Actions](docs/actions.md) | Action domain reference (~137 commands) |
 | [Development](docs/development.md) | Adding new actions, testing, commandlet mode |
 
 ## Credits

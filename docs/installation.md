@@ -14,7 +14,7 @@
 Engine\Build\BatchFiles\Build.bat <ProjectName>Editor Win64 Development <Project>.uproject -waitmutex
 ```
 
-编译成功后，打开 Unreal Editor 时插件自动在 `127.0.0.1:55558` 启动 TCP 服务器。
+编译成功后，打开 Unreal Editor 时插件自动在 `127.0.0.1:55558` 启动 TCP 服务器。可通过 `-MCPPort=<port>` 命令行参数指定其他端口。
 
 ## 第 2 步：Python 环境配置
 
@@ -28,7 +28,8 @@ cd Plugins/UECliTool
 脚本自动完成：
 1. 检测 UE 内置 Python（`Engine/Binaries/ThirdParty/Python3/Win64/python.exe`）
 2. 在 `Python/.venv` 创建虚拟环境并安装 `mcp` 包
-3. 在项目根目录生成 `.vscode/mcp.json`
+3. 将引擎路径和项目路径写入 `ue_mcp_config.yaml`（已有配置时合并而非覆盖）
+4. 在项目根目录生成 `.vscode/mcp.json`
 
 ### 手动配置
 
@@ -146,6 +147,20 @@ ue_query(query="health")
 如果返回 `connected` 状态，说明一切就绪。
 
 ## 常见问题
+
+### 多编辑器实例
+
+如需同时运行多个 UE 编辑器实例并分别通过 MCP 控制，为每个项目在 `ue_mcp_config.yaml` 中设置不同的 `tcp_port`：
+
+```yaml
+# 项目 A
+tcp_port: 55558
+
+# 项目 B
+tcp_port: 55559
+```
+
+C++ 插件端也可通过命令行参数覆盖：`-MCPPort=55559`
 
 ### TCP 连接失败
 
