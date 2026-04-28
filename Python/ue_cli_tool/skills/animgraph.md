@@ -129,3 +129,58 @@ animgraph.compile 返回：
 | `TwoWayBlend` | 双向 Alpha 混合 |
 | `BlendPosesByBool` | 布尔条件混合 |
 | `BlendPosesByInt` | 整数条件混合 |
+
+
+---
+
+## 动画资产分析 (v0.4.0)
+
+### 动画蓝图全景快照
+
+```
+describe_anim_blueprint_full ABP_Character
+```
+
+一次性返回：状态机列表（含状态数/转换数/入口状态）、动画资产引用、蓝图变量、Skeleton 引用、EventGraph 摘要。
+
+### Montage 结构查询
+
+```
+anim_describe_montage AM_Attack
+```
+
+返回 Section 列表、Slot 名称、Notify 列表、引用的动画序列。
+
+### BlendSpace 结构查询
+
+```
+anim_describe_blendspace BS_Locomotion
+```
+
+返回轴配置（参数名、范围）、采样点列表、引用的动画序列。
+
+### AnimNotify 管理
+
+```
+# 列出所有 Notify
+anim_list_notifies AM_Attack
+
+# 添加 Notify
+anim_add_notify AM_Attack --notify_name HitNotify --time 0.5
+
+# 添加带类型的 Notify
+anim_add_notify Idle_Anim --notify_name FootstepNotify --time 0.3 --notify_class AnimNotify_PlaySound --track_index 1
+
+# 移除 Notify
+anim_remove_notify AM_Attack --notify_name HitNotify
+```
+
+### 骨骼层级查询
+
+```
+# 完整模式（含 Transform）
+anim_get_skeleton_hierarchy SK_Mannequin
+
+# 紧凑模式（仅名称和父子关系）
+anim_get_skeleton_hierarchy SK_Mannequin --compact true
+```
