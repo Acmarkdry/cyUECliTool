@@ -734,10 +734,7 @@ TSharedPtr<FJsonObject> FAnimAddNotifyAction::ExecuteInternal(const TSharedPtr<F
 	FAnimNotifyEvent NewNotifyEvent;
 	NewNotifyEvent.NotifyName = FName(*NotifyName);
 
-	// Set trigger time using the frame-based API
-	FFrameRate FrameRate = AnimAsset->GetSamplingFrameRate();
-	FFrameNumber Frame = FrameRate.AsFrameNumber(Time);
-	NewNotifyEvent.Link.SetTime(Frame, FrameRate);
+	NewNotifyEvent.SetTime(Time);
 
 	NewNotifyEvent.TrackIndex = TrackIndex;
 

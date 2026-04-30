@@ -204,16 +204,16 @@ static TArray<TSharedPtr<FJsonValue>> CollectMVVMBindings(UWidgetBlueprint* Widg
 	{
 		TSharedPtr<FJsonObject> BindObj = MakeShared<FJsonObject>();
 
+		UClass* WidgetClass = WidgetBP->GeneratedClass ? WidgetBP->GeneratedClass : WidgetBP->SkeletonGeneratedClass;
+
 		// Source (ViewModel) path
-		const TArrayView<const FMVVMBlueprintPropertyPath> Sources = Binding.GetSources();
-		if (Sources.Num() > 0)
+		if (Binding.SourcePath.HasPaths())
 		{
-			BindObj->SetStringField(TEXT("viewmodel_property"), Sources[0].GetPropertyPath().ToString());
+			BindObj->SetStringField(TEXT("viewmodel_property"), Binding.SourcePath.GetPropertyPath(WidgetClass));
 		}
 
 		// Destination (Widget) path
-		const FMVVMBlueprintPropertyPath& Dest = Binding.GetDestinationPath();
-		BindObj->SetStringField(TEXT("widget_property"), Dest.GetPropertyPath().ToString());
+		BindObj->SetStringField(TEXT("widget_property"), Binding.DestinationPath.GetPropertyPath(WidgetClass));
 
 		// Binding mode
 		FString ModeStr;
@@ -408,7 +408,7 @@ TSharedPtr<FJsonObject> FWidgetCreateAnimationAction::ExecuteInternal(const TSha
 
 		// Set playback range based on duration
 		FFrameRate TickResolution = MovieScene->GetTickResolution();
-		FFrameNumber EndFrame = (Duration * TickResolution.AsDecimal());
+		FFrameNumber EndFrame = TickResolution.AsFrameNumber(Duration);
 		MovieScene->SetPlaybackRange(FFrameNumber(0), EndFrame.Value);
 	}
 
