@@ -199,6 +199,7 @@ See [docs/development.md](docs/development.md) for adding new actions and comman
 | [Architecture](docs/architecture.md) | Technical details, C++ server, event system, protocols |
 | [Actions](docs/actions.md) | Action domain reference (~137 commands) |
 | [Development](docs/development.md) | Adding new actions, testing, commandlet mode |
+| [GitHub Actions Runner](docs/github-actions-runner.md) | Self-hosted Windows runner setup for Unreal plugin builds |
 
 ## Credits
 

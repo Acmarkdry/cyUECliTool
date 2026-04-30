@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop]
   pull_request:
@@ -77,3 +78,22 @@ jobs:
 
       - name: Run tests
         run: pytest tests/ -v --tb=short
+
+  ue-build:
+    name: Build Unreal plugin
+    runs-on: [self-hosted, Windows, X64, ue]
+    timeout-minutes: 120
+    env:
+      ACTIONS_UE_ROOT: D:\Unreal\UnrealEngine
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build plugin with RunUAT
+        shell: powershell
+        run: .\scripts\ci\build-ue-plugin.ps1
+
+      - name: Upload packaged plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: UECliTool-Win64
+          path: artifacts/UECliTool
