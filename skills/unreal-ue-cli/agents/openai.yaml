@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unreal UE CLI"
+  short_description: "Use UE CLI runtime for editor automation."
+  default_prompt: "Use $unreal-ue-cli to inspect or automate Unreal Editor through the CLI-first runtime."

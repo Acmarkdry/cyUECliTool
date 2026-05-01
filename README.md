@@ -30,6 +30,20 @@ D:\UnrealEngine5\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe `
 
 The daemon auto-starts by default for `run`, `query`, and `doctor` commands.
 
+## Codex Skill
+
+The plugin ships a reusable Codex skill at `skills/unreal-ue-cli`. Install it
+into a Codex environment to make agents prefer the CLI-first runtime:
+
+```powershell
+$CodexSkills = "$env:USERPROFILE\.codex\skills"
+New-Item -ItemType Directory -Force $CodexSkills | Out-Null
+Copy-Item .\skills\unreal-ue-cli (Join-Path $CodexSkills "unreal-ue-cli") -Recurse -Force
+```
+
+After installation, agents can invoke `$unreal-ue-cli` or trigger it naturally
+when working on Unreal Editor automation tasks.
+
 ## Architecture
 
 ```text
