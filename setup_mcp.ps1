@@ -171,6 +171,11 @@ $newValues = @{
     engine_root  = $detectedEngineRoot.Replace('\', '/')
     project_root = $ProjectRoot.Replace('\', '/')
 }
+$defaultValues = @{
+    tcp_port = 55558
+    daemon_port = 55559
+    auto_start_daemon = "true"
+}
 
 if (Test-Path $configPath) {
     # Merge with existing config — preserve user-added keys (tcp_port, lua_script_dirs, etc.)
@@ -186,10 +191,17 @@ if (Test-Path $configPath) {
             $existingContent = $existingContent.TrimEnd() + "`n${key}: $val`n"
         }
     }
+    foreach ($key in $defaultValues.Keys) {
+        $val = $defaultValues[$key]
+        if ($existingContent -notmatch "(?m)^\s*${key}\s*:") {
+            $existingContent = $existingContent.TrimEnd() + "`n${key}: $val`n"
+        }
+    }
     $yamlContent = $existingContent
 } else {
     Write-Host "  Creating $configPath ..." -ForegroundColor DarkGray
-    $yamlContent = ($newValues.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)" }) -join "`n"
+    $allValues = $newValues + $defaultValues
+    $yamlContent = ($allValues.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)" }) -join "`n"
     $yamlContent += "`n"
 }
 

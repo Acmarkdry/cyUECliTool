@@ -1,209 +1,203 @@
 # cyUECliTool
 
-**CLI-native AI tool for controlling Unreal Engine Editor via MCP (Model Context Protocol).**
+CLI-first AI tool for controlling Unreal Engine Editor.
 
-> 12 JSON tools → 2 CLI tools. 73% fewer tokens. Zero new syntax to learn.
->
-> **v0.4.0**: Project config, multi-instance ports, Widget/Anim analysis, CLI shorthand syntax, enhanced diagnostics.
+v0.5.0 moves the model-facing interface away from MCP tool JSON. Codex and
+other agents should issue plain CLI text through the local `ue` command. A
+Python daemon owns the persistent Unreal Editor connection, and default output
+is concise text optimized for model reading.
+
+MCP support remains as a legacy compatibility path during migration.
 
 ## Quick Start
 
-```bash
-# 1. Compile UE project (plugin auto-builds with it)
-# 2. Setup Python environment
-cd Plugins/UECliTool
-.\setup_mcp.ps1
-# → auto-detects UE engine path, writes ue_mcp_config.yaml, creates venv
+```powershell
+# 1. Compile the UE project so the editor plugin is available.
 
-# 3. Open Unreal Editor → plugin starts TCP:55558 automatically
-#    AI client connects via MCP stdio → ready to go
+# 2. Install/setup the Python environment.
+cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
+.\setup_mcp.ps1
+
+# 3. Start Unreal Editor. The C++ bridge listens on tcp_port, default 55558.
+D:\UnrealEngine5\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe `
+  D:\UnrealGame\Lyra_56\Lyra_56.uproject -MCPPort=55558
+
+# 4. Use the CLI-first runtime.
+.\Python\.venv\Scripts\python.exe .\Python\ue.py daemon start
+.\Python\.venv\Scripts\python.exe .\Python\ue.py query health
+.\Python\.venv\Scripts\python.exe .\Python\ue.py run "get_context"
 ```
 
-See [docs/installation.md](docs/installation.md) for detailed setup instructions.
+The daemon auto-starts by default for `run`, `query`, and `doctor` commands.
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   AI (Claude, GPT, etc.)                     │
-│                                                              │
-│   ue_cli(command="@BP_Enemy\n                               │
-│     add_component_to_blueprint StaticMeshComponent Mesh\n    │
-│     compile_blueprint")                                      │
-│                                                              │
-│   ue_query(query="help create_blueprint")                    │
-├──────────────────────────┬──────────────────────────────────┤
-│       MCP Protocol       │   (stdio JSON — transport only)   │
-├──────────────────────────┴──────────────────────────────────┤
-│                                                              │
-│    server.py  (2 tools: ue_cli + ue_query)                   │
-│         │                                                    │
-│    cli_parser.py  ← ActionRegistry (auto-derive params)     │
-│         │                                                    │
-│    connection.py  (CircuitBreaker + Metrics + Persistent)    │
-│         │  TCP 55558 (configurable via ue_mcp_config.yaml)   │
-├─────────┼────────────────────────────────────────────────────┤
-│    C++ MCPServer → Game Thread → MCPBridge → EditorActions   │
-└─────────────────────────────────────────────────────────────┘
+```text
+Codex / user
+  -> ue.py run/query/doctor
+  -> local Python daemon on 127.0.0.1:55559
+  -> PersistentUnrealConnection
+  -> Unreal Editor C++ bridge on 127.0.0.1:55558
+  -> MCPBridge / FEditorAction handlers
 ```
 
-**Data flow:** AI sends CLI text → Python layer parses syntax, resolves `@target` context, maps positional args via ActionRegistry schema → sends structured JSON over TCP → C++ plugin executes on Game Thread → response flows back through the same path.
+The C++ bridge and action classes are preserved. The key change is the
+model-facing boundary: agents write CLI text, not MCP JSON.
 
-**Why a Python middle layer?** It handles CLI parsing, command batching, `@target` context management, circuit breaking, auto-reconnect, and metrics — keeping the C++ side focused on editor operations.
+## CLI Usage
 
-## CLI Syntax
+Run a single command:
 
-```bash
-<command> [positional_args...] [--flag value ...]
-@<target>     # Set context (auto-fills blueprint_name/material_name/widget_name)
-# comment     # Ignored
+```powershell
+python .\Python\ue.py run "create_blueprint BP_Player --parent_class Character"
 ```
 
-### Single Command
-```
-create_blueprint BP_Player --parent_class Character
-```
+Run multiple commands with context:
 
-### Multi-Command with Context
-```
+```powershell
+@"
 @BP_Player
 add_component_to_blueprint CapsuleComponent Capsule
 add_blueprint_variable Health --variable_type Float
-add_blueprint_event_node ReceiveBeginPlay
 compile_blueprint
+"@ | python .\Python\ue.py run
 ```
 
-### Material Workflow
-```
-@M_Glow
-create_material --path /Game/Materials
-add_material_expression MaterialExpressionVectorParameter BaseColor
-compile_material
+Shortcut form:
+
+```powershell
+python .\Python\ue.py "get_context"
 ```
 
-### Positional Args
-Mapped to `required` params in order from the command's schema.
-Context target fills the first matching param (`blueprint_name`, etc.),
-remaining positionals fill the rest.
+Query help and diagnostics:
 
-### Array & Object Shorthand (v0.4.0)
-
-When the command schema declares a parameter as `array` or `object`, you can use shorthand syntax instead of JSON:
-
-```bash
-# Array shorthand (comma-separated)
---items a,b,c              # → ["a", "b", "c"]
---values 1,2,3             # → [1, 2, 3]
-
-# Object shorthand (key=value pairs)
---props name=Sword,damage=50   # → {"name": "Sword", "damage": 50}
-
-# JSON syntax still works
---items [1,2,3]
---props {"name":"Sword"}
+```powershell
+python .\Python\ue.py query help
+python .\Python\ue.py query "help create_blueprint"
+python .\Python\ue.py query "search material"
+python .\Python\ue.py query "logs --n 50 --source editor"
+python .\Python\ue.py doctor
 ```
 
-## Project Configuration (v0.4.0)
+## Output Modes
 
-`setup_mcp.ps1` / `setup_mcp.bat` auto-generates `ue_mcp_config.yaml` in the project root:
+Default output is text:
+
+```text
+OK get_context
+Asset path: /Game/Characters/BP_Player
+Status: ok
+```
+
+Use JSON only when a script or test needs a stable machine-readable envelope:
+
+```powershell
+python .\Python\ue.py run "get_context" --json
+```
+
+Use raw mode for low-level debugging:
+
+```powershell
+python .\Python\ue.py run "get_context" --raw
+```
+
+## Daemon Commands
+
+```powershell
+python .\Python\ue.py daemon start
+python .\Python\ue.py daemon status
+python .\Python\ue.py daemon stop
+python .\Python\ue.py daemon serve
+```
+
+The daemon owns:
+
+- Persistent Unreal TCP connection.
+- Heartbeat and reconnect behavior.
+- Circuit breaker state.
+- Metrics and operation context.
+- Text/JSON/raw result envelopes for CLI callers.
+
+## Project Configuration
+
+`ue_mcp_config.yaml` is loaded from the project tree:
 
 ```yaml
-engine_root: "E:/EpicGame/UE_5.7"
-project_root: "E:/Projects/MyGame"
+engine_root: D:/UnrealEngine5/UnrealEngine
+project_root: D:/UnrealGame/Lyra_56
 tcp_port: 55558
+daemon_port: 55559
+auto_start_daemon: true
 ```
 
-The MCP server loads this at startup. To run multiple editor instances, set different `tcp_port` values per project. The C++ plugin also supports `-MCPPort=<port>` command-line override.
+Use different `tcp_port` and `daemon_port` values when running multiple editor
+instances.
 
-## Token Optimization: detail_level
+## CLI Syntax
 
-Commands like `get_blueprint_summary` support a `detail_level` parameter to control response verbosity:
-
-| Level | Content | Typical Tokens |
-|-------|---------|---------------|
-| `brief` (default) | Stats + name lists only | ~150 |
-| `normal` | Names + types + key metadata | ~500 |
-| `full` | Complete details (all properties, pin info, etc.) | ~2000+ |
-
-**Auto-detection:** If `blueprint_name` is omitted, the command automatically targets the currently selected/edited asset in the editor.
-
-```bash
-# Analyze whatever blueprint is currently open (brief by default)
-get_blueprint_summary
-
-# Full details for a specific blueprint
-get_blueprint_summary BP_Enemy --detail_level full
+```text
+<command> [positional_args...] [--flag value ...]
+@<target>     Set context for blueprint/material/widget commands
+# comment     Ignored
 ```
 
-## Query Examples
+Positional arguments are mapped from the command schema. The `@target` context
+fills the first matching context parameter such as `blueprint_name`,
+`material_name`, or `widget_name`.
 
-```
-ue_query(query="help")                          # List all commands
-ue_query(query="help create_blueprint")         # Command-specific help
-ue_query(query="search material")               # Search commands
-ue_query(query="context")                       # Session context
-ue_query(query="logs --n 50 --source editor")   # Editor logs
-ue_query(query="health")                        # Connection status
-ue_query(query="skills")                        # Skill catalog
-ue_query(query="resources conventions.md")       # Embedded docs
-```
+Array and object shorthand:
 
-## MCP Client Configuration
-
-Add to your MCP client config:
-```json
-{
-  "mcpServers": {
-    "ue-cli-tool": {
-      "command": "<path-to-venv>/python.exe",
-      "args": ["-m", "ue_cli_tool.server"],
-      "env": {
-        "PYTHONPATH": "<path-to-plugin>/Python"
-      }
-    }
-  }
-}
+```text
+--items a,b,c
+--values 1,2,3
+--props name=Sword,damage=50
 ```
 
-Or if installed via `pip install -e .`:
-```json
-{
-  "mcpServers": {
-    "ue-cli-tool": {
-      "command": "ue-cli-tool"
-    }
-  }
-}
-```
+JSON values still work when object data is truly needed.
 
-See [docs/installation.md](docs/installation.md) for client-specific examples.
+## Legacy MCP Path
 
-## Development
+The legacy MCP server is still available:
 
-```bash
-# Run tests
-cd Plugins/UECliTool
-python -m pytest tests/ -v
-
-# Run server directly
+```powershell
 python -m ue_cli_tool.server
 ```
 
-See [docs/development.md](docs/development.md) for adding new actions and commands.
+It exposes the old two-tool interface, `ue_cli` and `ue_query`, for clients that
+have not migrated yet. New development should target the CLI-first path.
+
+## Development
+
+```powershell
+cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
+.\Python\.venv\Scripts\python.exe -m pytest Python\tests -q
+```
+
+Key Python modules:
+
+| Module | Purpose |
+|--------|---------|
+| `ue_cli_tool.cli` | Short-lived CLI entrypoint |
+| `ue_cli_tool.daemon` | Long-lived local daemon |
+| `ue_cli_tool.runtime` | MCP-free command/query runtime |
+| `ue_cli_tool.formatter` | Text/json/raw output formatting |
+| `ue_cli_tool.connection` | Persistent Unreal TCP connection |
+| `ue_cli_tool.cli_parser` | CLI syntax parser |
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [Installation](docs/installation.md) | Environment setup, Python config, MCP client setup |
+| [Installation](docs/installation.md) | Environment setup and legacy MCP setup |
 | [Architecture](docs/architecture.md) | Technical details, C++ server, event system, protocols |
-| [Actions](docs/actions.md) | Action domain reference (~137 commands) |
-| [Development](docs/development.md) | Adding new actions, testing, commandlet mode |
-| [GitHub Actions Runner](docs/github-actions-runner.md) | Self-hosted Windows runner setup for Unreal plugin builds |
+| [Actions](docs/actions.md) | Action domain reference |
+| [Development](docs/development.md) | Adding new actions, tests, commandlet mode |
+| [GitHub Actions Runner](docs/github-actions-runner.md) | Self-hosted Windows runner setup |
 
 ## Credits
 
-Based on [lilklon/UEBlueprintMCP](https://github.com/lilklon/UEBlueprintMCP) (MIT License).
+Based on [lilklon/UEBlueprintMCP](https://github.com/lilklon/UEBlueprintMCP)
+(MIT License).
 
 ## License
 

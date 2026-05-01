@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "0.2.0",
+	"VersionName": "0.5.0",
 	"FriendlyName": "UECliTool",
-	"Description": "CLI-native AI tool for controlling Unreal Engine Editor. Based on lilklon/UEBlueprintMCP (MIT).",
+	"Description": "CLI-first AI tool for controlling Unreal Engine Editor. Based on lilklon/UEBlueprintMCP (MIT).",
 	"Category": "Editor",
 	"CreatedBy": "Acmarkdry (based on lilklon/UEBlueprintMCP)",
 	"CreatedByURL": "https://github.com/lilklon/UEBlueprintMCP",

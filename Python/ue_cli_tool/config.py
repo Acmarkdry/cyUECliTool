@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_FILENAME = "ue_mcp_config.yaml"
 _DEFAULT_TCP_PORT = 55558
+_DEFAULT_DAEMON_PORT = 55559
 _PORT_MIN = 1
 _PORT_MAX = 65535
 
@@ -44,6 +45,8 @@ class ProjectConfig:
     engine_root: str | None = None
     project_root: str | None = None
     tcp_port: int = _DEFAULT_TCP_PORT
+    daemon_port: int = _DEFAULT_DAEMON_PORT
+    auto_start_daemon: bool = True
     lua_script_dirs: list[str] = field(default_factory=list)
     extra_action_paths: list[str] = field(default_factory=list)
 
@@ -111,9 +114,11 @@ def _dict_to_config(data: dict[str, Any]) -> ProjectConfig:
         if f.name in data:
             kwargs[f.name] = data[f.name]
 
-    # Validate tcp_port specifically.
+    # Validate ports specifically.
     if "tcp_port" in kwargs:
         kwargs["tcp_port"] = _validate_port(kwargs["tcp_port"])
+    if "daemon_port" in kwargs:
+        kwargs["daemon_port"] = _validate_port(kwargs["daemon_port"])
 
     return ProjectConfig(**kwargs)
 
@@ -207,8 +212,10 @@ def merge_config(existing: ProjectConfig, updates: dict[str, Any]) -> ProjectCon
         else:
             merged[f.name] = getattr(existing, f.name)
 
-    # Validate tcp_port if it was part of the update.
+    # Validate ports if they were part of the update.
     if "tcp_port" in updates:
         merged["tcp_port"] = _validate_port(merged["tcp_port"])
+    if "daemon_port" in updates:
+        merged["daemon_port"] = _validate_port(merged["daemon_port"])
 
     return ProjectConfig(**merged)

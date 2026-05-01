@@ -139,6 +139,9 @@ if exist "!CONFIG_PATH!" (
     REM Read existing file, update engine_root and project_root, preserve other keys
     set "FOUND_ENGINE_ROOT=0"
     set "FOUND_PROJECT_ROOT=0"
+    set "FOUND_TCP_PORT=0"
+    set "FOUND_DAEMON_PORT=0"
+    set "FOUND_AUTO_START_DAEMON=0"
     set "TMPCONFIG=!CONFIG_PATH!.tmp"
     REM Clear temp file
     type nul > "!TMPCONFIG!"
@@ -156,7 +159,25 @@ if exist "!CONFIG_PATH!" (
                 >> "!TMPCONFIG!" echo project_root: !PROJECT_ROOT_FWD!
                 set "FOUND_PROJECT_ROOT=1"
             ) else (
-                >> "!TMPCONFIG!" echo !LINE!
+                echo !LINE! | findstr /b /c:"tcp_port:" >nul 2>&1
+                if !ERRORLEVEL! equ 0 (
+                    >> "!TMPCONFIG!" echo !LINE!
+                    set "FOUND_TCP_PORT=1"
+                ) else (
+                    echo !LINE! | findstr /b /c:"daemon_port:" >nul 2>&1
+                    if !ERRORLEVEL! equ 0 (
+                        >> "!TMPCONFIG!" echo !LINE!
+                        set "FOUND_DAEMON_PORT=1"
+                    ) else (
+                        echo !LINE! | findstr /b /c:"auto_start_daemon:" >nul 2>&1
+                        if !ERRORLEVEL! equ 0 (
+                            >> "!TMPCONFIG!" echo !LINE!
+                            set "FOUND_AUTO_START_DAEMON=1"
+                        ) else (
+                            >> "!TMPCONFIG!" echo !LINE!
+                        )
+                    )
+                )
             )
         )
     )
@@ -167,11 +188,23 @@ if exist "!CONFIG_PATH!" (
     if "!FOUND_PROJECT_ROOT!"=="0" (
         >> "!TMPCONFIG!" echo project_root: !PROJECT_ROOT_FWD!
     )
+    if "!FOUND_TCP_PORT!"=="0" (
+        >> "!TMPCONFIG!" echo tcp_port: 55558
+    )
+    if "!FOUND_DAEMON_PORT!"=="0" (
+        >> "!TMPCONFIG!" echo daemon_port: 55559
+    )
+    if "!FOUND_AUTO_START_DAEMON!"=="0" (
+        >> "!TMPCONFIG!" echo auto_start_daemon: true
+    )
     move /y "!TMPCONFIG!" "!CONFIG_PATH!" >nul
 ) else (
     echo   Creating !CONFIG_PATH! ...
     > "!CONFIG_PATH!" echo engine_root: !ENGINE_ROOT_FWD!
     >> "!CONFIG_PATH!" echo project_root: !PROJECT_ROOT_FWD!
+    >> "!CONFIG_PATH!" echo tcp_port: 55558
+    >> "!CONFIG_PATH!" echo daemon_port: 55559
+    >> "!CONFIG_PATH!" echo auto_start_daemon: true
 )
 echo   Config written: !CONFIG_PATH!
 echo.

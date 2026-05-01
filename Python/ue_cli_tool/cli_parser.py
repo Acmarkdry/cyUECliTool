@@ -22,6 +22,7 @@ Examples
 from __future__ import annotations
 
 import json
+import math
 import shlex
 from dataclasses import dataclass, field
 from typing import Any, TYPE_CHECKING
@@ -320,8 +321,10 @@ class CliParser:
 				pass
 			# Try float
 			try:
-				result.append(float(stripped))
-				continue
+				float_value = float(stripped)
+				if math.isfinite(float_value):
+					result.append(float_value)
+					continue
 			except ValueError:
 				pass
 			# Keep as string
@@ -352,8 +355,10 @@ class CliParser:
 			except ValueError:
 				pass
 			try:
-				result[key] = float(value)
-				continue
+				float_value = float(value)
+				if math.isfinite(float_value):
+					result[key] = float_value
+					continue
 			except ValueError:
 				pass
 			result[key] = value
