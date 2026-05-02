@@ -9,13 +9,12 @@ from ue_cli_tool.daemon import UEDaemon
 
 
 class _FakeConnection:
-	def __init__(self):
-		self.is_connected = True
+	def __init__(self, *, connected=True):
+		self.is_connected = connected
 		self.on_state_change = None
 
 	def connect(self):
-		self.is_connected = True
-		return True
+		return self.is_connected
 
 	def disconnect(self):
 		self.is_connected = False
@@ -28,10 +27,11 @@ class _FakeConnection:
 		return _Result()
 
 	def get_health(self):
-		return {"connection_state": "connected", "is_connected": True}
+		state = "connected" if self.is_connected else "disconnected"
+		return {"connection_state": state, "is_connected": self.is_connected}
 
 	def ping(self):
-		return True
+		return self.is_connected
 
 
 class _FakeContext:
@@ -58,6 +58,13 @@ def _daemon(monkeypatch):
 	return UEDaemon(ProjectConfig(tcp_port=55558, daemon_port=55559))
 
 
+def _disconnected_daemon(monkeypatch):
+	monkeypatch.setattr("ue_cli_tool.daemon.ContextStore", lambda *a, **k: _FakeContext())
+	monkeypatch.setattr("ue_cli_tool.daemon.PersistentUnrealConnection", lambda *a, **k: _FakeConnection(connected=False))
+	monkeypatch.setattr("ue_cli_tool.daemon._wire_metrics", lambda *a, **k: None)
+	return UEDaemon(ProjectConfig(tcp_port=55558, daemon_port=55559))
+
+
 def test_daemon_run_returns_envelope(monkeypatch):
 	daemon = _daemon(monkeypatch)
 
@@ -68,6 +75,16 @@ def test_daemon_run_returns_envelope(monkeypatch):
 	assert response["data"]["command"] == "get_context"
 
 
+def test_daemon_multiline_run_uses_run_action(monkeypatch):
+	daemon = _daemon(monkeypatch)
+
+	response = daemon.handle_request({"type": "run", "command": "ping\nping"})
+
+	assert response["success"] is True
+	assert response["action"] == "run"
+	assert response["data"]["executed"] == 2
+
+
 def test_daemon_query_health_uses_owned_connection(monkeypatch):
 	daemon = _daemon(monkeypatch)
 
@@ -75,6 +92,27 @@ def test_daemon_query_health_uses_owned_connection(monkeypatch):
 
 	assert response["success"] is True
 	assert response["data"]["health"]["is_connected"] is True
+
+
+def test_daemon_query_health_fails_when_unreal_is_disconnected(monkeypatch):
+	daemon = _disconnected_daemon(monkeypatch)
+
+	response = daemon.handle_request({"type": "query", "query": "health"})
+
+	assert response["success"] is False
+	assert response["error"]["code"] == "UE_NOT_CONNECTED"
+	assert response["diagnostics"]["health"]["is_connected"] is False
+
+
+def test_daemon_doctor_fails_when_unreal_is_disconnected(monkeypatch):
+	daemon = _disconnected_daemon(monkeypatch)
+	monkeypatch.setattr("ue_cli_tool.daemon.can_connect", lambda *a, **k: False)
+
+	response = daemon.handle_request({"type": "doctor"})
+
+	assert response["success"] is False
+	assert response["error"]["code"] == "UE_NOT_CONNECTED"
+	assert response["diagnostics"]["unreal"]["health"]["is_connected"] is False
 
 
 def test_daemon_exec_python_bypasses_cli_parser(monkeypatch):

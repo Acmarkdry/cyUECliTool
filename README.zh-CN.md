@@ -75,6 +75,8 @@ compile_blueprint
 .\ue.ps1 run --file .\.codex\tmp\task.uecli
 ```
 
+`run --file` 默认在第一条失败命令处停止。只有批处理里的命令彼此独立时，比如只读探测，才使用 `--continue-on-error`。
+
 Unreal Python 使用 `py`/`python` 子命令，绕开 run DSL parser：
 
 ```powershell
@@ -85,7 +87,7 @@ _result = unreal.SystemLibrary.get_engine_version()
 .\ue.ps1 py --json --file .\.codex\tmp\task.py
 ```
 
-`_result` 是结构化返回值；`print()` 只用于日志。如果把同一份数据既 `print()` 又赋给 `_result`，CLI 会同时显示 `Stdout` 和 `Return value`，这是两个不同输出通道。
+`_result` 是结构化返回值；`print()` 只用于日志。如果把同一份数据既 `print()` 又赋给 `_result`，文本输出会隐藏明显重复项；JSON 输出仍保留 `stdout` 和 `return_value`，便于精确诊断。
 
 查询帮助和诊断：
 
@@ -98,6 +100,8 @@ _result = unreal.SystemLibrary.get_engine_version()
 .\ue.ps1 query "search material"
 .\ue.ps1 query "logs --n 50 --source editor"
 ```
+
+当 Unreal Editor 未连接时，`query health` 和 `doctor` 会返回非 0 退出码，方便脚本和模型直接失败退出。
 
 ## 输出模式
 

@@ -118,15 +118,24 @@ class UEDaemon:
 			self._stop.set()
 			return make_result("daemon.stop", {"stopping": True})
 		if req_type == "doctor":
-			return make_result("doctor", self._doctor_payload())
+			payload = self._doctor_payload()
+			if not _doctor_ready(payload):
+				return make_error(
+					"UE_NOT_CONNECTED",
+					"Unreal Editor is not connected.",
+					action="doctor",
+					diagnostics=payload,
+					suggested_next="Start Unreal Editor with the configured MCP port, then run `ue daemon restart`.",
+				)
+			return make_result("doctor", payload)
 		if req_type == "run":
 			command = str(request.get("command", ""))
 			result = runtime.handle_cli(
-				{"command": command},
+				{"command": command, "continue_on_error": bool(request.get("continue_on_error", False))},
 				send_command_func=self._send_command,
 				log_command_func=self._log_command,
 			)
-			action = _infer_action(command, fallback="run")
+			action = "run" if _is_batch_result(result) else _infer_action(command, fallback="run")
 			return envelope_from_result(action, result)
 		if req_type == "exec_python":
 			code = str(request.get("code", ""))
@@ -245,7 +254,7 @@ def can_connect(port: int, *, timeout: float = 0.5) -> bool:
 		return False
 
 
-def request_daemon(payload: dict[str, Any], *, config: ProjectConfig | None = None, timeout: float = 30.0) -> dict[str, Any]:
+def request_daemon(payload: dict[str, Any], *, config: ProjectConfig | None = None, timeout: float = 300.0) -> dict[str, Any]:
 	cfg = config or load_config()
 	with socket.create_connection((HOST, cfg.daemon_port), timeout=timeout) as sock:
 		sock.settimeout(timeout)
@@ -254,6 +263,16 @@ def request_daemon(payload: dict[str, Any], *, config: ProjectConfig | None = No
 	if response is None:
 		return make_error("DAEMON_EMPTY_RESPONSE", "Daemon closed connection without a response")
 	return response
+
+
+def _doctor_ready(payload: dict[str, Any]) -> bool:
+	unreal = payload.get("unreal") if isinstance(payload.get("unreal"), dict) else {}
+	health = unreal.get("health") if isinstance(unreal.get("health"), dict) else {}
+	return bool(unreal.get("port_open")) and bool(health.get("is_connected"))
+
+
+def _is_batch_result(result: dict[str, Any]) -> bool:
+	return "results" in result and "executed" in result
 
 
 def _source_payload() -> dict[str, Any]:

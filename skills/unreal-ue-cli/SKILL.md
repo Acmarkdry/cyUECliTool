@@ -43,7 +43,8 @@ Do not make the model repeat venv paths such as
    ```
    Set `_result = ...` for structured data. Use `print()` only for log text.
    Do not print the same object assigned to `_result`; stdout and return value
-   are intentionally separate output channels.
+   are separate output channels. Text output hides obvious duplicates, but JSON
+   output intentionally preserves both fields for diagnostics.
 
 3. For CLI DSL batches, write a temporary `.uecli` file and execute it:
    ```powershell
@@ -51,6 +52,8 @@ Do not make the model repeat venv paths such as
    ```
    Use `@Target` to fill context parameters such as `blueprint_name`,
    `material_name`, or `widget_name`.
+   `run --file` stops on the first failed command by default. Use
+   `--continue-on-error` only for independent read-only batches.
 
 4. Use query commands for discovery and recovery:
    ```powershell
@@ -79,7 +82,8 @@ Prefer `.uecli` files for short batches of built-in commands.
 - Daemon loaded old Python modules: run `.\ue.ps1 daemon restart`, then
   `.\ue.ps1 daemon status --json` and inspect `data.source`.
 - Unreal Editor not reachable: start the project editor with `-MCPPort=<tcp_port>`
-  from `ue_mcp_config.yaml`, then run `.\ue.ps1 query health`.
+  from `ue_mcp_config.yaml`, then run `.\ue.ps1 query health`. `query health`
+  and `doctor` return non-zero when the editor is disconnected.
 - Parse errors: run `.\ue.ps1 query "help <command>"` or switch the work to
   `.\ue.ps1 py --file`.
 - Large output: use command-specific detail flags or `--json`; avoid `--raw`
@@ -90,6 +94,8 @@ Prefer `.uecli` files for short batches of built-in commands.
 - Read before write: inspect context/assets first.
 - Keep batches small enough that each child result is reviewable.
 - Prefer `_result` for exact data and assertions.
+- Rely on `_result` for Unreal arrays and object summaries; the CLI converts
+  common Unreal Python values into JSON-compatible structures.
 - Do not use PowerShell here-strings as the main path for complex Python; write
   a `.py` file and call `py --file`.
 - Do not call MCP tools (`ue_cli`, `ue_query`) unless the CLI path is blocked.

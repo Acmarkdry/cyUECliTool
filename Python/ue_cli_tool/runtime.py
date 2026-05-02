@@ -106,6 +106,18 @@ def _log_command(action_id: str, params: dict | None, result: dict, elapsed_ms: 
 	)
 
 
+def _health_result(health: dict[str, Any]) -> dict[str, Any]:
+	if health.get("is_connected") is True:
+		return {"success": True, "health": health}
+	return {
+		"success": False,
+		"error": "Unreal Editor is not connected",
+		"error_type": "ue_not_connected",
+		"recoverable": True,
+		"health": health,
+	}
+
+
 def handle_cli(
 	args: dict[str, Any],
 	*,
@@ -113,6 +125,7 @@ def handle_cli(
 	log_command_func: Callable[[str, dict | None, dict, float], None] | None = None,
 ) -> dict[str, Any]:
 	command_text = args.get("command", "")
+	continue_on_error = bool(args.get("continue_on_error", False))
 	if not command_text.strip():
 		return {"success": False, "error": "command is required", "error_type": "parse_error"}
 
@@ -149,6 +162,8 @@ def handle_cli(
 
 	results: list[dict[str, Any]] = []
 	all_ok = True
+	failure_message = ""
+	failure_error_type = "batch_child_failed"
 	for cmd in parsed.commands:
 		t0 = time.perf_counter()
 		try:
@@ -160,14 +175,27 @@ def handle_cli(
 		result["_cli_line"] = cmd.raw_line
 		if result.get("success") is False:
 			all_ok = False
+			if not failure_message:
+				failure_detail = str(result.get("error", "failed"))
+				failure_message = f"Command failed: {cmd.raw_line}: {failure_detail}"
+				failure_error_type = str(result.get("error_type") or failure_error_type)
 		results.append(result)
+		if result.get("success") is False and not continue_on_error:
+			break
 
-	return {
+	response = {
 		"success": all_ok,
 		"total": len(parsed.commands),
 		"executed": len(results),
+		"skipped": len(parsed.commands) - len(results),
+		"stopped_on_error": not all_ok and not continue_on_error,
+		"continue_on_error": continue_on_error,
 		"results": results,
 	}
+	if not all_ok:
+		response["error"] = failure_message or "One or more batch commands failed"
+		response["error_type"] = failure_error_type
+	return response
 
 
 def handle_query(
@@ -213,9 +241,9 @@ def handle_query(
 		}
 	if sub == "health":
 		if connection_health_func is not None:
-			return {"success": True, "health": connection_health_func()}
+			return _health_result(connection_health_func())
 		conn = get_connection()
-		return {"success": True, "health": conn.get_health()}
+		return _health_result(conn.get_health())
 	if sub == "resources":
 		if not rest:
 			available = [f.name for f in _RESOURCES_DIR.iterdir()] if _RESOURCES_DIR.exists() else []

@@ -39,7 +39,7 @@ def test_handle_cli_multiline_executes_commands_sequentially():
 	assert len(logged) == 2
 
 
-def test_handle_cli_multiline_continues_after_child_failure():
+def test_handle_cli_multiline_stops_after_child_failure_by_default():
 	calls = []
 
 	def fake_send(command, params):
@@ -55,6 +55,43 @@ def test_handle_cli_multiline_continues_after_child_failure():
 	)
 
 	assert result["success"] is False
+	assert result["executed"] == 1
+	assert result["skipped"] == 1
+	assert result["stopped_on_error"] is True
+	assert "exec_python _result = 1" in result["error"]
+	assert result["results"][0]["error"] == "first failed"
+	assert calls == [("exec_python", {"code": "_result = 1"})]
+
+
+def test_handle_cli_multiline_continue_on_error_runs_remaining_commands():
+	calls = []
+
+	def fake_send(command, params):
+		calls.append((command, params))
+		if len(calls) == 1:
+			return {"success": False, "error": "first failed"}
+		return {"success": True, "return_value": 2}
+
+	result = runtime.handle_cli(
+		{"command": "exec_python _result = 1\nexec_python _result = 2", "continue_on_error": True},
+		send_command_func=fake_send,
+		log_command_func=lambda *args: None,
+	)
+
+	assert result["success"] is False
 	assert result["executed"] == 2
+	assert result["skipped"] == 0
+	assert result["stopped_on_error"] is False
 	assert result["results"][0]["error"] == "first failed"
 	assert result["results"][1]["return_value"] == 2
+
+
+def test_handle_query_health_fails_when_unreal_is_disconnected():
+	result = runtime.handle_query(
+		{"query": "health"},
+		connection_health_func=lambda: {"is_connected": False, "connection_state": "disconnected"},
+	)
+
+	assert result["success"] is False
+	assert result["error_type"] == "ue_not_connected"
+	assert result["health"]["is_connected"] is False

@@ -36,6 +36,10 @@ compile_blueprint
 .\ue.ps1 run --file .\.codex\tmp\task.uecli
 ```
 
+`run --file` stops on the first failed command by default. Add
+`--continue-on-error` only for independent batches where later commands are
+still meaningful after an earlier failure.
+
 ## Domains
 
 The registry currently covers these broad domains:
@@ -84,8 +88,10 @@ Use raw mode only for debugging:
 Use `ue python` (alias: `ue py`) when the task needs custom Unreal Python. This
 path sends code directly to the daemon and avoids the `ue run` command parser.
 Always set `_result` to return structured data. Use `print()` only for log text;
-if the same data is printed and assigned to `_result`, CLI output will show both
-`Stdout` and `Return value` because they are separate channels.
+if the same data is printed and assigned to `_result`, text output suppresses
+obvious duplicates and JSON output preserves both channels. Unreal Python
+arrays, maps, objects, names, and text values are converted into JSON-compatible
+values before they reach the CLI.
 
 ```python
 import unreal
@@ -120,6 +126,9 @@ transactions.
 .\ue.ps1 query metrics
 .\ue.ps1 query health
 ```
+
+`query health` and `doctor` are command-health checks: if Unreal Editor is not
+connected they return an error envelope and a non-zero exit code.
 
 If a command fails, run:
 

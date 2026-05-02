@@ -135,7 +135,7 @@ def _format_exec_python(data: dict[str, Any]) -> str:
 	stderr = str(data.get("stderr") or "").strip()
 	return_value = data.get("return_value")
 
-	if stdout:
+	if stdout and not ("return_value" in data and _looks_like_duplicate_stdout(stdout, return_value)):
 		lines.append(f"Stdout: {_short(stdout)}")
 	if stderr:
 		lines.append(f"Stderr: {_short(stderr)}")
@@ -144,6 +144,19 @@ def _format_exec_python(data: dict[str, Any]) -> str:
 	if len(lines) == 1:
 		lines.append("Result: ok")
 	return "\n".join(lines)
+
+
+def _looks_like_duplicate_stdout(stdout: str, return_value: Any) -> bool:
+	normalized = stdout.strip()
+	if not normalized:
+		return False
+	candidates = {str(return_value).strip(), _short(return_value)}
+	try:
+		candidates.add(json.dumps(return_value, ensure_ascii=False))
+		candidates.add(json.dumps(return_value, ensure_ascii=False, separators=(",", ":")))
+	except TypeError:
+		pass
+	return normalized in candidates
 
 
 def _format_doctor(data: dict[str, Any]) -> str:
@@ -232,12 +245,26 @@ def _format_error(envelope: dict[str, Any]) -> str:
 	msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
 	recoverable = err.get("recoverable", True) if isinstance(err, dict) else True
 	next_step = err.get("suggested_next", "") if isinstance(err, dict) else ""
+	diagnostics = envelope.get("diagnostics") if isinstance(envelope.get("diagnostics"), dict) else {}
 
 	lines = [f"ERROR {code}", msg]
+	lines.extend(_error_diagnostic_lines(str(envelope.get("action") or "command"), diagnostics))
 	lines.append(f"Recoverable: {'yes' if recoverable else 'no'}")
 	if next_step:
 		lines.append(f"Next: {next_step}")
 	return "\n".join(lines)
+
+
+def _error_diagnostic_lines(action: str, diagnostics: dict[str, Any]) -> list[str]:
+	if not diagnostics:
+		return []
+	if "results" in diagnostics and _looks_like_batch(diagnostics):
+		return _format_batch(action, diagnostics).splitlines()
+	if isinstance(diagnostics.get("health"), dict):
+		return _format_health(action or "query health", diagnostics["health"]).splitlines()[1:]
+	if isinstance(diagnostics.get("unreal"), dict):
+		return _format_doctor(diagnostics).splitlines()[1:]
+	return []
 
 
 def _format_batch(action: str, data: dict[str, Any]) -> str:

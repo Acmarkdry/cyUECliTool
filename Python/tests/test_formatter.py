@@ -64,6 +64,17 @@ def test_exec_python_text_omits_empty_streams_and_shows_value():
 	assert text == 'OK exec_python\nReturn value: {"x":1}'
 
 
+def test_exec_python_text_suppresses_duplicate_stdout_value():
+	envelope = envelope_from_result(
+		"exec_python",
+		{"success": True, "stdout": '{"x":1}\n', "stderr": "", "return_value": {"x": 1}},
+	)
+
+	text = format_output(envelope)
+
+	assert text == 'OK exec_python\nReturn value: {"x":1}'
+
+
 def test_batch_output_is_line_oriented():
 	envelope = envelope_from_result(
 		"batch_execute",
@@ -83,6 +94,32 @@ def test_batch_output_is_line_oriented():
 	assert "OK batch 2/2" in text
 	assert "1 OK create_blueprint BP_A" in text
 	assert "2 OK compile_blueprint BP_A" in text
+
+
+def test_batch_error_output_shows_executed_and_skipped_lines():
+	envelope = envelope_from_result(
+		"run",
+		{
+			"success": False,
+			"error": "Command failed: no_such_command: Unknown command",
+			"error_type": "parse_error",
+			"total": 3,
+			"executed": 2,
+			"skipped": 1,
+			"stopped_on_error": True,
+			"results": [
+				{"success": True, "_cli_line": "ping"},
+				{"success": False, "error": "Unknown command", "_cli_line": "no_such_command"},
+			],
+		},
+	)
+
+	text = format_output(envelope)
+
+	assert "ERROR PARSE_ERROR" in text
+	assert "ERROR batch 1/3" in text
+	assert "1 OK ping" in text
+	assert "2 ERROR no_such_command: Unknown command" in text
 
 
 def test_health_output_shows_connection_state():
@@ -105,6 +142,24 @@ def test_health_output_shows_connection_state():
 	assert "OK query health" in text
 	assert "Connected: yes" in text
 	assert "UE endpoint: 127.0.0.1:55558" in text
+
+
+def test_health_error_output_keeps_connection_details():
+	envelope = envelope_from_result(
+		"query health",
+		{
+			"success": False,
+			"error": "Unreal Editor is not connected",
+			"error_type": "ue_not_connected",
+			"health": {"is_connected": False, "connection_state": "disconnected"},
+		},
+	)
+
+	text = format_output(envelope)
+
+	assert "ERROR UE_NOT_CONNECTED" in text
+	assert "Connected: no" in text
+	assert "State: disconnected" in text
 
 
 def test_doctor_output_is_actionable():

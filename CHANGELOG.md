@@ -12,6 +12,14 @@
   envelope-level `cli_line`.
 - Support PowerShell pipeline input in project and plugin launchers.
 - Execute multi-line `run --file` scripts sequentially through the daemon.
+- Stop `run --file` batches at the first failed command by default; add
+  `--continue-on-error` for explicit best-effort batches.
+- Return failing envelopes and non-zero CLI exit codes for disconnected
+  `query health` and `doctor` checks.
+- Increase daemon client timeouts for `run` and `py` editor work so long UE
+  actions are not cut off at 30 seconds.
+- Convert common Unreal Python `_result` values, including Unreal arrays and
+  objects, into JSON-compatible CLI return values.
 - Serialize daemon access to the shared Unreal TCP connection.
 - Register the C++ `batch_execute` action with `MCPBridge`.
 

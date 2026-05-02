@@ -35,7 +35,14 @@ def main(argv: list[str] | None = None) -> int:
 		except OSError as exc:
 			response = make_error("RUN_FILE_READ_FAILED", str(exc), recoverable=False)
 			return _print_response(response, args)
-		return _print_response(_request_with_autostart({"type": "run", "command": text}, config, args), args)
+		return _print_response(
+			_request_with_autostart(
+				{"type": "run", "command": text, "continue_on_error": bool(args.continue_on_error)},
+				config,
+				args,
+			),
+			args,
+		)
 	if args.command == "query":
 		text = " ".join(args.query_text).strip()
 		return _print_response(_request_with_autostart({"type": "query", "query": text}, config, args), args)
@@ -74,6 +81,11 @@ def _build_parser() -> argparse.ArgumentParser:
 	_add_output_flags(run)
 	run.add_argument("command_text", nargs="*", help="Command text. Reads stdin when omitted.")
 	run.add_argument("--file", "-f", dest="command_file", help="Read UE CLI command text from a UTF-8 file.")
+	run.add_argument(
+		"--continue-on-error",
+		action="store_true",
+		help="Keep executing a multi-command run batch after a command fails.",
+	)
 	run.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
 
 	query = sub.add_parser("query", help="Query help, search, logs, metrics, health, skills, resources")
@@ -143,8 +155,9 @@ def _strip_leading_bom(text: str) -> str:
 
 
 def _request_with_autostart(payload: dict[str, Any], config: ProjectConfig, args: argparse.Namespace) -> dict[str, Any]:
+	timeout = _request_timeout(payload)
 	try:
-		return request_daemon(payload, config=config)
+		return request_daemon(payload, config=config, timeout=timeout)
 	except OSError as exc:
 		if getattr(args, "no_daemon", False) or not config.auto_start_daemon:
 			return make_error(
@@ -160,13 +173,20 @@ def _request_with_autostart(payload: dict[str, Any], config: ProjectConfig, args
 				suggested_next="Run `ue daemon serve --json` in a terminal for logs.",
 			)
 		try:
-			return request_daemon(payload, config=config)
+			return request_daemon(payload, config=config, timeout=timeout)
 		except OSError as retry_exc:
 			return make_error(
 				"DAEMON_NOT_RUNNING",
 				f"Daemon start attempted, but connection still failed: {retry_exc}",
 				suggested_next="Run `ue doctor --json` for diagnostics.",
 			)
+
+
+def _request_timeout(payload: dict[str, Any]) -> float:
+	req_type = str(payload.get("type", "")).lower()
+	if req_type in {"run", "exec_python"}:
+		return 300.0
+	return 30.0
 
 
 def _handle_daemon(args: argparse.Namespace, config: ProjectConfig) -> int:

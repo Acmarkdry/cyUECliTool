@@ -9,7 +9,7 @@ from ue_cli_tool.config import ProjectConfig
 
 def test_bare_command_is_treated_as_run(monkeypatch, capsys):
 	def fake_request(payload, config, args):
-		assert payload == {"type": "run", "command": "get_context"}
+		assert payload == {"type": "run", "command": "get_context", "continue_on_error": False}
 		return {"success": True, "kind": "result", "action": "get_context", "data": {"name": "ctx"}}
 
 	monkeypatch.setattr(cli, "_request_with_autostart", fake_request)
@@ -66,6 +66,7 @@ def test_run_file_sends_command_text(monkeypatch, tmp_path, capsys):
 		assert payload == {
 			"type": "run",
 			"command": "@BP_Player\nget_blueprint_summary --detail_level brief\n",
+			"continue_on_error": False,
 		}
 		return {"success": True, "kind": "result", "action": "batch_execute", "data": {"results": []}}
 
@@ -76,6 +77,20 @@ def test_run_file_sends_command_text(monkeypatch, tmp_path, capsys):
 
 	assert rc == 0
 	assert "OK batch_execute" in out
+
+
+def test_run_continue_on_error_sets_payload_flag(monkeypatch, capsys):
+	def fake_request(payload, config, args):
+		assert payload == {"type": "run", "command": "ping\nping", "continue_on_error": True}
+		return {"success": True, "kind": "result", "action": "run", "data": {"results": []}}
+
+	monkeypatch.setattr(cli, "_request_with_autostart", fake_request)
+
+	rc = cli.main(["run", "--continue-on-error", "ping\nping"])
+	out = capsys.readouterr().out
+
+	assert rc == 0
+	assert "OK run" in out
 
 
 def test_run_file_read_error(monkeypatch, capsys):
@@ -154,6 +169,12 @@ def test_python_empty_code_is_error(monkeypatch, capsys):
 
 	assert rc == 1
 	assert "PYTHON_CODE_REQUIRED" in out
+
+
+def test_request_timeout_uses_long_timeout_for_editor_work():
+	assert cli._request_timeout({"type": "run"}) == 300.0
+	assert cli._request_timeout({"type": "exec_python"}) == 300.0
+	assert cli._request_timeout({"type": "query"}) == 30.0
 
 
 def test_start_daemon_closes_inherited_handles(monkeypatch):

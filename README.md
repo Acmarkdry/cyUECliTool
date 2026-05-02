@@ -85,6 +85,10 @@ compile_blueprint
 .\ue.ps1 run --file .\.codex\tmp\task.uecli
 ```
 
+`run --file` stops at the first failed child command by default. Use
+`--continue-on-error` only when the batch is intentionally independent, such as
+read-only probes.
+
 Shortcut form:
 
 ```powershell
@@ -102,6 +106,9 @@ Query help and diagnostics:
 .\ue.ps1 doctor
 ```
 
+`query health` and `doctor` return a non-zero exit code when Unreal Editor is
+not connected, so scripts can fail fast instead of parsing human text.
+
 Execute Unreal Python directly, bypassing the run-DSL parser:
 
 ```powershell
@@ -113,8 +120,9 @@ _result = unreal.SystemLibrary.get_engine_version()
 ```
 
 Use `_result` for structured return data. Use `print()` only for logs; printing
-the same object assigned to `_result` will show both `Stdout` and
-`Return value` because they are separate channels.
+the same object assigned to `_result` is redundant. Text output suppresses
+obvious duplicates, while JSON output still preserves both `stdout` and
+`return_value` for exact diagnostics.
 
 ## Output Modes
 
