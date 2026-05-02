@@ -502,7 +502,7 @@ def _help_command(command_name: str) -> dict:
 	lines = [
 		f"Command: {action.command}",
 		f"ID: {action.id}",
-		f"Description: {action.description}",
+		f"Description: {_help_description(action.command, action.description)}",
 		"",
 	]
 
@@ -515,6 +515,9 @@ def _help_command(command_name: str) -> dict:
 	)
 	lines.append(f"Usage: {action.command} {pos_parts} {opt_parts}".rstrip())
 	lines.append("")
+	if action.command == "exec_python":
+		lines.extend(_python_exec_cli_guidance())
+		return {"success": True, "help": "\n".join(lines)}
 
 	# Positional (required) params
 	if required:
@@ -542,6 +545,33 @@ def _help_command(command_name: str) -> dict:
 			lines.append(f"  {cli_line}")
 
 	return {"success": True, "help": "\n".join(lines)}
+
+
+def _help_description(command: str, description: str) -> str:
+	if command != "exec_python":
+		return description
+	return (
+		"Execute Python code in Unreal's embedded Python environment. "
+		"For shell use, prefer `ue python --file` or stdin; "
+		"`exec_python` remains the run-DSL compatibility command."
+	)
+
+
+def _python_exec_cli_guidance() -> list[str]:
+	return [
+		"RECOMMENDED CLI:",
+		"  ue python --json --file script.py",
+		"  @'",
+		"  import unreal",
+		"  _result = unreal.SystemLibrary.get_engine_version()",
+		"  '@ | ue python --json",
+		"  ue python --json \"print('hello')\"",
+		"",
+		"NOTES:",
+		"  `ue python` and `ue py` send code directly to the daemon and do not use the run DSL parser.",
+		"  Use `_result = ...` for structured return data; print output is captured as stdout.",
+		"  `ue run \"exec_python <code>\"` remains available for simple compatibility cases.",
+	]
 
 
 def _format_example_as_cli(command: str, example: dict, required: list[str]) -> str:

@@ -7,7 +7,9 @@ import json
 import logging
 import os
 import socket
+import sys
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -124,6 +126,15 @@ class UEDaemon:
 			)
 			action = _infer_action(command, fallback="run")
 			return envelope_from_result(action, result)
+		if req_type == "exec_python":
+			code = str(request.get("code", ""))
+			if not code.strip():
+				return make_error("PYTHON_CODE_REQUIRED", "Python code is required.", recoverable=False)
+			t0 = time.perf_counter()
+			result = self._send_command("exec_python", {"code": code})
+			elapsed = (time.perf_counter() - t0) * 1000
+			self._log_command("exec_python", {"code": code}, result, elapsed)
+			return envelope_from_result("exec_python", result)
 		if req_type == "query":
 			query = str(request.get("query", ""))
 			result = runtime.handle_query(
@@ -164,6 +175,7 @@ class UEDaemon:
 			"engine_root": self.config.engine_root,
 			"started_at": self._started_at,
 			"status_path": str(status_path()),
+			"source": _source_payload(),
 		}
 		if extra_health:
 			payload["ue_health"] = self.connection.get_health()
@@ -191,6 +203,7 @@ class UEDaemon:
 				"engine_root": self.config.engine_root,
 				"auto_start_daemon": self.config.auto_start_daemon,
 			},
+			"source": _source_payload(),
 		}
 
 	def _write_status(self, state: str) -> None:
@@ -205,6 +218,7 @@ class UEDaemon:
 			"project_root": self.config.project_root,
 			"started_at": self._started_at,
 			"updated_at": datetime.now(timezone.utc).isoformat(),
+			"source": _source_payload(),
 		}
 		try:
 			path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -229,6 +243,33 @@ def request_daemon(payload: dict[str, Any], *, config: ProjectConfig | None = No
 	if response is None:
 		return make_error("DAEMON_EMPTY_RESPONSE", "Daemon closed connection without a response")
 	return response
+
+
+def _source_payload() -> dict[str, Any]:
+	daemon_module = Path(__file__).resolve()
+	runtime_module = Path(runtime.__file__).resolve()
+	cli_module = daemon_module.with_name("cli.py")
+	parser_module = daemon_module.with_name("cli_parser.py")
+	return {
+		"python_executable": sys.executable,
+		"python_root": str(daemon_module.parents[1]),
+		"cwd": os.getcwd(),
+		"daemon_module": str(daemon_module),
+		"daemon_module_mtime": _mtime_iso(daemon_module),
+		"runtime_module": str(runtime_module),
+		"runtime_module_mtime": _mtime_iso(runtime_module),
+		"cli_module": str(cli_module),
+		"cli_module_mtime": _mtime_iso(cli_module),
+		"cli_parser_module": str(parser_module),
+		"cli_parser_module_mtime": _mtime_iso(parser_module),
+	}
+
+
+def _mtime_iso(path: Path) -> str:
+	try:
+		return datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat()
+	except OSError:
+		return ""
 
 
 def _infer_action(command_text: str, *, fallback: str) -> str:

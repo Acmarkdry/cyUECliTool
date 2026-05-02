@@ -74,6 +74,29 @@ def test_daemon_query_health_uses_owned_connection(monkeypatch):
 	assert response["data"]["health"]["is_connected"] is True
 
 
+def test_daemon_exec_python_bypasses_cli_parser(monkeypatch):
+	daemon = _daemon(monkeypatch)
+
+	response = daemon.handle_request({"type": "exec_python", "code": "import unreal; _result = 1"})
+
+	assert response["success"] is True
+	assert response["action"] == "exec_python"
+	assert response["data"]["command"] == "exec_python"
+	assert response["data"]["params"] == {"code": "import unreal; _result = 1"}
+
+
+def test_daemon_status_includes_source_identity(monkeypatch):
+	daemon = _daemon(monkeypatch)
+
+	response = daemon.handle_request({"type": "status"})
+
+	assert response["success"] is True
+	source = response["data"]["source"]
+	assert source["python_executable"]
+	assert source["daemon_module"].endswith("daemon.py")
+	assert source["cli_parser_module"].endswith("cli_parser.py")
+
+
 def test_daemon_unknown_request_is_error(monkeypatch):
 	daemon = _daemon(monkeypatch)
 

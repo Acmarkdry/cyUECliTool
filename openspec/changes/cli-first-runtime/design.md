@@ -80,14 +80,19 @@ python Plugins\UEEditorMCP\Python\ue.py <subcommand> [args...]
 Required subcommands:
 
 - `run <command_text>`: execute CLI command text.
+- `python` / `py`: execute Unreal Python code from a positional snippet,
+  stdin, or `--file` without passing through the `run` DSL parser.
 - `query <query_text>`: help, search, context, logs, metrics, health, skills,
   resources.
 - `daemon start`: start daemon in the background.
 - `daemon stop`: stop daemon.
+- `daemon restart`: stop and start the daemon so Python modules are reloaded.
 - `daemon status`: show daemon pid, project root, ports, and UE health.
 - `doctor`: run local diagnostics.
 
 `run` must also accept stdin for multi-line scripts.
+`python` must also accept stdin and `--file` for PowerShell-safe multi-line
+Python execution.
 
 ## Output Model
 

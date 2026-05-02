@@ -18,7 +18,7 @@ from .formatter import format_output, make_error
 
 def main(argv: list[str] | None = None) -> int:
 	argv = list(sys.argv[1:] if argv is None else argv)
-	if argv and argv[0] not in ("run", "query", "daemon", "doctor", "-h", "--help"):
+	if argv and argv[0] not in ("run", "query", "daemon", "doctor", "python", "py", "-h", "--help"):
 		argv = ["run", *argv]
 
 	parser = _build_parser()
@@ -31,6 +31,20 @@ def main(argv: list[str] | None = None) -> int:
 	if args.command == "query":
 		text = " ".join(args.query_text).strip()
 		return _print_response(_request_with_autostart({"type": "query", "query": text}, config, args), args)
+	if args.command in ("python", "py"):
+		try:
+			code = _python_code(args)
+		except OSError as exc:
+			response = make_error("PYTHON_FILE_READ_FAILED", str(exc), recoverable=False)
+			return _print_response(response, args)
+		if not code.strip():
+			response = make_error(
+				"PYTHON_CODE_REQUIRED",
+				"Python code is required. Pass code, pipe stdin, or use --file.",
+				recoverable=False,
+			)
+			return _print_response(response, args)
+		return _print_response(_request_with_autostart({"type": "exec_python", "code": code}, config, args), args)
 	if args.command == "doctor":
 		response = _request_with_autostart({"type": "doctor"}, config, args)
 		return _print_response(response, args)
@@ -55,15 +69,23 @@ def _build_parser() -> argparse.ArgumentParser:
 	query.add_argument("query_text", nargs="*", help="Query text, for example: help create_blueprint")
 	query.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
 
+	python = sub.add_parser("python", aliases=["py"], help="Execute Unreal Python code without CLI command parsing")
+	_add_output_flags(python)
+	python.add_argument("python_code", nargs="*", help="Python code. Reads stdin when omitted.")
+	python.add_argument("--file", "-f", dest="python_file", help="Read Python code from a UTF-8 file.")
+	python.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
+
 	doctor = sub.add_parser("doctor", help="Run local diagnostics")
 	_add_output_flags(doctor)
 	doctor.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
 
 	daemon = sub.add_parser("daemon", help="Manage the local UE CLI daemon")
 	daemon_sub = daemon.add_subparsers(dest="daemon_command")
-	daemon_sub.add_parser("start", help="Start daemon in the background")
+	start = daemon_sub.add_parser("start", help="Start daemon in the background")
+	start.add_argument("--restart", action="store_true", help="Stop a running daemon before starting.")
 	daemon_sub.add_parser("serve", help="Run daemon in the foreground")
 	daemon_sub.add_parser("stop", help="Stop daemon")
+	daemon_sub.add_parser("restart", help="Restart daemon and reload Python modules")
 	status = daemon_sub.add_parser("status", help="Show daemon status")
 	_add_output_flags(status)
 	return parser
@@ -81,6 +103,13 @@ def _command_text(parts: list[str]) -> str:
 	if not sys.stdin.isatty():
 		return sys.stdin.read()
 	return ""
+
+
+def _python_code(args: argparse.Namespace) -> str:
+	python_file = getattr(args, "python_file", None)
+	if python_file:
+		return Path(python_file).read_text(encoding="utf-8")
+	return _command_text(getattr(args, "python_code", []))
 
 
 def _request_with_autostart(payload: dict[str, Any], config: ProjectConfig, args: argparse.Namespace) -> dict[str, Any]:
@@ -117,13 +146,25 @@ def _handle_daemon(args: argparse.Namespace, config: ProjectConfig) -> int:
 
 		return daemon_main()
 	if cmd == "start":
-		if can_connect(config.daemon_port):
+		if getattr(args, "restart", False):
+			print(f"OK daemon restart requested on {HOST}:{config.daemon_port}", flush=True)
+			_stop_daemon_if_running(config)
+		elif can_connect(config.daemon_port):
 			print(f"OK daemon already running on {HOST}:{config.daemon_port}")
+			print("Use `ue daemon restart` to reload Python modules.")
 			return 0
 		if _start_daemon(config):
-			print(f"OK daemon started on {HOST}:{config.daemon_port}")
+			print(f"OK daemon started on {HOST}:{config.daemon_port}", flush=True)
 			return 0
 		print(f"ERROR failed to start daemon on {HOST}:{config.daemon_port}", file=sys.stderr)
+		return 1
+	if cmd == "restart":
+		print(f"OK daemon restart requested on {HOST}:{config.daemon_port}", flush=True)
+		_stop_daemon_if_running(config)
+		if _start_daemon(config):
+			print(f"OK daemon restarted on {HOST}:{config.daemon_port}", flush=True)
+			return 0
+		print(f"ERROR failed to restart daemon on {HOST}:{config.daemon_port}", file=sys.stderr)
 		return 1
 	if cmd == "stop":
 		try:
@@ -147,6 +188,25 @@ def _handle_daemon(args: argparse.Namespace, config: ProjectConfig) -> int:
 	return 1
 
 
+def _stop_daemon_if_running(config: ProjectConfig) -> None:
+	if not can_connect(config.daemon_port):
+		return
+	try:
+		request_daemon({"type": "stop"}, config=config, timeout=5)
+	except OSError:
+		return
+	_wait_for_daemon_stop(config)
+
+
+def _wait_for_daemon_stop(config: ProjectConfig, *, timeout: float = 5.0) -> bool:
+	deadline = time.time() + timeout
+	while time.time() < deadline:
+		if not can_connect(config.daemon_port, timeout=0.2):
+			return True
+		time.sleep(0.1)
+	return False
+
+
 def _start_daemon(config: ProjectConfig) -> bool:
 	if can_connect(config.daemon_port):
 		return True
@@ -158,7 +218,7 @@ def _start_daemon(config: ProjectConfig) -> bool:
 
 	creationflags = 0
 	if os.name == "nt":
-		creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0) | getattr(subprocess, "DETACHED_PROCESS", 0)
+		creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 	subprocess.Popen(
 		[sys.executable, "-m", "ue_cli_tool.cli", "daemon", "serve"],
@@ -168,7 +228,7 @@ def _start_daemon(config: ProjectConfig) -> bool:
 		stdout=subprocess.DEVNULL,
 		stderr=subprocess.DEVNULL,
 		creationflags=creationflags,
-		close_fds=os.name != "nt",
+		close_fds=True,
 	)
 
 	deadline = time.time() + 5.0

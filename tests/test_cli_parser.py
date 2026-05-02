@@ -230,6 +230,39 @@ class TestQuotedStrings:
         assert cmd.params["default_value"] == "Hello World"
 
 
+class TestExecPythonParsing:
+    def test_exec_python_captures_unquoted_rest(self, parser: CliParser):
+        result = parser.parse("exec_python import unreal; _result = 1")
+        assert result.errors == []
+        cmd = result.commands[0]
+        assert cmd.command == "exec_python"
+        assert cmd.params["code"] == "import unreal; _result = 1"
+
+    def test_exec_python_capture_rest_preserves_flag_like_code(self, parser: CliParser):
+        result = parser.parse("exec_python _result = ['--json', '--raw']")
+        assert result.errors == []
+        cmd = result.commands[0]
+        assert cmd.params["code"] == "_result = ['--json', '--raw']"
+
+    def test_exec_python_multiline_quoted_code(self, parser: CliParser):
+        script = 'exec_python "import unreal\n_result = unreal.SystemLibrary.get_engine_version()"'
+        result = parser.parse(script)
+        assert result.errors == []
+        assert len(result.commands) == 1
+        cmd = result.commands[0]
+        assert cmd.command == "exec_python"
+        assert (
+            cmd.params["code"]
+            == "import unreal\n_result = unreal.SystemLibrary.get_engine_version()"
+        )
+
+    def test_capture_rest_does_not_change_regular_excess_positionals(self, parser: CliParser):
+        result = parser.parse("compile_blueprint BP_Test extra1 extra2")
+        assert result.errors == []
+        cmd = result.commands[0]
+        assert cmd.params == {"blueprint_name": "BP_Test"}
+
+
 # 鈹€鈹€ Batch conversion 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 

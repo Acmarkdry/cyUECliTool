@@ -4,6 +4,17 @@
 > access the full Unreal Python API. Set `_result = <value>` to return data
 > to the MCP client.
 
+For shell use, prefer `ue python` or `ue py`. It sends code directly to the
+daemon and avoids the `ue run` DSL parser:
+
+```powershell
+python .\Python\ue.py python --json --file .\script.py
+@'
+import unreal
+_result = unreal.SystemLibrary.get_engine_version()
+'@ | python .\Python\ue.py python --json
+```
+
 ---
 
 ## 1. Conventions

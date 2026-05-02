@@ -29,6 +29,8 @@ _PYTHON_ACTIONS = [
 			"Execute Python code in Unreal's embedded Python environment. "
 			"Use `import unreal` to access the full UE Python API. "
 			"Set `_result = <value>` to return data. "
+			"For shell use, prefer `ue python --file` or stdin; "
+			"`exec_python` remains the run-DSL compatibility command. "
 			"Replaces many former C++ actions — actor management, blueprint creation, "
 			"material operations, viewport control, PIE control, etc. can all be done "
 			"through unreal.* Python API."
@@ -42,6 +44,7 @@ _PYTHON_ACTIONS = [
 						"Python code to execute. Use `import unreal` for UE API. "
 						"Set `_result = ...` to return data."
 					),
+					"x-capture-rest": True,
 				},
 			},
 			"required": ["code"],

@@ -2,7 +2,15 @@
 
 #include "Actions/PythonActions.h"
 #include "IPythonScriptPlugin.h"
+#include "HAL/FileManager.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/Base64.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Guid.h"
+#include "Misc/Paths.h"
 #include "Misc/ScopeLock.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 // =========================================================================
 // FExecPythonAction
@@ -32,17 +40,26 @@ TSharedPtr<FJsonObject> FExecPythonAction::ExecuteInternal(const TSharedPtr<FJso
 
 	FString Code = Params->GetStringField(TEXT("code"));
 
-	// Build a wrapper script that:
-	// 1. Redirects stdout/stderr to capture them
-	// 2. Executes the user code
-	// 3. Serializes _result to JSON
-	// 4. Stores everything in __mcp_* variables for retrieval
+	FString ResultFilePath = FPaths::Combine(
+		FPlatformProcess::UserTempDir(),
+		FString::Printf(TEXT("__mcp_python_result_%s.json"), *FGuid::NewGuid().ToString(EGuidFormats::Digits))
+	);
+	IFileManager::Get().Delete(*ResultFilePath);
+
+	const FString CodeBase64 = EncodeBase64Utf8(Code);
+	const FString ResultPathBase64 = EncodeBase64Utf8(ResultFilePath);
+
+	// The wrapper writes the result file in the same ExecPythonCommand call.
+	// This avoids relying on globals surviving across separate plugin calls.
 	FString WrapperCode = FString::Printf(TEXT(
+		"import base64 as __mcp_base64\n"
 		"import sys as __mcp_sys\n"
 		"import io as __mcp_io\n"
 		"import json as __mcp_json\n"
 		"import traceback as __mcp_traceback\n"
 		"\n"
+		"__mcp_code = __mcp_base64.b64decode('%s').decode('utf-8')\n"
+		"__mcp_result_path = __mcp_base64.b64decode('%s').decode('utf-8')\n"
 		"__mcp_stdout_capture = __mcp_io.StringIO()\n"
 		"__mcp_stderr_capture = __mcp_io.StringIO()\n"
 		"__mcp_old_stdout = __mcp_sys.stdout\n"
@@ -55,13 +72,16 @@ TSharedPtr<FJsonObject> FExecPythonAction::ExecuteInternal(const TSharedPtr<FJso
 		"__mcp_return_value_json = 'null'\n"
 		"\n"
 		"try:\n"
-		"    exec(r\"\"\"%s\"\"\")\n"
-		"    if '_result' in dir():\n"
-		"        __mcp_return_value = _result\n"
+		"    __mcp_user_ns = globals()\n"
+		"    if '_result' in __mcp_user_ns:\n"
+		"        del __mcp_user_ns['_result']\n"
+		"    exec(__mcp_code, __mcp_user_ns, __mcp_user_ns)\n"
+		"    if '_result' in __mcp_user_ns:\n"
+		"        __mcp_return_value = __mcp_user_ns['_result']\n"
 		"        try:\n"
 		"            __mcp_return_value_json = __mcp_json.dumps(__mcp_return_value, default=str, ensure_ascii=False)\n"
 		"        except Exception as __mcp_e:\n"
-		"            __mcp_return_value_json = __mcp_json.dumps(str(__mcp_return_value))\n"
+		"            __mcp_return_value_json = __mcp_json.dumps(str(__mcp_return_value), ensure_ascii=False)\n"
 		"except Exception as __mcp_e:\n"
 		"    __mcp_success = False\n"
 		"    __mcp_error = str(__mcp_e)\n"
@@ -71,51 +91,30 @@ TSharedPtr<FJsonObject> FExecPythonAction::ExecuteInternal(const TSharedPtr<FJso
 		"    __mcp_sys.stderr = __mcp_old_stderr\n"
 		"    __mcp_stdout_str = __mcp_stdout_capture.getvalue()\n"
 		"    __mcp_stderr_str = __mcp_stderr_capture.getvalue()\n"
-	), *EscapePythonString(Code));
+		"    __mcp_envelope = __mcp_json.dumps({\n"
+		"        'success': __mcp_success,\n"
+		"        'error': __mcp_error,\n"
+		"        'stdout': __mcp_stdout_str,\n"
+		"        'stderr': __mcp_stderr_str,\n"
+		"        'return_value_json': __mcp_return_value_json\n"
+		"    }, ensure_ascii=False)\n"
+		"    with open(__mcp_result_path, 'w', encoding='utf-8') as __mcp_f:\n"
+		"        __mcp_f.write(__mcp_envelope)\n"
+	), *CodeBase64, *ResultPathBase64);
 
 	// Execute the wrapper
 	bool bExecSuccess = PythonPlugin->ExecPythonCommand(*WrapperCode);
 
-	// Now retrieve results by executing small getter scripts
 	FString StdoutStr, StderrStr, ReturnValueJson, ErrorStr;
-	bool bPythonSuccess = true;
-
-	// Get stdout
-	{
-		FString GetStdout = TEXT(
-			"import sys as __mcp_sys\n"
-			"__mcp_sys.stdout.write('__MCP_OUT__' + __mcp_stdout_str + '__MCP_END__')\n"
-		);
-		// Use a simpler approach: query variables via ExecPythonCommand
-	}
-
-	// Simpler approach: use a single retrieval script that prints a JSON envelope
-	FString RetrieveCode = TEXT(
-		"import json as __mcp_json2, sys as __mcp_sys2\n"
-		"__mcp_envelope = __mcp_json2.dumps({\n"
-		"    'success': __mcp_success,\n"
-		"    'error': __mcp_error,\n"
-		"    'stdout': __mcp_stdout_str,\n"
-		"    'stderr': __mcp_stderr_str,\n"
-		"    'return_value_json': __mcp_return_value_json\n"
-		"}, ensure_ascii=False)\n"
-		"# Write to a temp file so C++ can read it\n"
-		"import tempfile as __mcp_tempfile, os as __mcp_os\n"
-		"__mcp_result_path = __mcp_os.path.join(__mcp_tempfile.gettempdir(), '__mcp_python_result.json')\n"
-		"with open(__mcp_result_path, 'w', encoding='utf-8') as __mcp_f:\n"
-		"    __mcp_f.write(__mcp_envelope)\n"
-	);
-	PythonPlugin->ExecPythonCommand(*RetrieveCode);
-
-	// Read the result file
-	FString TempDir = FPlatformProcess::UserTempDir();
-	FString ResultFilePath = FPaths::Combine(TempDir, TEXT("__mcp_python_result.json"));
 	FString ResultJson;
 
 	if (!FFileHelper::LoadFileToString(ResultJson, *ResultFilePath))
 	{
+		const FString Message = bExecSuccess
+			? TEXT("Failed to read Python execution result. The code may have crashed the Python interpreter.")
+			: TEXT("Python wrapper execution failed before producing a result.");
 		return CreateErrorResponse(
-			TEXT("Failed to read Python execution result. The code may have crashed the Python interpreter."),
+			Message,
 			TEXT("python_result_read_error")
 		);
 	}
@@ -175,11 +174,8 @@ TSharedPtr<FJsonObject> FExecPythonAction::ExecuteInternal(const TSharedPtr<FJso
 	return CreateSuccessResponse(ResultData);
 }
 
-FString FExecPythonAction::EscapePythonString(const FString& Input)
+FString FExecPythonAction::EncodeBase64Utf8(const FString& Input)
 {
-	// Escape backslashes and triple-quotes for embedding in r"""..."""
-	FString Result = Input;
-	// Replace """ with \" \" \" to avoid breaking the raw string literal
-	Result = Result.Replace(TEXT("\"\"\""), TEXT("\\\"\\\"\\\""));
-	return Result;
+	FTCHARToUTF8 Utf8(*Input);
+	return FBase64::Encode(reinterpret_cast<const uint8*>(Utf8.Get()), Utf8.Length());
 }

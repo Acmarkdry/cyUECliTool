@@ -308,13 +308,23 @@ def _help_command(command_name: str) -> dict[str, Any]:
 		}
 	required = action.input_schema.get("required", [])
 	properties = action.input_schema.get("properties", {})
-	lines = [f"Command: {action.command}", f"ID: {action.id}", f"Description: {action.description}", ""]
+	description = action.description
+	if action.command == "exec_python":
+		description = (
+			"Execute Python code in Unreal's embedded Python environment. "
+			"For shell use, prefer `ue python --file` or stdin; "
+			"`exec_python` remains the run-DSL compatibility command."
+		)
+	lines = [f"Command: {action.command}", f"ID: {action.id}", f"Description: {description}", ""]
 	pos_parts = " ".join(f"<{p}>" for p in required)
 	opt_parts = " ".join(
 		f"[--{k} <{properties[k].get('type', 'string')}>]" for k in properties if k not in required
 	)
 	lines.append(f"Usage: {action.command} {pos_parts} {opt_parts}".rstrip())
 	lines.append("")
+	if action.command == "exec_python":
+		lines.extend(_python_exec_cli_guidance())
+		return {"success": True, "help": "\n".join(lines)}
 	if required:
 		lines.append("POSITIONAL (required):")
 		for param in required:
@@ -333,6 +343,23 @@ def _help_command(command_name: str) -> dict[str, Any]:
 		for ex in action.examples:
 			lines.append(f"  {_format_example_as_cli(action.command, ex, required)}")
 	return {"success": True, "help": "\n".join(lines)}
+
+
+def _python_exec_cli_guidance() -> list[str]:
+	return [
+		"RECOMMENDED CLI:",
+		"  ue python --json --file script.py",
+		"  @'",
+		"  import unreal",
+		"  _result = unreal.SystemLibrary.get_engine_version()",
+		"  '@ | ue python --json",
+		"  ue python --json \"print('hello')\"",
+		"",
+		"NOTES:",
+		"  `ue python` and `ue py` send code directly to the daemon and do not use the run DSL parser.",
+		"  Use `_result = ...` for structured return data; print output is captured as stdout.",
+		"  `ue run \"exec_python <code>\"` remains available for simple compatibility cases.",
+	]
 
 
 def _format_example_as_cli(command: str, example: dict, required: list[str]) -> str:

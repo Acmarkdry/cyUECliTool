@@ -74,8 +74,25 @@ class CliParser:
 		"""
 		result = ParseResult()
 		context: dict[str, Any] = {}
+		pending_lines: list[str] = []
+
+		def emit_command(command_text: str, raw_text: str) -> None:
+			try:
+				cmd = self.parse_line(command_text, context)
+				cmd.raw_line = raw_text.rstrip()
+				result.commands.append(cmd)
+			except Exception as e:
+				result.errors.append(f"Error parsing '{command_text.strip()}': {e}")
 
 		for raw_line in text.splitlines():
+			if pending_lines:
+				pending_lines.append(raw_line)
+				command_text = "\n".join(pending_lines)
+				if self._is_complete_command(command_text):
+					emit_command(command_text, command_text)
+					pending_lines = []
+				continue
+
 			stripped = raw_line.strip()
 
 			# Skip blank lines and comments
@@ -92,13 +109,14 @@ class CliParser:
 				context = {"_target": target}
 				continue
 
-			# Regular command line
-			try:
-				cmd = self.parse_line(stripped, context)
-				cmd.raw_line = raw_line.rstrip()
-				result.commands.append(cmd)
-			except Exception as e:
-				result.errors.append(f"Error parsing '{stripped}': {e}")
+			pending_lines = [stripped]
+			if self._is_complete_command(stripped):
+				emit_command(stripped, raw_line)
+				pending_lines = []
+
+		if pending_lines:
+			command_text = "\n".join(pending_lines)
+			emit_command(command_text, command_text)
 
 		return result
 
@@ -170,6 +188,14 @@ class CliParser:
 
 		# Map positional tokens to required slots (excluding context-filled ones)
 		available_slots = [p for p in positional_order if p not in params]
+
+		if (
+			remaining
+			and len(available_slots) == 1
+			and self._should_capture_rest(command, available_slots[0])
+		):
+			params[available_slots[0]] = self._capture_rest_value(line, command)
+			return CommandDict(command=command, params=params)
 
 		for slot, value in zip(available_slots, positional_tokens):
 			params[slot] = self._coerce_value(value)
@@ -252,6 +278,34 @@ class CliParser:
 		except ValueError:
 			# Unbalanced quotes —?fallback to naive split
 			return line.split()
+
+	@staticmethod
+	def _is_complete_command(text: str) -> bool:
+		try:
+			shlex.split(text, posix=True)
+			return True
+		except ValueError:
+			return False
+
+	def _should_capture_rest(self, command: str, param_name: str) -> bool:
+		action = self._registry.get_by_command(command)
+		if action is None:
+			return False
+		prop = action.input_schema.get("properties", {}).get(param_name, {})
+		return bool(prop.get("x-capture-rest") or prop.get("x_capture_rest"))
+
+	@staticmethod
+	def _capture_rest_value(line: str, command: str) -> str:
+		rest = line.lstrip()[len(command) :].lstrip()
+		if not rest:
+			return ""
+		if rest[0] in ("'", '"'):
+			try:
+				tokens = shlex.split(rest, posix=True)
+			except ValueError:
+				return rest
+			return tokens[0] if len(tokens) == 1 else " ".join(tokens)
+		return rest
 
 	def _coerce_value_with_schema(
 		self, val: str, param_name: str, command: str

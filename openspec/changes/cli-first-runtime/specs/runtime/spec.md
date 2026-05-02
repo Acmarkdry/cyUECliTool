@@ -20,6 +20,13 @@ CLI text commands as the primary interface.
 - **THEN** the CLI SHALL parse the script with context target support
 - **AND** execute it through batch execution.
 
+#### Scenario: Execute Unreal Python through the dedicated path
+
+- **WHEN** Codex runs `ue python --file script.py` or pipes stdin to
+  `ue python`
+- **THEN** the CLI SHALL send an `exec_python` daemon request directly
+- **AND** SHALL NOT split the Python source through the `run` DSL parser.
+
 ### Requirement: Daemon-owned persistent Unreal connection
 
 The system SHALL keep the persistent Unreal Editor connection in a long-lived
@@ -49,6 +56,13 @@ default.
 - **THEN** it SHALL bind to `127.0.0.1:<daemon_port>`
 - **AND** write status information that includes pid, project root,
   `daemon_port`, and `tcp_port`.
+
+#### Scenario: Daemon module reload
+
+- **WHEN** Codex runs `ue daemon restart`
+- **THEN** the CLI SHALL stop any running daemon before starting a new one
+- **AND** `daemon status` SHALL expose source module paths and mtimes so callers
+  can verify the active daemon loaded the expected Python files.
 
 ### Requirement: Text-first model output
 

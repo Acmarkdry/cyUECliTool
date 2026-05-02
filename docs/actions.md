@@ -80,14 +80,29 @@ python .\Python\ue.py run "get_context" --raw
 
 ## Python Execution
 
-Use `python.exec` or its command alias only when the task genuinely needs custom
-Unreal Python. Always set `_result` to return data:
+Use `ue python` (alias: `ue py`) when the task needs custom Unreal Python. This
+path sends code directly to the daemon and avoids the `ue run` command parser.
+Always set `_result` to return structured data:
 
 ```python
 import unreal
 actors = unreal.EditorLevelLibrary.get_all_level_actors()
 _result = [{"name": a.get_name(), "class": a.get_class().get_name()} for a in actors]
 ```
+
+PowerShell-safe options:
+
+```powershell
+python .\Python\ue.py python --json --file .\script.py
+@'
+import unreal
+_result = unreal.SystemLibrary.get_engine_version()
+'@ | python .\Python\ue.py python --json
+python .\Python\ue.py python --json "print('hello')"
+```
+
+`ue run "exec_python <code>"` remains available for simple compatibility cases,
+but complex or multi-line Python should use `ue python --file` or stdin.
 
 Prefer dedicated commands for common Blueprint, graph, material, widget, and
 animation workflows because they usually provide better validation and safer

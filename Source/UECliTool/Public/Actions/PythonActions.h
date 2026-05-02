@@ -31,6 +31,6 @@ protected:
 	virtual bool RequiresSave() const override { return false; }
 
 private:
-	/** Escape user code for embedding in a Python raw triple-quoted string */
-	static FString EscapePythonString(const FString& Input);
+	/** Encode text as UTF-8 base64 for safe embedding in the Python wrapper. */
+	static FString EncodeBase64Utf8(const FString& Input);
 };
