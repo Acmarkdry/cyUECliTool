@@ -3,6 +3,7 @@
 #include "Actions/MaterialActions.h"
 #include "MCPContext.h"
 #include "MCPCommonUtils.h"
+#include "MaterialCommonHelpers.h"
 
 // Material system headers
 #include "Materials/Material.h"

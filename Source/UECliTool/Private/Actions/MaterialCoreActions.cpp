@@ -3,6 +3,7 @@
 #include "Actions/MaterialActions.h"
 #include "MCPContext.h"
 #include "MCPCommonUtils.h"
+#include "MaterialCommonHelpers.h"
 
 // Material system headers
 #include "Materials/Material.h"
@@ -113,9 +114,9 @@
 // Expression Class Mapping
 // =========================================================================
 
-static TMap<FString, UClass*> ExpressionClassMap;
-static TMap<FString, EMaterialShadingModel> ShadingModelMap;
-static TMap<FString, EBlendMode> BlendModeMap;
+TMap<FString, UClass*> ExpressionClassMap;
+TMap<FString, EMaterialShadingModel> ShadingModelMap;
+TMap<FString, EBlendMode> BlendModeMap;
 
 static bool IsInvalidMaterialParameterName(const FString& InName)
 {
@@ -148,7 +149,7 @@ static bool ValidateParameterOverrideKeys(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-static void InitShadingModelMap()
+void InitShadingModelMap()
 {
 	if (ShadingModelMap.Num() > 0) return;
 
@@ -175,7 +176,7 @@ static void InitShadingModelMap()
 	ShadingModelMap.Add(TEXT("MSM_Eye"), MSM_Eye);
 }
 
-static void InitBlendModeMap()
+void InitBlendModeMap()
 {
 	if (BlendModeMap.Num() > 0) return;
 
@@ -195,7 +196,7 @@ static void InitBlendModeMap()
 	BlendModeMap.Add(TEXT("BLEND_AlphaHoldout"), BLEND_AlphaHoldout);
 }
 
-static void InitExpressionClassMap()
+void InitExpressionClassMap()
 {
 	if (ExpressionClassMap.Num() > 0) return; // Already initialized
 

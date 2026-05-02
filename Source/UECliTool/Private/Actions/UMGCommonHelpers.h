@@ -10,6 +10,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Engine/Blueprint.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "MCPContext.h"
 
@@ -52,6 +53,51 @@ static UWidgetBlueprint* FindWidgetBlueprintByName(const FString& BlueprintName)
 		{
 			UWidgetBlueprint* Widget = Cast<UWidgetBlueprint>(AssetData.GetAsset());
 			if (Widget) return Widget;
+		}
+	}
+
+	return nullptr;
+}
+
+// Helper to resolve a class by short name, generated Blueprint class name, or asset name.
+static UClass* ResolveClassByName(const FString& ClassName)
+{
+	// Try full path first (e.g. "/Script/MyModule.UMyViewModel").
+	UClass* FoundClass = FindFirstObject<UClass>(*ClassName, EFindFirstObjectOptions::EnsureIfAmbiguous);
+	if (FoundClass)
+	{
+		return FoundClass;
+	}
+
+	TArray<FString> Candidates = {
+		FString::Printf(TEXT("U%s"), *ClassName),
+		FString::Printf(TEXT("%s_C"), *ClassName),
+	};
+
+	for (const FString& Candidate : Candidates)
+	{
+		FoundClass = FindFirstObject<UClass>(*Candidate, EFindFirstObjectOptions::EnsureIfAmbiguous);
+		if (FoundClass)
+		{
+			return FoundClass;
+		}
+	}
+
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+	TArray<FAssetData> AssetList;
+	AssetRegistry.GetAssetsByClass(UBlueprint::StaticClass()->GetClassPathName(), AssetList, true);
+
+	for (const FAssetData& AssetData : AssetList)
+	{
+		if (AssetData.AssetName.ToString() == ClassName)
+		{
+			UBlueprint* BP = Cast<UBlueprint>(AssetData.GetAsset());
+			if (BP && BP->GeneratedClass)
+			{
+				return BP->GeneratedClass;
+			}
 		}
 	}
 
