@@ -159,12 +159,18 @@ TSharedPtr<FJsonObject> FExecPythonAction::ExecuteInternal(const TSharedPtr<FJso
 	ResultData->SetStringField(TEXT("stdout"), StdoutStr);
 	ResultData->SetStringField(TEXT("stderr"), StderrStr);
 
-	// Parse return_value_json into a proper JSON value
-	TSharedPtr<FJsonValue> ReturnValue;
-	TSharedRef<TJsonReader<>> ReturnReader = TJsonReaderFactory<>::Create(ReturnValueJson);
-	if (FJsonSerializer::Deserialize(ReturnReader, ReturnValue) && ReturnValue.IsValid())
+	// Parse return_value_json into a proper JSON value. Wrap the value so UE's
+	// JSON parser also handles top-level strings, booleans, numbers, and null.
+	TSharedPtr<FJsonObject> WrappedReturnObject;
+	const FString WrappedReturnJson = FString::Printf(TEXT("{\"value\":%s}"), *ReturnValueJson);
+	TSharedRef<TJsonReader<>> ReturnReader = TJsonReaderFactory<>::Create(WrappedReturnJson);
+	if (
+		FJsonSerializer::Deserialize(ReturnReader, WrappedReturnObject)
+		&& WrappedReturnObject.IsValid()
+		&& WrappedReturnObject->TryGetField(TEXT("value")).IsValid()
+	)
 	{
-		ResultData->SetField(TEXT("return_value"), ReturnValue);
+		ResultData->SetField(TEXT("return_value"), WrappedReturnObject->TryGetField(TEXT("value")));
 	}
 	else
 	{
