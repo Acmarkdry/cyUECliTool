@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.5.0",
+	"Version": 6,
+	"VersionName": "0.6.0",
 	"FriendlyName": "UECliTool",
 	"Description": "CLI-first AI tool for controlling Unreal Engine Editor. Based on lilklon/UEBlueprintMCP (MIT).",
 	"Category": "Editor",

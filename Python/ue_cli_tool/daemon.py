@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from . import __version__
 from .config import ProjectConfig, load_config
 from .connection import ConnectionConfig, PersistentUnrealConnection, _wire_metrics
 from .context import ContextStore
@@ -261,6 +262,7 @@ def _source_payload() -> dict[str, Any]:
 	cli_module = daemon_module.with_name("cli.py")
 	parser_module = daemon_module.with_name("cli_parser.py")
 	return {
+		"version": __version__,
 		"python_executable": sys.executable,
 		"python_root": str(daemon_module.parents[1]),
 		"cwd": os.getcwd(),

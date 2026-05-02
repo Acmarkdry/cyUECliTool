@@ -43,6 +43,27 @@ def test_json_mode_returns_envelope():
 	assert decoded["data"]["pong"] is True
 
 
+def test_cli_line_is_only_in_envelope_not_data():
+	envelope = envelope_from_result(
+		"exec_python",
+		{"success": True, "return_value": 7, "_cli_line": "exec_python _result = 7"},
+	)
+
+	assert envelope["cli_line"] == "exec_python _result = 7"
+	assert "_cli_line" not in envelope["data"]
+
+
+def test_exec_python_text_omits_empty_streams_and_shows_value():
+	envelope = envelope_from_result(
+		"exec_python",
+		{"success": True, "stdout": "", "stderr": "", "return_value": {"x": 1}},
+	)
+
+	text = format_output(envelope)
+
+	assert text == 'OK exec_python\nReturn value: {"x":1}'
+
+
 def test_batch_output_is_line_oriented():
 	envelope = envelope_from_result(
 		"batch_execute",
@@ -62,3 +83,54 @@ def test_batch_output_is_line_oriented():
 	assert "OK batch 2/2" in text
 	assert "1 OK create_blueprint BP_A" in text
 	assert "2 OK compile_blueprint BP_A" in text
+
+
+def test_health_output_shows_connection_state():
+	envelope = envelope_from_result(
+		"query health",
+		{
+			"success": True,
+			"health": {
+				"is_connected": True,
+				"connection_state": "connected",
+				"consecutive_failures": 0,
+				"config": {"host": "127.0.0.1", "port": 55558},
+				"circuit_breaker": {"state": "closed"},
+			},
+		},
+	)
+
+	text = format_output(envelope)
+
+	assert "OK query health" in text
+	assert "Connected: yes" in text
+	assert "UE endpoint: 127.0.0.1:55558" in text
+
+
+def test_doctor_output_is_actionable():
+	envelope = envelope_from_result(
+		"doctor",
+		{
+			"success": True,
+			"daemon": {"running": True, "pid": 123, "port": 55559},
+			"unreal": {
+				"port_open": True,
+				"port": 55558,
+				"health": {"is_connected": True, "connection_state": "connected"},
+			},
+			"config": {
+				"project_root": "D:/Project",
+				"engine_root": "D:/UE",
+				"auto_start_daemon": True,
+			},
+			"source": {"version": "0.6.0"},
+		},
+	)
+
+	text = format_output(envelope)
+
+	assert "OK doctor" in text
+	assert "Version: 0.6.0" in text
+	assert "Daemon: running pid=123 port=55559" in text
+	assert "Unreal: running port=55558 connected=yes" in text
+	assert "Project: D:/Project" in text

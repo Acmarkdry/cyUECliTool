@@ -8,12 +8,16 @@ For shell use, prefer `ue python` or `ue py`. It sends code directly to the
 daemon and avoids the `ue run` DSL parser:
 
 ```powershell
-python .\Python\ue.py python --json --file .\script.py
+.\ue.ps1 py --json --file .\script.py
 @'
 import unreal
 _result = unreal.SystemLibrary.get_engine_version()
-'@ | python .\Python\ue.py python --json
+'@ | .\ue.ps1 py --json
 ```
+
+Use `_result` for structured data. Use `print()` only for log text; printing the
+same object assigned to `_result` will show both stdout and return-value
+channels.
 
 ---
 

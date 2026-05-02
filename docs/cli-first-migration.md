@@ -1,7 +1,7 @@
 # CLI-first Migration Notes
 
-This document tracks the v0.5.0 move from model-facing MCP tools to the
-CLI-first runtime.
+This document tracks the v0.5.0 through v0.6.0 move from model-facing MCP tools
+to the CLI-first runtime.
 
 ## Completed
 
@@ -16,6 +16,13 @@ CLI-first runtime.
 - Changed setup scripts to validate the CLI entrypoint instead of generating
   MCP client config by default.
 - Removed obsolete `.kiro` planning/spec files.
+- Added project-root PowerShell launchers so agents can call `.\ue.ps1`.
+- Added `ue py` / `ue python` direct execution for PowerShell-safe Unreal
+  Python via `--file` or stdin.
+- Added `ue run --file` for multi-line CLI DSL scripts.
+- Made daemon requests serialize access to the shared Unreal TCP connection.
+- Improved text diagnostics for `doctor`, `daemon status`, `query health`, and
+  `exec_python`.
 
 ## Preserved Compatibility
 
@@ -40,12 +47,13 @@ These names are compatibility details, not the public model-facing path.
 
 ## Current Recommendation
 
-Use:
+Use the project launcher form:
 
 ```powershell
-.\Python\.venv\Scripts\python.exe .\Python\ue.py doctor
-.\Python\.venv\Scripts\python.exe .\Python\ue.py query help
-.\Python\.venv\Scripts\python.exe .\Python\ue.py run "get_context"
+.\ue.ps1 doctor
+.\ue.ps1 query help
+.\ue.ps1 py --json --file .\.codex\tmp\task.py
+.\ue.ps1 run --json --file .\.codex\tmp\task.uecli
 ```
 
 Do not use `ue_cli(...)` or `ue_query(...)` unless testing legacy MCP

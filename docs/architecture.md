@@ -1,13 +1,13 @@
 # Architecture
 
-## v0.5.0 CLI-first Runtime
+## v0.6.0 CLI-first Runtime
 
 The primary model-facing interface is now a shell-invoked CLI. Agents write
 plain command text; they do not author MCP tool JSON for normal workflows.
 
 ```text
 Codex / user
-  -> Python/ue.py run/query/doctor
+  -> ue.ps1 run/query/py/doctor
   -> ue_cli_tool.cli
   -> local daemon IPC on 127.0.0.1:<daemon_port>
   -> ue_cli_tool.daemon
@@ -71,13 +71,13 @@ Status: ok
 Machine-readable JSON is explicit:
 
 ```powershell
-python .\Python\ue.py run "get_context" --json
+.\ue.ps1 run "get_context" --json
 ```
 
 Raw debugging output is explicit:
 
 ```powershell
-python .\Python\ue.py run "get_context" --raw
+.\ue.ps1 run "get_context" --raw
 ```
 
 ## Command Flow
@@ -97,8 +97,13 @@ CLI text
   -> text/json/raw formatting
 ```
 
-Multi-line command scripts are converted into `batch_execute` and sent as one
-Unreal bridge request.
+Multi-line command scripts are parsed by Python and executed sequentially
+through the daemon-owned Unreal connection. This keeps `run --file` reliable
+even when a project has older bridge binaries, and it lets each child result
+retain its source CLI line for review.
+
+Direct `batch_execute` remains available as an editor action for callers that
+explicitly want C++ bridge-side batching.
 
 ## C++ Bridge
 

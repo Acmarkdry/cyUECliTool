@@ -24,6 +24,7 @@ IMPORTANT_KEYS = (
 	"pin_count",
 	"warning_count",
 	"error_count",
+	"version",
 )
 
 
@@ -81,7 +82,7 @@ def envelope_from_result(action: str, result: Any, *, cli_line: str | None = Non
 			diagnostics=_diagnostics_from_result(result),
 		)
 
-	data = {k: v for k, v in result.items() if k not in ("success",)}
+	data = {k: v for k, v in result.items() if k not in ("success", "_cli_line")}
 	return make_result(action, data, cli_line=cli_line or result.get("_cli_line"))
 
 
@@ -102,6 +103,14 @@ def format_text(envelope: dict[str, Any]) -> str:
 	action = envelope.get("action") or "command"
 
 	if isinstance(data, dict):
+		if action == "exec_python":
+			return _format_exec_python(data)
+		if action == "doctor":
+			return _format_doctor(data)
+		if action == "daemon.status":
+			return _format_daemon_status(data)
+		if "health" in data and isinstance(data["health"], dict):
+			return _format_health(action, data["health"])
 		if "help" in data and isinstance(data["help"], str):
 			return f"OK {action}\n{data['help'].strip()}"
 		if "domains" in data:
@@ -117,6 +126,103 @@ def format_text(envelope: dict[str, Any]) -> str:
 	lines.extend(_summarize_value(data))
 	if len(lines) == 1:
 		lines.append("Result: ok")
+	return "\n".join(lines)
+
+
+def _format_exec_python(data: dict[str, Any]) -> str:
+	lines = ["OK exec_python"]
+	stdout = str(data.get("stdout") or "").strip()
+	stderr = str(data.get("stderr") or "").strip()
+	return_value = data.get("return_value")
+
+	if stdout:
+		lines.append(f"Stdout: {_short(stdout)}")
+	if stderr:
+		lines.append(f"Stderr: {_short(stderr)}")
+	if "return_value" in data:
+		lines.append(f"Return value: {_short(return_value)}")
+	if len(lines) == 1:
+		lines.append("Result: ok")
+	return "\n".join(lines)
+
+
+def _format_doctor(data: dict[str, Any]) -> str:
+	daemon = data.get("daemon") if isinstance(data.get("daemon"), dict) else {}
+	unreal = data.get("unreal") if isinstance(data.get("unreal"), dict) else {}
+	config = data.get("config") if isinstance(data.get("config"), dict) else {}
+	source = data.get("source") if isinstance(data.get("source"), dict) else {}
+	health = unreal.get("health") if isinstance(unreal.get("health"), dict) else {}
+
+	lines = ["OK doctor"]
+	if source.get("version"):
+		lines.append(f"Version: {source.get('version')}")
+	lines.append(
+		"Daemon: "
+		+ _status_word(bool(daemon.get("running")))
+		+ f" pid={daemon.get('pid', '?')} port={daemon.get('port', '?')}"
+	)
+	lines.append(
+		"Unreal: "
+		+ _status_word(bool(unreal.get("port_open")))
+		+ f" port={unreal.get('port', '?')} connected={_yes_no(bool(health.get('is_connected')))}"
+	)
+	state = health.get("connection_state")
+	if state:
+		lines.append(f"UE state: {state}")
+	last_error = health.get("last_error")
+	if last_error:
+		lines.append(f"Last UE error: {_short(last_error)}")
+	if config.get("project_root"):
+		lines.append(f"Project: {config.get('project_root')}")
+	if config.get("engine_root"):
+		lines.append(f"Engine: {config.get('engine_root')}")
+	lines.append(f"Auto-start daemon: {_yes_no(bool(config.get('auto_start_daemon')))}")
+	return "\n".join(lines)
+
+
+def _format_daemon_status(data: dict[str, Any]) -> str:
+	source = data.get("source") if isinstance(data.get("source"), dict) else {}
+	health = data.get("ue_health") if isinstance(data.get("ue_health"), dict) else {}
+	context = data.get("context") if isinstance(data.get("context"), dict) else {}
+
+	lines = ["OK daemon.status"]
+	if source.get("version"):
+		lines.append(f"Version: {source.get('version')}")
+	lines.append(f"PID: {data.get('pid', '?')}")
+	lines.append(f"Daemon: {data.get('host', '127.0.0.1')}:{data.get('daemon_port', '?')}")
+	lines.append(
+		f"Unreal: {data.get('host', '127.0.0.1')}:{data.get('tcp_port', '?')} "
+		f"connected={_yes_no(bool(health.get('is_connected')))}"
+	)
+	if health.get("connection_state"):
+		lines.append(f"UE state: {health.get('connection_state')}")
+	if health.get("last_error"):
+		lines.append(f"Last UE error: {_short(health.get('last_error'))}")
+	if context.get("op_count") is not None:
+		lines.append(f"Operations: {context.get('op_count')}")
+	if data.get("project_root"):
+		lines.append(f"Project: {data.get('project_root')}")
+	if source.get("python_executable"):
+		lines.append(f"Python: {source.get('python_executable')}")
+	return "\n".join(lines)
+
+
+def _format_health(action: str, health: dict[str, Any]) -> str:
+	config = health.get("config") if isinstance(health.get("config"), dict) else {}
+	circuit = health.get("circuit_breaker") if isinstance(health.get("circuit_breaker"), dict) else {}
+
+	lines = [f"OK {action}"]
+	lines.append(f"Connected: {_yes_no(bool(health.get('is_connected')))}")
+	if health.get("connection_state"):
+		lines.append(f"State: {health.get('connection_state')}")
+	if config:
+		lines.append(f"UE endpoint: {config.get('host', '127.0.0.1')}:{config.get('port', '?')}")
+	if circuit.get("state"):
+		lines.append(f"Circuit breaker: {circuit.get('state')}")
+	if health.get("consecutive_failures") is not None:
+		lines.append(f"Consecutive failures: {health.get('consecutive_failures')}")
+	if health.get("last_error"):
+		lines.append(f"Last error: {_short(health.get('last_error'))}")
 	return "\n".join(lines)
 
 
@@ -249,6 +355,14 @@ def _short(value: Any, limit: int = 220) -> str:
 
 def _label(key: str) -> str:
 	return key.replace("_", " ").capitalize()
+
+
+def _yes_no(value: bool) -> str:
+	return "yes" if value else "no"
+
+
+def _status_word(value: bool) -> str:
+	return "running" if value else "stopped"
 
 
 def _diagnostics_from_result(result: dict[str, Any]) -> dict[str, Any]:

@@ -42,6 +42,8 @@ Do not make the model repeat venv paths such as
    .\ue.ps1 py --json --file .\.codex\tmp\task.py
    ```
    Set `_result = ...` for structured data. Use `print()` only for log text.
+   Do not print the same object assigned to `_result`; stdout and return value
+   are intentionally separate output channels.
 
 3. For CLI DSL batches, write a temporary `.uecli` file and execute it:
    ```powershell

@@ -1,6 +1,6 @@
 # Development
 
-UECliTool v0.5.0 is CLI-first at the model boundary while preserving the C++
+UECliTool v0.6.0 is CLI-first at the model boundary while preserving the C++
 editor bridge and action registry.
 
 ## Add A New Editor Action
@@ -8,7 +8,7 @@ editor bridge and action registry.
 1. Add a C++ `FEditorAction` subclass.
 2. Register it in `MCPBridge.cpp`.
 3. Add a Python `ActionDef` in `Python/ue_cli_tool/registry/actions.py`.
-4. Verify discovery through `Python/ue.py query`.
+4. Verify discovery through `.\ue.ps1 query`.
 
 Example C++ skeleton:
 
@@ -64,15 +64,15 @@ from the registry schema.
 ## Verify A New Action
 
 ```powershell
-.\Python\.venv\Scripts\python.exe .\Python\ue.py query "search my_new_action"
-.\Python\.venv\Scripts\python.exe .\Python\ue.py query "help my_new_action"
-.\Python\.venv\Scripts\python.exe .\Python\ue.py run "my_new_action value"
+.\ue.ps1 query "search my_new_action"
+.\ue.ps1 query "help my_new_action"
+.\ue.ps1 run "my_new_action value"
 ```
 
 Use `--json` for exact test assertions:
 
 ```powershell
-.\Python\.venv\Scripts\python.exe .\Python\ue.py run "my_new_action value" --json
+.\ue.ps1 run "my_new_action value" --json
 ```
 
 ## Response Formatting
@@ -103,6 +103,9 @@ is too noisy or hides important identifiers.
 - Keep `--json` stable enough for tests and scripts.
 - Keep `--raw` for debugging only.
 - Use `query "help <command>"` as the source of truth for syntax.
+- Prefer `ue py --file` for custom Unreal Python. Use `_result` for returned
+  data and `print()` only for logs, otherwise users will see both stdout and
+  return-value channels.
 
 ## Commandlet Mode
 

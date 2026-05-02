@@ -11,14 +11,18 @@ import time
 from pathlib import Path
 from typing import Any
 
+from . import __version__
 from .config import ProjectConfig, load_config
 from .daemon import HOST, can_connect, request_daemon
-from .formatter import format_output, make_error
+from .formatter import format_output, make_error, make_result
 
 
 def main(argv: list[str] | None = None) -> int:
 	argv = list(sys.argv[1:] if argv is None else argv)
-	if argv and argv[0] not in ("run", "query", "daemon", "doctor", "python", "py", "-h", "--help"):
+	if argv == ["--version"]:
+		print(f"ue {__version__}")
+		return 0
+	if argv and argv[0] not in ("run", "query", "daemon", "doctor", "python", "py", "version", "-h", "--help", "--version"):
 		argv = ["run", *argv]
 
 	parser = _build_parser()
@@ -52,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
 	if args.command == "doctor":
 		response = _request_with_autostart({"type": "doctor"}, config, args)
 		return _print_response(response, args)
+	if args.command == "version":
+		return _print_response(make_result("version", {"version": __version__}), args)
 	if args.command == "daemon":
 		return _handle_daemon(args, config)
 
@@ -61,6 +67,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def _build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(prog="ue", description="CLI-first Unreal Editor automation")
+	parser.add_argument("--version", action="version", version=f"ue {__version__}")
 	sub = parser.add_subparsers(dest="command")
 
 	run = sub.add_parser("run", help="Execute UE CLI command text")
@@ -83,6 +90,9 @@ def _build_parser() -> argparse.ArgumentParser:
 	doctor = sub.add_parser("doctor", help="Run local diagnostics")
 	_add_output_flags(doctor)
 	doctor.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
+
+	version = sub.add_parser("version", help="Print CLI version")
+	_add_output_flags(version)
 
 	daemon = sub.add_parser("daemon", help="Manage the local UE CLI daemon")
 	daemon_sub = daemon.add_subparsers(dest="daemon_command")

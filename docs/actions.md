@@ -83,7 +83,9 @@ Use raw mode only for debugging:
 
 Use `ue python` (alias: `ue py`) when the task needs custom Unreal Python. This
 path sends code directly to the daemon and avoids the `ue run` command parser.
-Always set `_result` to return structured data:
+Always set `_result` to return structured data. Use `print()` only for log text;
+if the same data is printed and assigned to `_result`, CLI output will show both
+`Stdout` and `Return value` because they are separate channels.
 
 ```python
 import unreal

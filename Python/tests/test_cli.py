@@ -36,6 +36,28 @@ def test_query_json_flag(monkeypatch, capsys):
 	assert out.lstrip().startswith("{")
 
 
+def test_version_command_does_not_touch_daemon(monkeypatch, capsys):
+	def fail_request(payload, config, args):
+		raise AssertionError("version should not contact daemon")
+
+	monkeypatch.setattr(cli, "_request_with_autostart", fail_request)
+
+	rc = cli.main(["version"])
+	out = capsys.readouterr().out
+
+	assert rc == 0
+	assert "OK version" in out
+	assert "0.6.0" in out
+
+
+def test_global_version_flag(capsys):
+	rc = cli.main(["--version"])
+	out = capsys.readouterr().out
+
+	assert rc == 0
+	assert out.strip() == "ue 0.6.0"
+
+
 def test_run_file_sends_command_text(monkeypatch, tmp_path, capsys):
 	script = tmp_path / "commands.uecli"
 	script.write_text("\ufeff@BP_Player\nget_blueprint_summary --detail_level brief\n", encoding="utf-8")

@@ -4,10 +4,11 @@
 
 CLI-first AI tool for controlling Unreal Engine Editor.
 
-v0.5.0 moves the model-facing interface away from MCP tool JSON. Codex and
-other agents should issue plain CLI text through the local `ue` command. A
-Python daemon owns the persistent Unreal Editor connection, and default output
-is concise text optimized for model reading.
+v0.6.0 makes the PowerShell launcher and Codex skill the primary interface.
+Codex and other agents should call the local `.\ue.ps1` launcher, write complex
+Python or command batches to files, and use the daemon-backed CLI instead of
+MCP tool JSON. A Python daemon owns the persistent Unreal Editor connection,
+and default output is concise text optimized for model reading.
 
 MCP support remains as a legacy compatibility path during migration.
 
@@ -24,23 +25,26 @@ cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
 D:\UnrealEngine5\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe `
   D:\UnrealGame\Lyra_56\Lyra_56.uproject -MCPPort=55558
 
-# 4. Use the CLI-first runtime.
-.\Python\.venv\Scripts\python.exe .\Python\ue.py daemon start
-.\Python\.venv\Scripts\python.exe .\Python\ue.py query health
-.\Python\.venv\Scripts\python.exe .\Python\ue.py run "get_context"
+# 4. Install project-root launchers and use the CLI-first runtime.
+.\scripts\install_project_launchers.ps1 -ProjectRoot D:\UnrealGame\Lyra_56
+cd D:\UnrealGame\Lyra_56
+.\ue.ps1 version
+.\ue.ps1 query health
+.\ue.ps1 run "get_context"
 ```
 
-The daemon auto-starts by default for `run`, `query`, and `doctor` commands.
+The daemon auto-starts by default for `run`, `query`, `py`, and `doctor`
+commands.
 
 ## Codex Skill
 
-The plugin ships a reusable Codex skill at `skills/unreal-ue-cli`. Install it
-into a Codex environment to make agents prefer the CLI-first runtime:
+The plugin ships a reusable Codex skill at `skills/unreal-ue-cli`. Link it into
+the Codex skill directory so the plugin copy remains the single source of
+truth:
 
 ```powershell
-$CodexSkills = "$env:USERPROFILE\.codex\skills"
-New-Item -ItemType Directory -Force $CodexSkills | Out-Null
-Copy-Item .\skills\unreal-ue-cli (Join-Path $CodexSkills "unreal-ue-cli") -Recurse -Force
+cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
+.\scripts\link_codex_skill.ps1
 ```
 
 After installation, agents can invoke `$unreal-ue-cli` or trigger it naturally
@@ -50,7 +54,7 @@ when working on Unreal Editor automation tasks.
 
 ```text
 Codex / user
-  -> ue.py run/query/doctor
+  -> ue.ps1 run/query/py/doctor
   -> local Python daemon on 127.0.0.1:55559
   -> PersistentUnrealConnection
   -> Unreal Editor C++ bridge on 127.0.0.1:55558
@@ -65,35 +69,52 @@ model-facing boundary: agents write CLI text, not MCP JSON.
 Run a single command:
 
 ```powershell
-python .\Python\ue.py run "create_blueprint BP_Player --parent_class Character"
+.\ue.ps1 run "create_blueprint BP_Player --parent_class Character"
 ```
 
-Run multiple commands with context:
+Run multiple commands with context through a PowerShell-safe file:
 
 ```powershell
-@"
+New-Item -ItemType Directory -Force .\.codex\tmp | Out-Null
+@'
 @BP_Player
 add_component_to_blueprint CapsuleComponent Capsule
 add_blueprint_variable Health --variable_type Float
 compile_blueprint
-"@ | python .\Python\ue.py run
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\task.uecli
+.\ue.ps1 run --file .\.codex\tmp\task.uecli
 ```
 
 Shortcut form:
 
 ```powershell
-python .\Python\ue.py "get_context"
+.\ue.ps1 "get_context"
 ```
 
 Query help and diagnostics:
 
 ```powershell
-python .\Python\ue.py query help
-python .\Python\ue.py query "help create_blueprint"
-python .\Python\ue.py query "search material"
-python .\Python\ue.py query "logs --n 50 --source editor"
-python .\Python\ue.py doctor
+.\ue.ps1 version
+.\ue.ps1 query help
+.\ue.ps1 query "help create_blueprint"
+.\ue.ps1 query "search material"
+.\ue.ps1 query "logs --n 50 --source editor"
+.\ue.ps1 doctor
 ```
+
+Execute Unreal Python directly, bypassing the run-DSL parser:
+
+```powershell
+@'
+import unreal
+_result = unreal.SystemLibrary.get_engine_version()
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\task.py
+.\ue.ps1 py --json --file .\.codex\tmp\task.py
+```
+
+Use `_result` for structured return data. Use `print()` only for logs; printing
+the same object assigned to `_result` will show both `Stdout` and
+`Return value` because they are separate channels.
 
 ## Output Modes
 
@@ -108,22 +129,22 @@ Status: ok
 Use JSON only when a script or test needs a stable machine-readable envelope:
 
 ```powershell
-python .\Python\ue.py run "get_context" --json
+.\ue.ps1 run "get_context" --json
 ```
 
 Use raw mode for low-level debugging:
 
 ```powershell
-python .\Python\ue.py run "get_context" --raw
+.\ue.ps1 run "get_context" --raw
 ```
 
 ## Daemon Commands
 
 ```powershell
-python .\Python\ue.py daemon start
-python .\Python\ue.py daemon status
-python .\Python\ue.py daemon stop
-python .\Python\ue.py daemon serve
+.\ue.ps1 daemon start
+.\ue.ps1 daemon status
+.\ue.ps1 daemon stop
+.\ue.ps1 daemon serve
 ```
 
 The daemon owns:
@@ -176,7 +197,7 @@ JSON values still work when object data is truly needed.
 The legacy MCP server is still available:
 
 ```powershell
-python -m ue_cli_tool.server
+.\Python\.venv\Scripts\python.exe -m ue_cli_tool.server
 ```
 
 It exposes the old two-tool interface, `ue_cli` and `ue_query`, for clients that
@@ -187,6 +208,7 @@ have not migrated yet. New development should target the CLI-first path.
 ```powershell
 cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
 .\Python\.venv\Scripts\python.exe -m pytest Python\tests -q
+.\Python\.venv\Scripts\python.exe -m pytest tests -q
 ```
 
 Key Python modules:
@@ -210,6 +232,7 @@ Key Python modules:
 | [Development](docs/development.md) | Adding new actions, tests, commandlet mode |
 | [CLI-first Migration](docs/cli-first-migration.md) | Migration status and remaining compatibility notes |
 | [GitHub Actions Runner](docs/github-actions-runner.md) | Self-hosted Windows runner setup |
+| [Changelog](CHANGELOG.md) | Release notes |
 
 ## Credits
 

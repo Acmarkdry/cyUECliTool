@@ -1,9 +1,9 @@
 # Installation
 
-UECliTool v0.5.0 is CLI-first. The normal path is:
+UECliTool v0.6.0 is CLI-first. The normal path is:
 
 ```text
-Codex or user -> Python/ue.py -> local daemon -> Unreal Editor TCP bridge
+Codex or user -> ue.ps1 -> local daemon -> Unreal Editor TCP bridge
 ```
 
 The legacy MCP server is still available, but it is no longer the default
@@ -23,7 +23,7 @@ Build the project editor target so Unreal compiles the plugin:
 
 ```powershell
 D:\UnrealEngine5\UnrealEngine\Engine\Build\BatchFiles\Build.bat `
-  Lyra_56Editor Win64 Development `
+  LyraEditor Win64 Development `
   D:\UnrealGame\Lyra_56\Lyra_56.uproject -waitmutex
 ```
 
@@ -69,31 +69,53 @@ instances.
 ## Verify CLI Runtime
 
 ```powershell
-$Plugin = "D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP"
-$Py = "$Plugin\Python\.venv\Scripts\python.exe"
-$Ue = "$Plugin\Python\ue.py"
+cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
+.\scripts\install_project_launchers.ps1 -ProjectRoot D:\UnrealGame\Lyra_56
 
-& $Py $Ue doctor
-& $Py $Ue daemon status
-& $Py $Ue query health
-& $Py $Ue run "get_context"
+cd D:\UnrealGame\Lyra_56
+.\ue.ps1 version
+.\ue.ps1 doctor
+.\ue.ps1 daemon status
+.\ue.ps1 query health
+.\ue.ps1 run "get_context"
 ```
 
 The daemon auto-starts for `run`, `query`, and `doctor` unless
 `auto_start_daemon: false` is set.
+
+For complex Unreal Python, use a file or stdin instead of shell-quoted code:
+
+```powershell
+New-Item -ItemType Directory -Force .\.codex\tmp | Out-Null
+@'
+import unreal
+_result = unreal.SystemLibrary.get_engine_version()
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\check.py
+.\ue.ps1 py --json --file .\.codex\tmp\check.py
+```
+
+For multi-line CLI DSL batches, use `run --file`:
+
+```powershell
+@'
+ping
+get_context
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\check.uecli
+.\ue.ps1 run --json --file .\.codex\tmp\check.uecli
+```
 
 ## Install The Codex Skill
 
 The plugin ships a reusable skill at `skills/unreal-ue-cli`:
 
 ```powershell
-$CodexSkills = "$env:USERPROFILE\.codex\skills"
-New-Item -ItemType Directory -Force $CodexSkills | Out-Null
-Copy-Item .\skills\unreal-ue-cli (Join-Path $CodexSkills "unreal-ue-cli") -Recurse -Force
+cd D:\UnrealGame\Lyra_56\Plugins\UEEditorMCP
+.\scripts\link_codex_skill.ps1
 ```
 
 After installation, Codex can use `$unreal-ue-cli` or trigger the skill
-naturally for Unreal Editor automation tasks.
+naturally for Unreal Editor automation tasks. The link keeps the plugin skill
+and the Codex skill as one maintained copy.
 
 ## Output Modes
 
@@ -108,13 +130,13 @@ Status: ok
 Use `--json` for scripts and tests:
 
 ```powershell
-& $Py $Ue run "get_context" --json
+.\ue.ps1 run "get_context" --json
 ```
 
 Use `--raw` only for low-level debugging:
 
 ```powershell
-& $Py $Ue run "get_context" --raw
+.\ue.ps1 run "get_context" --raw
 ```
 
 ## Troubleshooting
@@ -122,8 +144,8 @@ Use `--raw` only for low-level debugging:
 ### Daemon Not Running
 
 ```powershell
-& $Py $Ue daemon start
-& $Py $Ue daemon status
+.\ue.ps1 daemon start
+.\ue.ps1 daemon status
 ```
 
 ### Unreal Bridge Not Reachable
@@ -142,8 +164,8 @@ Start the editor with the configured `-MCPPort=<tcp_port>`.
 Ask the CLI for command help:
 
 ```powershell
-& $Py $Ue query "help <command>"
-& $Py $Ue query "search <keyword>"
+.\ue.ps1 query "help <command>"
+.\ue.ps1 query "search <keyword>"
 ```
 
 ### Large Output
@@ -175,4 +197,4 @@ A compatible MCP config uses:
 }
 ```
 
-Keep this path for compatibility only. New Codex usage should call `Python/ue.py`.
+Keep this path for compatibility only. New Codex usage should call `.\ue.ps1`.
