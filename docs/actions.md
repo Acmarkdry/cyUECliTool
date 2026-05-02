@@ -4,10 +4,10 @@ Use the CLI to discover the live command catalog. Do not copy action syntax from
 static documentation when the registry can answer directly.
 
 ```powershell
-python .\Python\ue.py query help
-python .\Python\ue.py query "help create_blueprint"
-python .\Python\ue.py query "search material"
-python .\Python\ue.py query skills
+.\ue.ps1 query help
+.\ue.ps1 query "help create_blueprint"
+.\ue.ps1 query "search material"
+.\ue.ps1 query skills
 ```
 
 ## CLI Syntax
@@ -21,18 +21,19 @@ python .\Python\ue.py query skills
 Examples:
 
 ```powershell
-python .\Python\ue.py run "get_context"
-python .\Python\ue.py run "get_blueprint_summary BP_Player --detail_level normal"
+.\ue.ps1 run "get_context"
+.\ue.ps1 run "get_blueprint_summary BP_Player --detail_level normal"
 ```
 
 Batch with context:
 
 ```powershell
-@"
+@'
 @BP_Player
 add_blueprint_variable Health --variable_type Float
 compile_blueprint
-"@ | python .\Python\ue.py run
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\task.uecli
+.\ue.ps1 run --file .\.codex\tmp\task.uecli
 ```
 
 ## Domains
@@ -68,14 +69,14 @@ payloads and includes key fields.
 Use JSON explicitly:
 
 ```powershell
-python .\Python\ue.py query help --json
-python .\Python\ue.py run "get_context" --json
+.\ue.ps1 query help --json
+.\ue.ps1 run "get_context" --json
 ```
 
 Use raw mode only for debugging:
 
 ```powershell
-python .\Python\ue.py run "get_context" --raw
+.\ue.ps1 run "get_context" --raw
 ```
 
 ## Python Execution
@@ -93,12 +94,13 @@ _result = [{"name": a.get_name(), "class": a.get_class().get_name()} for a in ac
 PowerShell-safe options:
 
 ```powershell
-python .\Python\ue.py python --json --file .\script.py
+.\ue.ps1 python --json --file .\script.py
 @'
 import unreal
 _result = unreal.SystemLibrary.get_engine_version()
-'@ | python .\Python\ue.py python --json
-python .\Python\ue.py python --json "print('hello')"
+'@ | Set-Content -Encoding UTF8 .\.codex\tmp\task.py
+.\ue.ps1 python --json --file .\.codex\tmp\task.py
+.\ue.ps1 python --json "print('hello')"
 ```
 
 `ue run "exec_python <code>"` remains available for simple compatibility cases,
@@ -111,14 +113,14 @@ transactions.
 ## Diagnostics
 
 ```powershell
-python .\Python\ue.py doctor
-python .\Python\ue.py query "logs --n 50 --source editor"
-python .\Python\ue.py query metrics
-python .\Python\ue.py query health
+.\ue.ps1 doctor
+.\ue.ps1 query "logs --n 50 --source editor"
+.\ue.ps1 query metrics
+.\ue.ps1 query health
 ```
 
 If a command fails, run:
 
 ```powershell
-python .\Python\ue.py query "help <command>"
+.\ue.ps1 query "help <command>"
 ```

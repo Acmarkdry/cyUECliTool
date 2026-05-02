@@ -36,6 +36,39 @@ def test_query_json_flag(monkeypatch, capsys):
 	assert out.lstrip().startswith("{")
 
 
+def test_run_file_sends_command_text(monkeypatch, tmp_path, capsys):
+	script = tmp_path / "commands.uecli"
+	script.write_text("\ufeff@BP_Player\nget_blueprint_summary --detail_level brief\n", encoding="utf-8")
+
+	def fake_request(payload, config, args):
+		assert payload == {
+			"type": "run",
+			"command": "@BP_Player\nget_blueprint_summary --detail_level brief\n",
+		}
+		return {"success": True, "kind": "result", "action": "batch_execute", "data": {"results": []}}
+
+	monkeypatch.setattr(cli, "_request_with_autostart", fake_request)
+
+	rc = cli.main(["run", "--file", str(script)])
+	out = capsys.readouterr().out
+
+	assert rc == 0
+	assert "OK batch_execute" in out
+
+
+def test_run_file_read_error(monkeypatch, capsys):
+	def fail_request(payload, config, args):
+		raise AssertionError("request should not be sent")
+
+	monkeypatch.setattr(cli, "_request_with_autostart", fail_request)
+
+	rc = cli.main(["run", "--file", "does-not-exist.uecli"])
+	out = capsys.readouterr().out
+
+	assert rc == 1
+	assert "RUN_FILE_READ_FAILED" in out
+
+
 def test_python_positional_sends_exec_python(monkeypatch, capsys):
 	def fake_request(payload, config, args):
 		assert payload == {"type": "exec_python", "code": "print('hello')"}
@@ -69,7 +102,7 @@ def test_py_alias_reads_stdin(monkeypatch, capsys):
 
 def test_python_file_sends_file_contents(monkeypatch, tmp_path, capsys):
 	script = tmp_path / "script.py"
-	script.write_text("_result = {'ok': True}\n", encoding="utf-8")
+	script.write_text("\ufeff_result = {'ok': True}\n", encoding="utf-8")
 
 	def fake_request(payload, config, args):
 		assert payload == {"type": "exec_python", "code": "_result = {'ok': True}\n"}

@@ -74,12 +74,12 @@ Recommended defaults:
 Recommended entrypoint:
 
 ```powershell
-python Plugins\UEEditorMCP\Python\ue.py <subcommand> [args...]
+.\ue.ps1 <subcommand> [args...]
 ```
 
 Required subcommands:
 
-- `run <command_text>`: execute CLI command text.
+- `run <command_text>` / `run --file <path>`: execute CLI command text.
 - `python` / `py`: execute Unreal Python code from a positional snippet,
   stdin, or `--file` without passing through the `run` DSL parser.
 - `query <query_text>`: help, search, context, logs, metrics, health, skills,
@@ -90,7 +90,7 @@ Required subcommands:
 - `daemon status`: show daemon pid, project root, ports, and UE health.
 - `doctor`: run local diagnostics.
 
-`run` must also accept stdin for multi-line scripts.
+`run` must also accept stdin and `--file` for multi-line scripts.
 `python` must also accept stdin and `--file` for PowerShell-safe multi-line
 Python execution.
 

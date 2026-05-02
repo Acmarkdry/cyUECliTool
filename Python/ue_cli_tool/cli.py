@@ -26,7 +26,11 @@ def main(argv: list[str] | None = None) -> int:
 	config = load_config()
 
 	if args.command == "run":
-		text = _command_text(args.command_text)
+		try:
+			text = _run_command_text(args)
+		except OSError as exc:
+			response = make_error("RUN_FILE_READ_FAILED", str(exc), recoverable=False)
+			return _print_response(response, args)
 		return _print_response(_request_with_autostart({"type": "run", "command": text}, config, args), args)
 	if args.command == "query":
 		text = " ".join(args.query_text).strip()
@@ -62,6 +66,7 @@ def _build_parser() -> argparse.ArgumentParser:
 	run = sub.add_parser("run", help="Execute UE CLI command text")
 	_add_output_flags(run)
 	run.add_argument("command_text", nargs="*", help="Command text. Reads stdin when omitted.")
+	run.add_argument("--file", "-f", dest="command_file", help="Read UE CLI command text from a UTF-8 file.")
 	run.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
 
 	query = sub.add_parser("query", help="Query help, search, logs, metrics, health, skills, resources")
@@ -101,15 +106,30 @@ def _command_text(parts: list[str]) -> str:
 	if parts:
 		return " ".join(parts)
 	if not sys.stdin.isatty():
-		return sys.stdin.read()
+		return _strip_leading_bom(sys.stdin.read())
 	return ""
+
+
+def _run_command_text(args: argparse.Namespace) -> str:
+	command_file = getattr(args, "command_file", None)
+	if command_file:
+		return _read_utf8_text(command_file)
+	return _command_text(getattr(args, "command_text", []))
 
 
 def _python_code(args: argparse.Namespace) -> str:
 	python_file = getattr(args, "python_file", None)
 	if python_file:
-		return Path(python_file).read_text(encoding="utf-8")
+		return _read_utf8_text(python_file)
 	return _command_text(getattr(args, "python_code", []))
+
+
+def _read_utf8_text(path: str) -> str:
+	return _strip_leading_bom(Path(path).read_text(encoding="utf-8-sig"))
+
+
+def _strip_leading_bom(text: str) -> str:
+	return text[1:] if text.startswith("\ufeff") else text
 
 
 def _request_with_autostart(payload: dict[str, Any], config: ProjectConfig, args: argparse.Namespace) -> dict[str, Any]:

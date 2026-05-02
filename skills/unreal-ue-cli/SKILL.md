@@ -1,133 +1,93 @@
 ---
 name: unreal-ue-cli
-description: Use this skill when working with Unreal Editor projects that have the UEEditorMCP/UECliTool plugin and Codex needs to inspect or automate editor assets through the CLI-first runtime. Use for Blueprint, material, UMG widget, AnimGraph, Niagara, Sequencer, level, asset, log, diagnostics, or editor automation tasks that should run through Python/ue.py instead of MCP tool JSON.
+description: Use this skill when working with Unreal Editor projects that have the UEEditorMCP/UECliTool plugin and Codex needs to inspect or automate editor assets through the CLI-first runtime. Use for Blueprint, material, UMG widget, AnimGraph, Niagara, Sequencer, level, asset, log, diagnostics, or editor automation tasks that should run through the PowerShell CLI instead of MCP tool JSON.
 ---
 
 # Unreal UE CLI
 
-Use the project's `Python/ue.py` CLI as the model-facing interface to Unreal
-Editor. Treat MCP as a legacy fallback only when the user explicitly asks for it
-or the CLI path is unavailable.
+Use the project CLI as the model-facing interface to Unreal Editor. Do not use
+MCP tools by default; treat MCP as a legacy fallback only when the user
+explicitly asks for it or the CLI path is blocked.
 
-## Locate The CLI
+## Command Contract
 
-Prefer the plugin-local Python venv when present:
-
-```powershell
-$Plugin = "D:\Path\To\Project\Plugins\UEEditorMCP"
-$Py = Join-Path $Plugin "Python\.venv\Scripts\python.exe"
-$Ue = Join-Path $Plugin "Python\ue.py"
-& $Py $Ue query health
-```
-
-If the plugin path is not known, search from the project root:
+Prefer the project-root launcher when it exists:
 
 ```powershell
-Get-ChildItem -Recurse -Filter ue.py | Where-Object { $_.FullName -like "*UEEditorMCP*Python*" }
+.\ue.ps1 query health
+.\ue.ps1 py --json --file .\.codex\tmp\task.py
+.\ue.ps1 run --json --file .\.codex\tmp\task.uecli
+.\ue.ps1 daemon restart
 ```
 
-Fallback to `python <plugin>\Python\ue.py ...` only when the venv is missing.
-
-## Health Workflow
-
-Start with cheap diagnostics before editor mutations:
+If the project-root launcher is missing, use the plugin launcher:
 
 ```powershell
-& $Py $Ue doctor
-& $Py $Ue daemon status
-& $Py $Ue query health
-& $Py $Ue query context
+.\Plugins\UEEditorMCP\ue.ps1 query health
 ```
 
-If the daemon is not running, start it:
+Do not make the model repeat venv paths such as
+`Python\.venv\Scripts\python.exe Python\ue.py`. The launchers own that detail.
+
+## Main Workflow
+
+1. Check health before editor work:
+   ```powershell
+   .\ue.ps1 query health
+   .\ue.ps1 query context
+   ```
+
+2. For Unreal Python, write a temporary `.py` file and execute it:
+   ```powershell
+   .\ue.ps1 py --json --file .\.codex\tmp\task.py
+   ```
+   Set `_result = ...` for structured data. Use `print()` only for log text.
+
+3. For CLI DSL batches, write a temporary `.uecli` file and execute it:
+   ```powershell
+   .\ue.ps1 run --json --file .\.codex\tmp\task.uecli
+   ```
+   Use `@Target` to fill context parameters such as `blueprint_name`,
+   `material_name`, or `widget_name`.
+
+4. Use query commands for discovery and recovery:
+   ```powershell
+   .\ue.ps1 query help
+   .\ue.ps1 query "help get_blueprint_summary"
+   .\ue.ps1 query "search material"
+   .\ue.ps1 query "logs --n 50 --source editor"
+   ```
+
+## Temporary Files
+
+Use `.codex\tmp` under the project root for generated scripts. Create it when
+missing:
 
 ```powershell
-& $Py $Ue daemon start
+New-Item -ItemType Directory -Force .\.codex\tmp | Out-Null
 ```
 
-If Unreal Editor is not reachable, inspect project config and editor process:
+Keep generated scripts focused on one task. Prefer Python files for complex
+logic, loops, object construction, or anything involving quotes/newlines.
+Prefer `.uecli` files for short batches of built-in commands.
 
-```powershell
-Get-Content .\ue_mcp_config.yaml
-Get-Process | Where-Object { $_.ProcessName -like "*UnrealEditor*" }
-Get-NetTCPConnection -LocalPort 55558 -ErrorAction SilentlyContinue
-```
+## Startup And Recovery
 
-Start Unreal Editor with the configured `tcp_port` when needed. If
-`ue_mcp_config.yaml` contains `engine_root` and `project_root`, derive the
-editor path and `.uproject` from those values.
-
-## Command Discovery
-
-Do not guess command syntax when help is available:
-
-```powershell
-& $Py $Ue query help
-& $Py $Ue query "help create_blueprint"
-& $Py $Ue query "search material"
-& $Py $Ue query "skills"
-```
-
-The default output is text written for Codex/humans. Use `--json` for tests,
-scripts, or precise field extraction. Use `--raw` only for debugging low-level
-daemon or UE bridge payloads.
-
-## Running Commands
-
-Single command:
-
-```powershell
-& $Py $Ue run "get_context"
-& $Py $Ue run "get_blueprint_summary BP_Player --detail_level normal"
-```
-
-Shortcut form is allowed:
-
-```powershell
-& $Py $Ue "get_context"
-```
-
-Multi-command batch with context:
-
-```powershell
-@"
-@BP_Player
-add_component_to_blueprint CapsuleComponent Capsule
-add_blueprint_variable Health --variable_type Float
-compile_blueprint
-"@ | & $Py $Ue run
-```
-
-`@Target` fills the first matching context parameter such as
-`blueprint_name`, `material_name`, or `widget_name`.
-
-## Output Handling
-
-Read default text output first. It should contain status, key fields, counts,
-warnings, and suggested next actions.
-
-Use JSON only when the task needs machine-readable assertions:
-
-```powershell
-& $Py $Ue run "get_context" --json
-```
-
-When output says a result was summarized, request a more specific command or add
-the command's own detail flag, such as `--detail_level full`, before using
-`--raw`.
+- `DAEMON_NOT_RUNNING`: run `.\ue.ps1 daemon start`.
+- Daemon loaded old Python modules: run `.\ue.ps1 daemon restart`, then
+  `.\ue.ps1 daemon status --json` and inspect `data.source`.
+- Unreal Editor not reachable: start the project editor with `-MCPPort=<tcp_port>`
+  from `ue_mcp_config.yaml`, then run `.\ue.ps1 query health`.
+- Parse errors: run `.\ue.ps1 query "help <command>"` or switch the work to
+  `.\ue.ps1 py --file`.
+- Large output: use command-specific detail flags or `--json`; avoid `--raw`
+  unless debugging transport payloads.
 
 ## Safety Rules
 
-- Use read-only commands first to identify the target asset.
-- Use `query "help <command>"` before unfamiliar write commands.
-- Keep batches focused and review each child result line.
-- Prefer `@Target` context for Blueprint/material/widget workflows.
-- Avoid `--raw` as default; it can produce large nested payloads.
+- Read before write: inspect context/assets first.
+- Keep batches small enough that each child result is reviewable.
+- Prefer `_result` for exact data and assertions.
+- Do not use PowerShell here-strings as the main path for complex Python; write
+  a `.py` file and call `py --file`.
 - Do not call MCP tools (`ue_cli`, `ue_query`) unless the CLI path is blocked.
-
-## Common Recovery
-
-- `DAEMON_NOT_RUNNING`: run `daemon start`, then retry.
-- `UE_NOT_CONNECTED` or transport errors: start Unreal Editor with the configured `-MCPPort`, then run `doctor`.
-- Parse errors: run `query "help <command>"` and fix the CLI line.
-- Large output: use command-specific compact/detail flags or `--json` for exact fields.

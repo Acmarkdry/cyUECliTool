@@ -16,7 +16,8 @@ CLI text commands as the primary interface.
 
 #### Scenario: Execute a multi-line script
 
-- **WHEN** Codex pipes a multi-line script to `ue run`
+- **WHEN** Codex runs `ue run --file commands.uecli` or pipes a multi-line
+  script to `ue run`
 - **THEN** the CLI SHALL parse the script with context target support
 - **AND** execute it through batch execution.
 
