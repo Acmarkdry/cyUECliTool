@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.3
+
+- Clear stale `last_error` from `query health` after a successful UE command.
+
 ## 0.6.2
 
 - Add `describe_linked_anim_stack` to traverse linked AnimBP layers (linked inputs,

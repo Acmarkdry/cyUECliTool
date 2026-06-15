@@ -417,6 +417,8 @@ class PersistentUnrealConnection:
 		if result.success:
 			self._circuit.record_success()
 			self._consecutive_cmd_failures = 0
+			self._last_error = None
+			self._last_error_time = 0.0
 		elif result.error and any(
 			kw in (result.error or "")
 			for kw in ("timed out", "Connection lost", "Socket", "not connected")

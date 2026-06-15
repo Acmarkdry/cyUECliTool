@@ -438,3 +438,16 @@ class TestTimeoutTiers:
 
         # ping is normally PING (3.0), but explicit SLOW should win
         assert conn._resolve_timeout("ping", TimeoutTier.SLOW) == TimeoutTier.SLOW.value
+
+
+def test_send_command_clears_last_error_after_success():
+    conn = PersistentUnrealConnection()
+    conn._last_error = "previous failure"
+    conn._last_error_time = 123.0
+
+    with patch.object(conn, "_send_impl", return_value=CommandResult(success=True, data={"ok": True})):
+        result = conn.send_command("ping")
+
+    assert result.success is True
+    assert conn.get_health()["last_error"] is None
+    assert conn.get_health()["last_error_time"] == 0.0
