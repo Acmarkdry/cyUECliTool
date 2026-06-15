@@ -8,6 +8,10 @@
 
 - **节点 GUID**：每个图节点都有唯一 GUID，写入操作（连接、设置属性等）需要先通过读取操作获取 GUID。
 - **compact 模式**：`describe_topology`、`get_state_subgraph`、`get_transition_rule` 均支持 `compact: true` 参数，可省略隐藏引脚和元数据，显著减少输出体积。建议在大型图中优先使用。
+- **semantic 模式**：`get_state_subgraph` 支持 `mode=semantic`（或 `--semantic true`），返回 `semantic_summary` + `semantic_nodes`，适合 Agent 学习。
+- **节点元数据**：子图节点可含 `modify_curves`、`branch_filters`、`cache_name`、`enum_type` 等字段。
+- **拓扑分页**：`describe_topology` / `get_state_subgraph` 支持 `node_class_filter`、`max_nodes`、`offset`。
+- **命令别名**：`describe_asset AB_Als` 自动路由到 `describe_anim_blueprint_full`；未知命令会返回 `suggestions`。
 - **Property Binding**：`get_state_subgraph` / `describe_topology` 的节点 JSON 含 `property_bindings[]`（pin → path），绑定的输入引脚会标记 `is_bound: true` 且 `is_connected: true`。
 - **Property Access 转换**：`get_transition_rule` 解析 `K2Node_PropertyAccess`，输出 `property_path` / `referenced_property_paths`。
 - **嵌套状态机**：`describe_anim_blueprint_full` 递归收录嵌套状态机（含 `parent_state_machine`、`depth`）。

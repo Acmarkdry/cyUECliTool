@@ -14,7 +14,7 @@ class UEdGraph;
 class UEdGraphNode;
 
 // ============================================================================
-// AnimGraphHelpers ‚Ä?Internal helper functions
+// AnimGraphHelpers ù?Internal helper functions
 // ============================================================================
 
 namespace AnimGraphHelpers
@@ -43,6 +43,15 @@ namespace AnimGraphHelpers
 
 	/** Parse K2Node_PropertyAccess path segments for transition rule graphs */
 	bool ExtractPropertyAccessNodeInfo(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj, TArray<FString>& OutReferencedPaths);
+
+	/** Export node-type-specific metadata (ModifyCurve, SaveCachedPose, etc.) */
+	void ExtractAnimNodeMetadata(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj);
+
+	/** Build a compact semantic summary for a pose subgraph */
+	void AppendSemanticSubgraphFields(UEdGraph* Graph, TSharedPtr<FJsonObject>& Result);
+
+	/** Filter nodes by class name substring */
+	bool ShouldIncludeAnimGraphNode(const UEdGraphNode* Node, const FString& NodeClassFilter);
 
 	/** Create an animation graph node by type string at the given position */
 	UAnimGraphNode_Base* CreateAnimNodeByType(UEdGraph* Graph, const FString& NodeType,
@@ -154,7 +163,7 @@ protected:
 
 
 // ============================================================================
-// Create Action (inherits FEditorAction ‚Ä?no existing blueprint required)
+// Create Action (inherits FEditorAction ù?no existing blueprint required)
 // ============================================================================
 
 /**

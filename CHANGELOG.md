@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.6
+
+- `get_state_subgraph` adds `mode=semantic` with `semantic_summary` and compact `semantic_nodes[]`.
+- AnimGraph nodes export metadata: `modify_curves`, `branch_filters`, `cache_name`, `enum_type`.
+- `describe_animgraph_topology` and `get_state_subgraph` support `node_class_filter`, `max_nodes`, `offset` pagination.
+- State machine transitions include `crossfade_duration`, `automatic_rule`, `bidirectional`, `sync_group`.
+
 ## 0.6.5
 
 - Add `describe_asset` CLI alias with prefix-based routing (AB_/AM_/BS_/SK_ → specialized describe commands).

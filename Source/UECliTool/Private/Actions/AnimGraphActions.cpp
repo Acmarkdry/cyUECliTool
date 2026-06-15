@@ -31,12 +31,18 @@
 #include "AnimGraphNode_TwoWayBlend.h"
 #include "AnimGraphNode_BlendListByBool.h"
 #include "AnimGraphNode_BlendListByInt.h"
+#include "AnimGraphNode_ModifyCurve.h"
+#include "AnimGraphNode_SaveCachedPose.h"
+#include "AnimGraphNode_BlendListByEnum.h"
 #include "AnimGraphNode_Root.h"
+#include "AnimNodes/AnimNode_ModifyCurve.h"
+#include "Animation/AnimData/BoneMaskFilter.h"
 #include "Factories/AnimBlueprintFactory.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/BlendSpace.h"
 #include "UObject/UnrealType.h"
+#include "Misc/Paths.h"
 
 // ============================================================================
 // AnimGraphHelpers
@@ -501,6 +507,311 @@ void ExtractAnimAssetReferences(const UEdGraphNode* Node, TSharedPtr<FJsonObject
 	}
 }
 
+void ExtractAnimNodeMetadata(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj)
+{
+	if (!Node || !OutNodeObj.IsValid())
+	{
+		return;
+	}
+
+	if (const UAnimGraphNode_SaveCachedPose* SaveNode = Cast<UAnimGraphNode_SaveCachedPose>(Node))
+	{
+		FString CacheName = SaveNode->CacheName;
+		if (CacheName.IsEmpty())
+		{
+			CacheName = SaveNode->GetNodeTitle(ENodeTitleType::FullTitle).ToString();
+		}
+		OutNodeObj->SetStringField(TEXT("cache_name"), CacheName);
+	}
+
+	if (const UAnimGraphNode_LayeredBoneBlend* LayerNode = Cast<UAnimGraphNode_LayeredBoneBlend>(Node))
+	{
+		TArray<TSharedPtr<FJsonValue>> FiltersArray;
+		for (const FInputBlendPose& Layer : LayerNode->Node.LayerSetup)
+		{
+			for (const FBranchFilter& Branch : Layer.BranchFilters)
+			{
+				TSharedPtr<FJsonObject> FilterObj = MakeShared<FJsonObject>();
+				FilterObj->SetStringField(TEXT("bone"), Branch.BoneName.ToString());
+				FilterObj->SetNumberField(TEXT("blend_depth"), Branch.BlendDepth);
+				FiltersArray.Add(MakeShared<FJsonValueObject>(FilterObj));
+			}
+		}
+		if (FiltersArray.Num() > 0)
+		{
+			OutNodeObj->SetArrayField(TEXT("branch_filters"), FiltersArray);
+		}
+	}
+
+	if (const UAnimGraphNode_BlendListByEnum* EnumNode = Cast<UAnimGraphNode_BlendListByEnum>(Node))
+	{
+		if (const UEnum* BoundEnum = EnumNode->GetEnum())
+		{
+			OutNodeObj->SetStringField(TEXT("enum_type"), BoundEnum->GetName());
+		}
+	}
+
+	if (Node->GetClass()->GetName().Contains(TEXT("ModifyCurve")))
+	{
+		if (const FStructProperty* NodeProp = FindFProperty<FStructProperty>(Node->GetClass(), TEXT("Node")))
+		{
+			if (NodeProp->Struct == FAnimNode_ModifyCurve::StaticStruct())
+			{
+				const FAnimNode_ModifyCurve* ModifyNode =
+					NodeProp->ContainerPtrToValuePtr<FAnimNode_ModifyCurve>(Node);
+				TArray<TSharedPtr<FJsonValue>> CurvesArray;
+				for (int32 Index = 0; Index < ModifyNode->CurveNames.Num(); ++Index)
+				{
+					TSharedPtr<FJsonObject> CurveObj = MakeShared<FJsonObject>();
+					CurveObj->SetStringField(TEXT("name"), ModifyNode->CurveNames[Index].ToString());
+					if (ModifyNode->CurveValues.IsValidIndex(Index))
+					{
+						CurveObj->SetNumberField(TEXT("value"), ModifyNode->CurveValues[Index]);
+					}
+					CurvesArray.Add(MakeShared<FJsonValueObject>(CurveObj));
+				}
+				if (CurvesArray.Num() > 0)
+				{
+					OutNodeObj->SetArrayField(TEXT("modify_curves"), CurvesArray);
+				}
+			}
+		}
+	}
+}
+
+static FString BuildSemanticNodeLine(const UEdGraphNode* Node, const TSharedPtr<FJsonObject>& NodeObj)
+{
+	if (!Node || !NodeObj.IsValid())
+	{
+		return TEXT("");
+	}
+
+	FString Title = Node->GetNodeTitle(ENodeTitleType::FullTitle).ToString();
+	Title.ReplaceInline(TEXT("\n"), TEXT(" "));
+
+	const FString* BlendSpacePath = nullptr;
+	FString BlendSpaceValue;
+	if (NodeObj->TryGetStringField(TEXT("blend_space"), BlendSpaceValue))
+	{
+		BlendSpacePath = &BlendSpaceValue;
+	}
+
+	if (BlendSpacePath)
+	{
+		return FString::Printf(TEXT("BlendSpace(%s)"), *FPaths::GetBaseFilename(*BlendSpacePath));
+	}
+
+	const TArray<TSharedPtr<FJsonValue>>* ModifyCurves = nullptr;
+	if (NodeObj->HasTypedField<EJson::Array>(TEXT("modify_curves")))
+	{
+		ModifyCurves = &NodeObj->GetArrayField(TEXT("modify_curves"));
+	}
+	if (ModifyCurves && ModifyCurves->Num() > 0)
+	{
+		TArray<FString> CurveParts;
+		for (const TSharedPtr<FJsonValue>& CurveValue : *ModifyCurves)
+		{
+			const TSharedPtr<FJsonObject>* CurveObj = nullptr;
+			if (CurveValue.IsValid() && CurveValue->TryGetObject(CurveObj) && CurveObj && CurveObj->IsValid())
+			{
+				FString CurveName;
+				double CurveAmount = 0.0;
+				(*CurveObj)->TryGetStringField(TEXT("name"), CurveName);
+				(*CurveObj)->TryGetNumberField(TEXT("value"), CurveAmount);
+				CurveParts.Add(FString::Printf(TEXT("%s=%.3f"), *CurveName, CurveAmount));
+			}
+		}
+		return FString::Printf(TEXT("ModifyCurve(%s)"), *FString::Join(CurveParts, TEXT(", ")));
+	}
+
+	if (NodeObj->HasField(TEXT("cache_name")))
+	{
+		FString CacheName;
+		NodeObj->TryGetStringField(TEXT("cache_name"), CacheName);
+		return FString::Printf(TEXT("SaveCachedPose(%s)"), *CacheName);
+	}
+
+	if (Node->GetClass()->GetName().Contains(TEXT("MultiWayBlend")))
+	{
+		return FString::Printf(TEXT("BlendMulti(%s)"), *Title);
+	}
+
+	if (Node->GetClass()->GetName().Contains(TEXT("BlendListByEnum")))
+	{
+		FString EnumType;
+		if (NodeObj->TryGetStringField(TEXT("enum_type"), EnumType))
+		{
+			return FString::Printf(TEXT("BlendListByEnum(%s)"), *EnumType);
+		}
+	}
+
+	if (Node->GetClass()->GetName().Contains(TEXT("LayeredBoneBlend")))
+	{
+		const TArray<TSharedPtr<FJsonValue>>* Filters = nullptr;
+		if (NodeObj->HasTypedField<EJson::Array>(TEXT("branch_filters")))
+		{
+			Filters = &NodeObj->GetArrayField(TEXT("branch_filters"));
+		}
+		if (Filters && Filters->Num() > 0)
+		{
+			const TSharedPtr<FJsonObject>* FirstFilter = nullptr;
+			if ((*Filters)[0].IsValid() && (*Filters)[0]->TryGetObject(FirstFilter) && FirstFilter && FirstFilter->IsValid())
+			{
+				FString BoneName;
+				(*FirstFilter)->TryGetStringField(TEXT("bone"), BoneName);
+				return FString::Printf(TEXT("LayeredBoneBlend(%s)"), *BoneName);
+			}
+		}
+		return TEXT("LayeredBoneBlend");
+	}
+
+	if (Node->GetClass()->GetName().Contains(TEXT("SequenceEvaluator")) || Node->GetClass()->GetName().Contains(TEXT("SequencePlayer")))
+	{
+		return FString::Printf(TEXT("Sequence(%s)"), *Title);
+	}
+
+	return Title;
+}
+
+static void CollectUpstreamPoseNodes(
+	const UEdGraphNode* StartNode,
+	TSet<const UEdGraphNode*>& Visited,
+	TArray<const UEdGraphNode*>& OutOrdered)
+{
+	if (!StartNode || Visited.Contains(StartNode))
+	{
+		return;
+	}
+	Visited.Add(StartNode);
+
+	for (const UEdGraphPin* Pin : StartNode->Pins)
+	{
+		if (!Pin || Pin->Direction != EGPD_Input)
+		{
+			continue;
+		}
+		if (!Pin->PinType.PinCategory.IsEqual(TEXT("struct")))
+		{
+			continue;
+		}
+
+		for (const UEdGraphPin* LinkedPin : Pin->LinkedTo)
+		{
+			if (!LinkedPin || !LinkedPin->GetOwningNode())
+			{
+				continue;
+			}
+			CollectUpstreamPoseNodes(LinkedPin->GetOwningNode(), Visited, OutOrdered);
+		}
+	}
+
+	OutOrdered.Add(StartNode);
+}
+
+void AppendSemanticSubgraphFields(UEdGraph* Graph, TSharedPtr<FJsonObject>& Result)
+{
+	if (!Graph || !Result.IsValid())
+	{
+		return;
+	}
+
+	const UEdGraphNode* ResultNode = nullptr;
+	for (UEdGraphNode* Node : Graph->Nodes)
+	{
+		if (Node && Node->GetClass()->GetName().Contains(TEXT("StateResult")))
+		{
+			ResultNode = Node;
+			break;
+		}
+	}
+	if (!ResultNode)
+	{
+		for (UEdGraphNode* Node : Graph->Nodes)
+		{
+			if (Node && Node->GetClass()->GetName().Contains(TEXT("AnimGraphNode_Root")))
+			{
+				ResultNode = Node;
+				break;
+			}
+		}
+	}
+	if (!ResultNode)
+	{
+		return;
+	}
+
+	TSet<const UEdGraphNode*> Visited;
+	TArray<const UEdGraphNode*> OrderedNodes;
+	CollectUpstreamPoseNodes(ResultNode, Visited, OrderedNodes);
+
+	TArray<FString> ChainParts;
+	TArray<TSharedPtr<FJsonValue>> SemanticNodes;
+	for (const UEdGraphNode* Node : OrderedNodes)
+	{
+		TSharedPtr<FJsonObject> NodeObj = SerializeAnimNode(Node, true);
+		if (!NodeObj.IsValid())
+		{
+			continue;
+		}
+		ExtractAnimAssetReferences(Node, NodeObj);
+		ExtractPropertyBindings(Node, NodeObj);
+		ExtractAnimNodeMetadata(Node, NodeObj);
+
+		const FString Line = BuildSemanticNodeLine(Node, NodeObj);
+		if (!Line.IsEmpty())
+		{
+			ChainParts.Add(Line);
+		}
+
+		TSharedPtr<FJsonObject> SemanticObj = MakeShared<FJsonObject>();
+		SemanticObj->SetStringField(TEXT("node_id"), Node->NodeGuid.ToString());
+		SemanticObj->SetStringField(TEXT("node_class"), Node->GetClass()->GetName());
+		SemanticObj->SetStringField(TEXT("summary"), Line);
+		if (NodeObj->HasField(TEXT("property_bindings")))
+		{
+			SemanticObj->SetArrayField(TEXT("property_bindings"), NodeObj->GetArrayField(TEXT("property_bindings")));
+		}
+		if (NodeObj->HasField(TEXT("modify_curves")))
+		{
+			SemanticObj->SetArrayField(TEXT("modify_curves"), NodeObj->GetArrayField(TEXT("modify_curves")));
+		}
+		if (NodeObj->HasField(TEXT("branch_filters")))
+		{
+			SemanticObj->SetArrayField(TEXT("branch_filters"), NodeObj->GetArrayField(TEXT("branch_filters")));
+		}
+		if (NodeObj->HasField(TEXT("cache_name")))
+		{
+			FString CacheNameValue;
+			NodeObj->TryGetStringField(TEXT("cache_name"), CacheNameValue);
+			SemanticObj->SetStringField(TEXT("cache_name"), CacheNameValue);
+		}
+		SemanticNodes.Add(MakeShared<FJsonValueObject>(SemanticObj));
+	}
+
+	FString Summary;
+	if (ChainParts.Num() > 0)
+	{
+		Summary = FString::Printf(TEXT("output: %s"), *FString::Join(ChainParts, TEXT(" <- ")));
+	}
+
+	Result->SetStringField(TEXT("mode"), TEXT("semantic"));
+	Result->SetStringField(TEXT("semantic_summary"), Summary);
+	Result->SetArrayField(TEXT("semantic_nodes"), SemanticNodes);
+}
+
+bool ShouldIncludeAnimGraphNode(const UEdGraphNode* Node, const FString& NodeClassFilter)
+{
+	if (!Node)
+	{
+		return false;
+	}
+	if (NodeClassFilter.IsEmpty())
+	{
+		return true;
+	}
+	return Node->GetClass()->GetName().Contains(NodeClassFilter);
+}
+
 UAnimGraphNode_Base* CreateAnimNodeByType(UEdGraph* Graph, const FString& NodeType,
 	FVector2D Position, const TSharedPtr<FJsonObject>& Params, FString& OutError)
 {
@@ -708,30 +1019,46 @@ TSharedPtr<FJsonObject> FDescribeAnimGraphTopologyAction::ExecuteInternal(const 
 	}
 
 	const bool bCompact = GetOptionalBool(Params, TEXT("compact"), false);
+	const FString NodeClassFilter = GetOptionalString(Params, TEXT("node_class_filter"), TEXT(""));
+	const int32 MaxNodes = (int32)GetOptionalNumber(Params, TEXT("max_nodes"), 0.0);
+	const int32 Offset = (int32)GetOptionalNumber(Params, TEXT("offset"), 0.0);
 
 	TArray<TSharedPtr<FJsonValue>> NodesArray;
 	TArray<TSharedPtr<FJsonValue>> EdgesArray;
 	TSet<FString> SeenEdges;
+	int32 MatchedNodes = 0;
+	int32 EmittedNodes = 0;
 
 	for (UEdGraphNode* Node : TargetGraph->Nodes)
 	{
-		if (!Node) continue;
+		if (!Node || !AnimGraphHelpers::ShouldIncludeAnimGraphNode(Node, NodeClassFilter)) continue;
+		++MatchedNodes;
+		if (Offset > 0 && MatchedNodes <= Offset)
+		{
+			continue;
+		}
+		if (MaxNodes > 0 && EmittedNodes >= MaxNodes)
+		{
+			continue;
+		}
 
 		TSharedPtr<FJsonObject> NodeObj = AnimGraphHelpers::SerializeAnimNode(Node, bCompact);
 		if (!NodeObj.IsValid()) continue;
 
-		// Attach animation asset references
 		AnimGraphHelpers::ExtractAnimAssetReferences(Node, NodeObj);
+		AnimGraphHelpers::ExtractPropertyBindings(Node, NodeObj);
+		AnimGraphHelpers::ExtractAnimNodeMetadata(Node, NodeObj);
 
 		NodesArray.Add(MakeShared<FJsonValueObject>(NodeObj));
+		++EmittedNodes;
 
-		// Collect edges from output pins
 		for (const UEdGraphPin* Pin : Node->Pins)
 		{
 			if (!Pin || Pin->Direction != EGPD_Output) continue;
 			for (const UEdGraphPin* LinkedPin : Pin->LinkedTo)
 			{
 				if (!LinkedPin || !LinkedPin->GetOwningNode()) continue;
+				if (!AnimGraphHelpers::ShouldIncludeAnimGraphNode(LinkedPin->GetOwningNode(), NodeClassFilter)) continue;
 				FString EdgeKey = FString::Printf(TEXT("%s:%s->%s:%s"),
 					*Node->NodeGuid.ToString(), *Pin->PinName.ToString(),
 					*LinkedPin->GetOwningNode()->NodeGuid.ToString(), *LinkedPin->PinName.ToString());
@@ -752,6 +1079,16 @@ TSharedPtr<FJsonObject> FDescribeAnimGraphTopologyAction::ExecuteInternal(const 
 	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
 	Result->SetStringField(TEXT("graph_name"), TargetGraph->GetName());
 	Result->SetBoolField(TEXT("compact"), bCompact);
+	if (!NodeClassFilter.IsEmpty())
+	{
+		Result->SetStringField(TEXT("node_class_filter"), NodeClassFilter);
+	}
+	if (MaxNodes > 0)
+	{
+		Result->SetNumberField(TEXT("max_nodes"), MaxNodes);
+		Result->SetNumberField(TEXT("offset"), Offset);
+		Result->SetNumberField(TEXT("total_matched_nodes"), MatchedNodes);
+	}
 	Result->SetNumberField(TEXT("node_count"), NodesArray.Num());
 	Result->SetNumberField(TEXT("edge_count"), EdgesArray.Num());
 	Result->SetArrayField(TEXT("nodes"), NodesArray);
@@ -855,6 +1192,14 @@ TSharedPtr<FJsonObject> FGetStateMachineStructureAction::ExecuteInternal(const T
 			TransObj->SetStringField(TEXT("target_state"), NextState ? NextState->GetStateName() : TEXT(""));
 			TransObj->SetStringField(TEXT("transition_guid"), TransNode->NodeGuid.ToString());
 			TransObj->SetNumberField(TEXT("priority"), TransNode->PriorityOrder);
+			TransObj->SetNumberField(TEXT("crossfade_duration"), TransNode->CrossfadeDuration);
+			TransObj->SetBoolField(TEXT("automatic_rule"), TransNode->bAutomaticRuleBasedOnSequencePlayerInState);
+			TransObj->SetNumberField(TEXT("automatic_rule_trigger_time"), TransNode->AutomaticRuleTriggerTime);
+			TransObj->SetBoolField(TEXT("bidirectional"), TransNode->Bidirectional);
+			if (!TransNode->SyncGroupNameToRequireValidMarkersRule.IsNone())
+			{
+				TransObj->SetStringField(TEXT("sync_group"), TransNode->SyncGroupNameToRequireValidMarkersRule.ToString());
+			}
 			TransitionsArray.Add(MakeShared<FJsonValueObject>(TransObj));
 		}
 	}
@@ -932,24 +1277,53 @@ TSharedPtr<FJsonObject> FGetStateSubgraphAction::ExecuteInternal(const TSharedPt
 
 	UEdGraph* SubGraph = StateNode->BoundGraph;
 	const bool bCompact = GetOptionalBool(Params, TEXT("compact"), false);
+	const FString Mode = GetOptionalString(Params, TEXT("mode"), TEXT(""));
+	const bool bSemantic = Mode.Equals(TEXT("semantic"), ESearchCase::IgnoreCase)
+		|| GetOptionalBool(Params, TEXT("semantic"), false);
+	const FString NodeClassFilter = GetOptionalString(Params, TEXT("node_class_filter"), TEXT(""));
+	const int32 MaxNodes = (int32)GetOptionalNumber(Params, TEXT("max_nodes"), 0.0);
+	const int32 Offset = (int32)GetOptionalNumber(Params, TEXT("offset"), 0.0);
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("state_machine_name"), StateMachineName);
+	Result->SetStringField(TEXT("state_name"), StateName);
+	Result->SetStringField(TEXT("subgraph_name"), SubGraph->GetName());
+	Result->SetBoolField(TEXT("compact"), bCompact);
+	if (bSemantic)
+	{
+		AnimGraphHelpers::AppendSemanticSubgraphFields(SubGraph, Result);
+		return CreateSuccessResponse(Result);
+	}
 
 	TArray<TSharedPtr<FJsonValue>> NodesArray;
 	TArray<TSharedPtr<FJsonValue>> EdgesArray;
 	TSet<FString> SeenEdges;
+	int32 MatchedNodes = 0;
+	int32 EmittedNodes = 0;
 
 	for (UEdGraphNode* Node : SubGraph->Nodes)
 	{
-		if (!Node) continue;
+		if (!Node || !AnimGraphHelpers::ShouldIncludeAnimGraphNode(Node, NodeClassFilter)) continue;
+		++MatchedNodes;
+		if (Offset > 0 && MatchedNodes <= Offset)
+		{
+			continue;
+		}
+		if (MaxNodes > 0 && EmittedNodes >= MaxNodes)
+		{
+			continue;
+		}
 
 		TSharedPtr<FJsonObject> NodeObj = AnimGraphHelpers::SerializeAnimNode(Node, bCompact);
 		if (!NodeObj.IsValid()) continue;
 
-		// Annotate animation asset references (AnimSequence, BlendSpace)
 		AnimGraphHelpers::ExtractAnimAssetReferences(Node, NodeObj);
+		AnimGraphHelpers::ExtractPropertyBindings(Node, NodeObj);
+		AnimGraphHelpers::ExtractAnimNodeMetadata(Node, NodeObj);
 
 		NodesArray.Add(MakeShared<FJsonValueObject>(NodeObj));
+		++EmittedNodes;
 
-		// Collect edges
 		for (const UEdGraphPin* Pin : Node->Pins)
 		{
 			if (!Pin || Pin->Direction != EGPD_Output) continue;
@@ -973,11 +1347,16 @@ TSharedPtr<FJsonObject> FGetStateSubgraphAction::ExecuteInternal(const TSharedPt
 		}
 	}
 
-	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
-	Result->SetStringField(TEXT("state_machine_name"), StateMachineName);
-	Result->SetStringField(TEXT("state_name"), StateName);
-	Result->SetStringField(TEXT("subgraph_name"), SubGraph->GetName());
-	Result->SetBoolField(TEXT("compact"), bCompact);
+	if (!NodeClassFilter.IsEmpty())
+	{
+		Result->SetStringField(TEXT("node_class_filter"), NodeClassFilter);
+	}
+	if (MaxNodes > 0)
+	{
+		Result->SetNumberField(TEXT("max_nodes"), MaxNodes);
+		Result->SetNumberField(TEXT("offset"), Offset);
+		Result->SetNumberField(TEXT("total_matched_nodes"), MatchedNodes);
+	}
 	Result->SetNumberField(TEXT("node_count"), NodesArray.Num());
 	Result->SetNumberField(TEXT("edge_count"), EdgesArray.Num());
 	Result->SetArrayField(TEXT("nodes"), NodesArray);
