@@ -130,8 +130,14 @@ class UEDaemon:
 			return make_result("doctor", payload)
 		if req_type == "run":
 			command = str(request.get("command", ""))
+			run_args: dict[str, Any] = {
+				"command": command,
+				"continue_on_error": bool(request.get("continue_on_error", False)),
+			}
+			if request.get("params") is not None:
+				run_args["params"] = request.get("params")
 			result = runtime.handle_cli(
-				{"command": command, "continue_on_error": bool(request.get("continue_on_error", False))},
+				run_args,
 				send_command_func=self._send_command,
 				log_command_func=self._log_command,
 			)
@@ -167,7 +173,9 @@ class UEDaemon:
 		with self._connection_lock:
 			if not self.connection.is_connected:
 				self.connection.connect()
-			return self.connection.send_command(command_type, params).to_dict()
+			resolved_command, resolved_params = runtime._resolve_command_alias(command_type, params)
+			result = self.connection.send_command(resolved_command, resolved_params).to_dict()
+			return runtime._attach_command_suggestions(result, resolved_command)
 
 	def _connection_health(self) -> dict[str, Any]:
 		with self._connection_lock:

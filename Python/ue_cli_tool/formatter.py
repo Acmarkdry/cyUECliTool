@@ -249,6 +249,14 @@ def _format_error(envelope: dict[str, Any]) -> str:
 
 	lines = [f"ERROR {code}", msg]
 	lines.extend(_error_diagnostic_lines(str(envelope.get("action") or "command"), diagnostics))
+	suggestions = diagnostics.get("suggestions") if isinstance(diagnostics, dict) else None
+	if suggestions:
+		lines.append("Did you mean:")
+		for item in suggestions[:5]:
+			if isinstance(item, dict):
+				cmd = item.get("command") or item.get("id")
+				desc = item.get("description", "")
+				lines.append(f"  - {cmd}: {_short(desc, 80)}")
 	lines.append(f"Recoverable: {'yes' if recoverable else 'no'}")
 	if next_step:
 		lines.append(f"Next: {next_step}")

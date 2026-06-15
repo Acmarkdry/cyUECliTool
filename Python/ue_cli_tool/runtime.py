@@ -84,6 +84,49 @@ def _to_serializable(obj: Any) -> Any:
 	return obj
 
 
+def _resolve_command_alias(command: str, params: dict[str, Any] | None) -> tuple[str, dict[str, Any]]:
+	"""Map friendly aliases to concrete registry commands."""
+	merged = dict(params or {})
+	if command != "describe_asset":
+		return command, merged
+
+	asset_name = (
+		merged.get("asset_name")
+		or merged.get("name")
+		or merged.get("blueprint_name")
+		or merged.get("skeleton_name")
+	)
+	if not asset_name:
+		return command, merged
+
+	name_upper = str(asset_name).upper()
+	if name_upper.startswith("AM_"):
+		return "anim_describe_montage", {**merged, "asset_name": asset_name}
+	if name_upper.startswith("BS_"):
+		return "anim_describe_blendspace", {**merged, "asset_name": asset_name}
+	if name_upper.startswith("SK_"):
+		return "anim_get_skeleton_hierarchy", {**merged, "skeleton_name": asset_name}
+	if name_upper.startswith(("AB_", "ABP_")):
+		return "describe_anim_blueprint_full", {**merged, "blueprint_name": asset_name}
+	return "describe_blueprint_full", {**merged, "blueprint_name": asset_name}
+
+
+def _attach_command_suggestions(result: dict[str, Any], command_type: str) -> dict[str, Any]:
+	if result.get("success"):
+		return result
+
+	error_type = str(result.get("error_type", "")).lower()
+	if error_type not in {"unknown_command", "validation_failed"}:
+		return result
+
+	registry = get_registry()
+	query = command_type
+	if error_type == "validation_failed":
+		query = command_type.replace("_", " ")
+	result["suggestions"] = registry.search(query, top_k=5)
+	return result
+
+
 def _send_command(command_type: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
 	config = get_project_config()
 	conn = get_connection(ConnectionConfig(port=config.tcp_port))
@@ -91,7 +134,9 @@ def _send_command(command_type: str, params: dict[str, Any] | None = None) -> di
 		conn.on_state_change = _context_store._on_ue_state_change
 	if not conn.is_connected:
 		conn.connect()
-	return conn.send_command(command_type, params).to_dict()
+	resolved_command, resolved_params = _resolve_command_alias(command_type, params)
+	result = conn.send_command(resolved_command, resolved_params).to_dict()
+	return _attach_command_suggestions(result, resolved_command)
 
 
 def _log_command(action_id: str, params: dict | None, result: dict, elapsed_ms: float) -> None:
@@ -165,8 +210,10 @@ def handle_cli(
 		cmd_params = dict(cmd.params or {})
 		if params_override:
 			cmd_params.update(params_override)
+		resolved_command, resolved_params = _resolve_command_alias(cmd.command, cmd_params)
 		t0 = time.perf_counter()
-		result = send(cmd.command, cmd_params or None)
+		result = send(resolved_command, resolved_params or None)
+		result = _attach_command_suggestions(result, resolved_command)
 		elapsed = (time.perf_counter() - t0) * 1000
 		log(cmd.command, cmd_params, result, elapsed)
 		result["_cli_line"] = cmd.raw_line
@@ -184,9 +231,12 @@ def handle_cli(
 	failure_message = ""
 	failure_error_type = "batch_child_failed"
 	for cmd in parsed.commands:
+		cmd_params = dict(cmd.params or {})
+		resolved_command, resolved_params = _resolve_command_alias(cmd.command, cmd_params)
 		t0 = time.perf_counter()
 		try:
-			result = send(cmd.command, cmd.params or None)
+			result = send(resolved_command, resolved_params or None)
+			result = _attach_command_suggestions(result, resolved_command)
 		except Exception as exc:
 			result = {"success": False, "error": str(exc), "error_type": "transport_error"}
 		elapsed = (time.perf_counter() - t0) * 1000

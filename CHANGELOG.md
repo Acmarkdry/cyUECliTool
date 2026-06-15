@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.5
+
+- Add `describe_asset` CLI alias with prefix-based routing (AB_/AM_/BS_/SK_ → specialized describe commands).
+- Register `describe_asset` in the action registry so positional args map correctly.
+- Unknown commands now return `Did you mean:` suggestions from the registry search.
+- Alias resolution applies in daemon `_send_command`, `handle_cli`, and batch runs.
+
 ## 0.6.4
 
 - Add `run --params '<json>'` to pass command parameters without fragile shell quoting.

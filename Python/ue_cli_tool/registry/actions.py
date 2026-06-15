@@ -98,6 +98,8 @@ def register_all_actions(registry: ActionRegistry) -> None:
 	registry.register_many(_EXTENDED_ACTIONS)
 	# v0.4.0: Widget analysis extensions
 	registry.register_many(_WIDGET_ANALYSIS_ACTIONS)
+	# CLI aliases (resolved in Python before hitting C++)
+	registry.register_many(_CLI_ALIAS_ACTIONS)
 	# v0.4.0: Animation analysis extensions
 	registry.register_many(_ANIM_ANALYSIS_ACTIONS)
 
@@ -6518,6 +6520,40 @@ _WIDGET_ANALYSIS_ACTIONS = [
 		examples=(
 			{"widget_name": "WBP_HUD"},
 			{"widget_name": "WBP_HUD", "filter_type": "TextBlock"},
+		),
+	),
+]
+
+
+# =========================================================================
+# CLI aliases (Python-side routing only — not sent to C++ as-is)
+# =========================================================================
+_CLI_ALIAS_ACTIONS = [
+	ActionDef(
+		id="cli.describe_asset",
+		command="describe_asset",
+		tags=("asset", "describe", "alias", "blueprint", "animation", "montage", "blendspace", "skeleton"),
+		description=(
+			"Friendly alias that routes to the best describe command by asset name prefix: "
+			"AB_/ABP_ → describe_anim_blueprint_full, AM_ → anim_describe_montage, "
+			"BS_ → anim_describe_blendspace, SK_ → anim_get_skeleton_hierarchy, "
+			"else → describe_blueprint_full."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"asset_name": {
+					"type": "string",
+					"description": "Asset name (e.g. AB_Als, BS_Locomotion, SK_Mannequin)",
+				},
+			},
+			"required": ["asset_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"asset_name": "AB_Als_Standing"},
+			{"asset_name": "BP_Player"},
+			{"asset_name": "BS_Locomotion"},
 		),
 	),
 ]

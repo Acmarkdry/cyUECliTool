@@ -86,6 +86,45 @@ def test_handle_cli_multiline_continue_on_error_runs_remaining_commands():
 	assert result["results"][1]["return_value"] == 2
 
 
+def test_resolve_command_alias_describe_asset_routes_anim_blueprint():
+	command, params = runtime._resolve_command_alias(
+		"describe_asset",
+		{"asset_name": "AB_Als_Standing"},
+	)
+	assert command == "describe_anim_blueprint_full"
+	assert params["blueprint_name"] == "AB_Als_Standing"
+
+
+def test_cli_parser_maps_describe_asset_positional():
+	from ue_cli_tool.cli_parser import CliParser
+	from ue_cli_tool.registry import get_registry
+
+	parser = CliParser(get_registry())
+	parsed = parser.parse("describe_asset AB_Als_Standing")
+	assert not parsed.errors
+	assert len(parsed.commands) == 1
+	assert parsed.commands[0].command == "describe_asset"
+	assert parsed.commands[0].params["asset_name"] == "AB_Als_Standing"
+
+
+def test_resolve_command_alias_describe_asset_routes_blendspace():
+	command, params = runtime._resolve_command_alias(
+		"describe_asset",
+		{"asset_name": "BS_Locomotion"},
+	)
+	assert command == "anim_describe_blendspace"
+	assert params["asset_name"] == "BS_Locomotion"
+
+
+def test_attach_command_suggestions_on_unknown_command():
+	result = runtime._attach_command_suggestions(
+		{"success": False, "error_type": "unknown_command"},
+		"describe_asset_typo",
+	)
+	assert "suggestions" in result
+	assert isinstance(result["suggestions"], list)
+
+
 def test_handle_cli_params_override_merges_into_single_command():
 	calls = []
 
