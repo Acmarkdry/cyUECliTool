@@ -126,6 +126,22 @@ def handle_cli(
 ) -> dict[str, Any]:
 	command_text = args.get("command", "")
 	continue_on_error = bool(args.get("continue_on_error", False))
+	params_override = args.get("params")
+	if isinstance(params_override, str):
+		try:
+			params_override = json.loads(params_override)
+		except json.JSONDecodeError as exc:
+			return {
+				"success": False,
+				"error": f"Invalid params JSON: {exc}",
+				"error_type": "parse_error",
+			}
+	if params_override is not None and not isinstance(params_override, dict):
+		return {
+			"success": False,
+			"error": "params must be a JSON object",
+			"error_type": "parse_error",
+		}
 	if not command_text.strip():
 		return {"success": False, "error": "command is required", "error_type": "parse_error"}
 
@@ -146,10 +162,13 @@ def handle_cli(
 
 	if len(parsed.commands) == 1:
 		cmd = parsed.commands[0]
+		cmd_params = dict(cmd.params or {})
+		if params_override:
+			cmd_params.update(params_override)
 		t0 = time.perf_counter()
-		result = send(cmd.command, cmd.params or None)
+		result = send(cmd.command, cmd_params or None)
 		elapsed = (time.perf_counter() - t0) * 1000
-		log(cmd.command, cmd.params, result, elapsed)
+		log(cmd.command, cmd_params, result, elapsed)
 		result["_cli_line"] = cmd.raw_line
 		return result
 

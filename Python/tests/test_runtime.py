@@ -86,6 +86,39 @@ def test_handle_cli_multiline_continue_on_error_runs_remaining_commands():
 	assert result["results"][1]["return_value"] == 2
 
 
+def test_handle_cli_params_override_merges_into_single_command():
+	calls = []
+
+	def fake_send(command, params):
+		calls.append((command, params))
+		return {"success": True, "params": params}
+
+	result = runtime.handle_cli(
+		{
+			"command": "get_state_subgraph",
+			"params": {
+				"blueprint_name": "AB_Als_Standing",
+				"state_machine_name": "Stop States",
+				"state_name": "Plant Left Foot",
+			},
+		},
+		send_command_func=fake_send,
+		log_command_func=lambda *args: None,
+	)
+
+	assert result["success"] is True
+	assert calls == [
+		(
+			"get_state_subgraph",
+			{
+				"blueprint_name": "AB_Als_Standing",
+				"state_machine_name": "Stop States",
+				"state_name": "Plant Left Foot",
+			},
+		)
+	]
+
+
 def test_handle_query_health_fails_when_unreal_is_disconnected():
 	result = runtime.handle_query(
 		{"query": "health"},

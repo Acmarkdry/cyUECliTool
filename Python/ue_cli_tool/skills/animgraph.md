@@ -11,7 +11,7 @@
 - **Property Binding**：`get_state_subgraph` / `describe_topology` 的节点 JSON 含 `property_bindings[]`（pin → path），绑定的输入引脚会标记 `is_bound: true` 且 `is_connected: true`。
 - **Property Access 转换**：`get_transition_rule` 解析 `K2Node_PropertyAccess`，输出 `property_path` / `referenced_property_paths`。
 - **嵌套状态机**：`describe_anim_blueprint_full` 递归收录嵌套状态机（含 `parent_state_machine`、`depth`）。
-- **带空格参数**：PowerShell 下状态机名含空格时，**必须**用 `.uecli` 批处理，不要直接在命令行传引号参数。
+- **带空格参数**：PowerShell 下状态机名含空格时，**必须**用 `.uecli` 批处理，或使用 `run --params '{"blueprint_name":"...","state_machine_name":"..."}'`。
 - **编译诊断**：修改动画蓝图后务必调用 `animgraph.compile`，通过 `error_count` 和 `errors` 字段确认修改正确。
 
 ---

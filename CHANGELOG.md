@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4
+
+- Add `run --params '<json>'` to pass command parameters without fragile shell quoting.
+
 ## 0.6.3
 
 - Clear stale `last_error` from `query health` after a successful UE command.

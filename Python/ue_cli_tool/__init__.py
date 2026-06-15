@@ -1,7 +1,7 @@
 # coding: utf-8
 """CLI-first AI interface for controlling Unreal Engine Editor."""
 
-__version__ = "0.6.3"
+__version__ = "0.6.4"
 __author__ = "zolnoor"
 
 from .connection import PersistentUnrealConnection

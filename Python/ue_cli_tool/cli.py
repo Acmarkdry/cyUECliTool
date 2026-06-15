@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -35,12 +36,31 @@ def main(argv: list[str] | None = None) -> int:
 		except OSError as exc:
 			response = make_error("RUN_FILE_READ_FAILED", str(exc), recoverable=False)
 			return _print_response(response, args)
+		payload: dict[str, Any] = {
+			"type": "run",
+			"command": text,
+			"continue_on_error": bool(args.continue_on_error),
+		}
+		if getattr(args, "params_json", None):
+			try:
+				parsed_params = json.loads(args.params_json)
+			except json.JSONDecodeError as exc:
+				response = make_error(
+					"INVALID_PARAMS_JSON",
+					f"Invalid --params JSON: {exc}",
+					recoverable=False,
+				)
+				return _print_response(response, args)
+			if not isinstance(parsed_params, dict):
+				response = make_error(
+					"INVALID_PARAMS_JSON",
+					"--params must be a JSON object",
+					recoverable=False,
+				)
+				return _print_response(response, args)
+			payload["params"] = parsed_params
 		return _print_response(
-			_request_with_autostart(
-				{"type": "run", "command": text, "continue_on_error": bool(args.continue_on_error)},
-				config,
-				args,
-			),
+			_request_with_autostart(payload, config, args),
 			args,
 		)
 	if args.command == "query":
@@ -85,6 +105,11 @@ def _build_parser() -> argparse.ArgumentParser:
 		"--continue-on-error",
 		action="store_true",
 		help="Keep executing a multi-command run batch after a command fails.",
+	)
+	run.add_argument(
+		"--params",
+		dest="params_json",
+		help="JSON object merged into the command parameters (single-command runs).",
 	)
 	run.add_argument("--no-daemon", action="store_true", help="Do not auto-start the daemon.")
 
