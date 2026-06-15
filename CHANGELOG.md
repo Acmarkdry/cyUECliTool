@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.1
+
+- Export AnimGraph `property_bindings[]` from `get_state_subgraph` and
+  `describe_animgraph_topology` (pin, path, friendly_name, property_path).
+- Bound anim pins now surface as `is_bound` / `is_connected` even without wire links.
+- `get_transition_rule` parses `K2Node_PropertyAccess` into `property_path` and
+  `referenced_property_paths`.
+- `describe_anim_blueprint_full` recursively lists nested state machines with
+  `parent_state_machine`, `parent_state`, and `depth`.
+
 ## 0.6.0
 
 - Make the PowerShell launcher (`ue.ps1`) and Codex skill the primary workflow.

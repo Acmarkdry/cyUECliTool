@@ -36,6 +36,7 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/BlendSpace.h"
+#include "UObject/UnrealType.h"
 
 // ============================================================================
 // AnimGraphHelpers
@@ -187,6 +188,217 @@ UAnimStateTransitionNode* FindTransitionNode(UEdGraph* StateMachineGraph,
 	return nullptr;
 }
 
+static void AppendPropertyBindingJson(
+	const FName& PinName,
+	const FAnimGraphNodePropertyBinding& Binding,
+	TArray<TSharedPtr<FJsonValue>>& OutBindings)
+{
+	if (!Binding.bIsBound && Binding.PropertyPath.Num() == 0 && Binding.PathAsText.IsEmpty())
+	{
+		return;
+	}
+
+	TSharedPtr<FJsonObject> BindObj = MakeShared<FJsonObject>();
+	BindObj->SetStringField(TEXT("pin"), PinName.ToString());
+
+	FString PathStr;
+	if (!Binding.PathAsText.IsEmpty())
+	{
+		PathStr = Binding.PathAsText.ToString();
+	}
+	else if (Binding.PropertyPath.Num() > 0)
+	{
+		PathStr = FString::Join(Binding.PropertyPath, TEXT("."));
+	}
+	if (!PathStr.IsEmpty())
+	{
+		BindObj->SetStringField(TEXT("path"), PathStr);
+	}
+
+	if (!Binding.PathAsText.IsEmpty())
+	{
+		BindObj->SetStringField(TEXT("friendly_name"), Binding.PathAsText.ToString());
+	}
+	else if (Binding.PropertyPath.Num() > 0)
+	{
+		BindObj->SetStringField(TEXT("friendly_name"), Binding.PropertyPath.Last());
+	}
+
+	if (Binding.PropertyPath.Num() > 0)
+	{
+		TArray<TSharedPtr<FJsonValue>> PathSegments;
+		for (const FString& Segment : Binding.PropertyPath)
+		{
+			PathSegments.Add(MakeShared<FJsonValueString>(Segment));
+		}
+		BindObj->SetArrayField(TEXT("property_path"), PathSegments);
+	}
+
+	if (Binding.Type == EAnimGraphNodePropertyBindingType::Function)
+	{
+		BindObj->SetStringField(TEXT("binding_type"), TEXT("function"));
+	}
+	else if (Binding.Type == EAnimGraphNodePropertyBindingType::Property)
+	{
+		BindObj->SetStringField(TEXT("binding_type"), TEXT("property"));
+	}
+
+	BindObj->SetBoolField(TEXT("is_bound"), Binding.bIsBound);
+	OutBindings.Add(MakeShared<FJsonValueObject>(BindObj));
+}
+
+static void CollectAnimNodePropertyBindings(
+	const UAnimGraphNode_Base* AnimNode,
+	TArray<TSharedPtr<FJsonValue>>& OutBindings)
+{
+	if (!AnimNode)
+	{
+		return;
+	}
+
+	TSet<FName> SeenPins;
+
+	auto CollectFromMap = [&](const TMap<FName, FAnimGraphNodePropertyBinding>& BindingsMap)
+	{
+		for (const TPair<FName, FAnimGraphNodePropertyBinding>& Pair : BindingsMap)
+		{
+			if (SeenPins.Contains(Pair.Key))
+			{
+				continue;
+			}
+			SeenPins.Add(Pair.Key);
+			AppendPropertyBindingJson(Pair.Key, Pair.Value, OutBindings);
+		}
+	};
+
+	CollectFromMap(AnimNode->PropertyBindings_DEPRECATED);
+
+	if (const UObject* BindingObject = reinterpret_cast<const UObject*>(AnimNode->GetBinding()))
+	{
+		if (const FMapProperty* MapProp = FindFProperty<FMapProperty>(BindingObject->GetClass(), TEXT("PropertyBindings")))
+		{
+			FScriptMapHelper MapHelper(
+				MapProp,
+				MapProp->ContainerPtrToValuePtr<void>(const_cast<UObject*>(BindingObject)));
+			const FStructProperty* ValueStructProp = CastField<FStructProperty>(MapProp->ValueProp);
+			if (ValueStructProp && ValueStructProp->Struct == FAnimGraphNodePropertyBinding::StaticStruct())
+			{
+				for (int32 Index = 0; Index < MapHelper.Num(); ++Index)
+				{
+					if (!MapHelper.IsValidIndex(Index))
+					{
+						continue;
+					}
+
+					const FName PinName = *reinterpret_cast<const FName*>(MapHelper.GetKeyPtr(Index));
+					if (SeenPins.Contains(PinName))
+					{
+						continue;
+					}
+					SeenPins.Add(PinName);
+
+					const FAnimGraphNodePropertyBinding& BindingInfo =
+						*reinterpret_cast<const FAnimGraphNodePropertyBinding*>(MapHelper.GetValuePtr(Index));
+					AppendPropertyBindingJson(PinName, BindingInfo, OutBindings);
+				}
+			}
+		}
+	}
+}
+
+void ExtractPropertyBindings(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj)
+{
+	if (!Node || !OutNodeObj.IsValid())
+	{
+		return;
+	}
+
+	const UAnimGraphNode_Base* AnimNode = Cast<UAnimGraphNode_Base>(Node);
+	if (!AnimNode)
+	{
+		return;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> BindingsArray;
+	CollectAnimNodePropertyBindings(AnimNode, BindingsArray);
+	if (BindingsArray.Num() > 0)
+	{
+		OutNodeObj->SetArrayField(TEXT("property_bindings"), BindingsArray);
+	}
+}
+
+bool ExtractPropertyAccessNodeInfo(
+	const UEdGraphNode* Node,
+	TSharedPtr<FJsonObject>& OutNodeObj,
+	TArray<FString>& OutReferencedPaths)
+{
+	if (!Node || !OutNodeObj.IsValid() || Node->GetClass()->GetName() != TEXT("K2Node_PropertyAccess"))
+	{
+		return false;
+	}
+
+	TArray<FString> PathSegments;
+	if (const FArrayProperty* PathArrayProp = FindFProperty<FArrayProperty>(Node->GetClass(), TEXT("Path")))
+	{
+		FScriptArrayHelper ArrayHelper(PathArrayProp, PathArrayProp->ContainerPtrToValuePtr<void>(Node));
+		for (int32 Index = 0; Index < ArrayHelper.Num(); ++Index)
+		{
+			const FString* Segment = reinterpret_cast<const FString*>(ArrayHelper.GetRawPtr(Index));
+			if (Segment && !Segment->IsEmpty())
+			{
+				PathSegments.Add(*Segment);
+			}
+		}
+	}
+
+	FString TextPath;
+	if (const FStructProperty* TextPathProp = FindFProperty<FStructProperty>(Node->GetClass(), TEXT("TextPath")))
+	{
+		const FText* TextPtr = TextPathProp->ContainerPtrToValuePtr<FText>(Node);
+		if (TextPtr && !TextPtr->IsEmpty())
+		{
+			TextPath = TextPtr->ToString();
+		}
+	}
+
+	if (PathSegments.Num() == 0 && TextPath.IsEmpty())
+	{
+		return false;
+	}
+
+	OutNodeObj->SetStringField(TEXT("node_kind"), TEXT("PropertyAccess"));
+
+	if (!TextPath.IsEmpty())
+	{
+		OutNodeObj->SetStringField(TEXT("property_path_text"), TextPath);
+	}
+
+	if (PathSegments.Num() > 0)
+	{
+		const FString JoinedPath = FString::Join(PathSegments, TEXT("."));
+		OutNodeObj->SetStringField(TEXT("property_path"), JoinedPath);
+		OutNodeObj->SetStringField(TEXT("friendly_name"), PathSegments.Last());
+
+		TArray<TSharedPtr<FJsonValue>> SegmentsArray;
+		for (const FString& Segment : PathSegments)
+		{
+			SegmentsArray.Add(MakeShared<FJsonValueString>(Segment));
+		}
+		OutNodeObj->SetArrayField(TEXT("property_path_segments"), SegmentsArray);
+
+		if (!OutReferencedPaths.Contains(JoinedPath))
+		{
+			OutReferencedPaths.Add(JoinedPath);
+		}
+	}
+	else if (!TextPath.IsEmpty() && !OutReferencedPaths.Contains(TextPath))
+	{
+		OutReferencedPaths.Add(TextPath);
+	}
+
+	return true;
+}
+
 TSharedPtr<FJsonObject> SerializeAnimNode(const UEdGraphNode* Node, bool bCompact)
 {
 	if (!Node) return nullptr;
@@ -214,7 +426,20 @@ TSharedPtr<FJsonObject> SerializeAnimNode(const UEdGraphNode* Node, bool bCompac
 		PinObj->SetStringField(TEXT("pin_name"), Pin->PinName.ToString());
 		PinObj->SetStringField(TEXT("direction"), Pin->Direction == EGPD_Input ? TEXT("input") : TEXT("output"));
 		PinObj->SetStringField(TEXT("category"), Pin->PinType.PinCategory.ToString());
-		PinObj->SetBoolField(TEXT("is_connected"), Pin->LinkedTo.Num() > 0);
+		bool bIsPinConnected = Pin->LinkedTo.Num() > 0;
+		if (!bIsPinConnected)
+		{
+			if (const UAnimGraphNode_Base* AnimNode = Cast<UAnimGraphNode_Base>(Node))
+			{
+				if (Pin->Direction == EGPD_Input
+					&& AnimNode->IsPinExposedAndBound(Pin->PinName.ToString(), EGPD_Input))
+				{
+					bIsPinConnected = true;
+					PinObj->SetBoolField(TEXT("is_bound"), true);
+				}
+			}
+		}
+		PinObj->SetBoolField(TEXT("is_connected"), bIsPinConnected);
 
 		if (!bCompact)
 		{
@@ -247,6 +472,8 @@ TSharedPtr<FJsonObject> SerializeAnimNode(const UEdGraphNode* Node, bool bCompac
 		PinsArray.Add(MakeShared<FJsonValueObject>(PinObj));
 	}
 	NodeObj->SetArrayField(TEXT("pins"), PinsArray);
+
+	ExtractPropertyBindings(Node, NodeObj);
 
 	return NodeObj;
 }
@@ -836,6 +1063,7 @@ TSharedPtr<FJsonObject> FGetTransitionRuleAction::ExecuteInternal(const TSharedP
 
 	// Collect variable references used in the condition graph
 	TArray<FString> ReferencedVariables;
+	TArray<FString> ReferencedPropertyPaths;
 
 	for (UEdGraphNode* Node : CondGraph->Nodes)
 	{
@@ -855,6 +1083,45 @@ TSharedPtr<FJsonObject> FGetTransitionRuleAction::ExecuteInternal(const TSharedP
 				ReferencedVariables.Add(VarName);
 			}
 			NodeObj->SetStringField(TEXT("variable_name"), VarName);
+		}
+		else if (AnimGraphHelpers::ExtractPropertyAccessNodeInfo(Node, NodeObj, ReferencedPropertyPaths))
+		{
+			FString FriendlyNameValue;
+			if (NodeObj->TryGetStringField(TEXT("friendly_name"), FriendlyNameValue)
+				&& !FriendlyNameValue.IsEmpty()
+				&& !ReferencedVariables.Contains(FriendlyNameValue))
+			{
+				ReferencedVariables.Add(FriendlyNameValue);
+			}
+		}
+
+		const TArray<TSharedPtr<FJsonValue>>* NodeBindings = nullptr;
+		if (NodeObj->TryGetArrayField(TEXT("property_bindings"), NodeBindings) && NodeBindings)
+		{
+			for (const TSharedPtr<FJsonValue>& BindingValue : *NodeBindings)
+			{
+				const TSharedPtr<FJsonObject>* BindingObj = nullptr;
+				if (!BindingValue.IsValid() || !BindingValue->TryGetObject(BindingObj) || !BindingObj || !BindingObj->IsValid())
+				{
+					continue;
+				}
+
+				FString BindingPath;
+				if ((*BindingObj)->TryGetStringField(TEXT("path"), BindingPath)
+					&& !BindingPath.IsEmpty()
+					&& !ReferencedPropertyPaths.Contains(BindingPath))
+				{
+					ReferencedPropertyPaths.Add(BindingPath);
+				}
+
+				FString BindingFriendlyName;
+				if ((*BindingObj)->TryGetStringField(TEXT("friendly_name"), BindingFriendlyName)
+					&& !BindingFriendlyName.IsEmpty()
+					&& !ReferencedVariables.Contains(BindingFriendlyName))
+				{
+					ReferencedVariables.Add(BindingFriendlyName);
+				}
+			}
 		}
 
 		NodesArray.Add(MakeShared<FJsonValueObject>(NodeObj));
@@ -901,6 +1168,13 @@ TSharedPtr<FJsonObject> FGetTransitionRuleAction::ExecuteInternal(const TSharedP
 	Result->SetArrayField(TEXT("nodes"), NodesArray);
 	Result->SetArrayField(TEXT("edges"), EdgesArray);
 	Result->SetArrayField(TEXT("referenced_variables"), VarRefsArray);
+
+	TArray<TSharedPtr<FJsonValue>> PropertyPathRefsArray;
+	for (const FString& PropertyPath : ReferencedPropertyPaths)
+	{
+		PropertyPathRefsArray.Add(MakeShared<FJsonValueString>(PropertyPath));
+	}
+	Result->SetArrayField(TEXT("referenced_property_paths"), PropertyPathRefsArray);
 
 	return CreateSuccessResponse(Result);
 }

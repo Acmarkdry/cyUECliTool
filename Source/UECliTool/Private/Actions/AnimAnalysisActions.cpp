@@ -206,11 +206,128 @@ static TArray<FString> CollectAnimAssetReferences(UAnimBlueprint* AnimBP)
 }
 
 /**
+ * Build a summary object for a state machine graph.
+ */
+static TSharedPtr<FJsonObject> BuildStateMachineSummary(UEdGraph* SMGraph)
+{
+	int32 StateCount = 0;
+	int32 TransitionCount = 0;
+	FString EntryStateName;
+
+	for (UEdGraphNode* SMChild : SMGraph->Nodes)
+	{
+		if (!SMChild) continue;
+
+		if (Cast<UAnimStateNode>(SMChild))
+		{
+			StateCount++;
+		}
+		else if (Cast<UAnimStateTransitionNode>(SMChild))
+		{
+			TransitionCount++;
+		}
+		else if (UAnimStateEntryNode* EntryNode = Cast<UAnimStateEntryNode>(SMChild))
+		{
+			for (UEdGraphPin* Pin : EntryNode->Pins)
+			{
+				if (Pin && Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
+				{
+					UEdGraphNode* LinkedNode = Pin->LinkedTo[0]->GetOwningNode();
+					if (UAnimStateNode* DefaultState = Cast<UAnimStateNode>(LinkedNode))
+					{
+						EntryStateName = DefaultState->GetStateName();
+					}
+				}
+			}
+		}
+	}
+
+	TSharedPtr<FJsonObject> SMObj = MakeShared<FJsonObject>();
+	SMObj->SetStringField(TEXT("name"), SMGraph->GetName());
+	SMObj->SetNumberField(TEXT("state_count"), StateCount);
+	SMObj->SetNumberField(TEXT("transition_count"), TransitionCount);
+	SMObj->SetStringField(TEXT("entry_state"), EntryStateName);
+	return SMObj;
+}
+
+/**
+ * Recursively discover nested state machines inside state bound graphs.
+ */
+static void CollectNestedStateMachinesInGraph(
+	UEdGraph* Graph,
+	const FString& ParentStateMachine,
+	const FString& ParentState,
+	int32 Depth,
+	TArray<TSharedPtr<FJsonValue>>& OutStateMachines,
+	TSet<FString>& SeenNames)
+{
+	if (!Graph)
+	{
+		return;
+	}
+
+	for (UEdGraphNode* Node : Graph->Nodes)
+	{
+		if (!Node) continue;
+
+		if (UAnimGraphNode_StateMachine* SMNode = Cast<UAnimGraphNode_StateMachine>(Node))
+		{
+			if (!SMNode->EditorStateMachineGraph) continue;
+
+			const FString Name = SMNode->EditorStateMachineGraph->GetName();
+			if (SeenNames.Contains(Name)) continue;
+			SeenNames.Add(Name);
+
+			TSharedPtr<FJsonObject> SMObj = BuildStateMachineSummary(SMNode->EditorStateMachineGraph);
+			SMObj->SetStringField(TEXT("parent_state_machine"), ParentStateMachine);
+			if (!ParentState.IsEmpty())
+			{
+				SMObj->SetStringField(TEXT("parent_state"), ParentState);
+			}
+			SMObj->SetNumberField(TEXT("depth"), Depth);
+			OutStateMachines.Add(MakeShared<FJsonValueObject>(SMObj));
+
+			for (UEdGraphNode* SMChild : SMNode->EditorStateMachineGraph->Nodes)
+			{
+				if (UAnimStateNode* StateNode = Cast<UAnimStateNode>(SMChild))
+				{
+					if (StateNode->BoundGraph)
+					{
+						CollectNestedStateMachinesInGraph(
+							StateNode->BoundGraph,
+							Name,
+							StateNode->GetStateName(),
+							Depth + 1,
+							OutStateMachines,
+							SeenNames);
+					}
+				}
+			}
+		}
+
+		if (UAnimStateNode* StateNode = Cast<UAnimStateNode>(Node))
+		{
+			if (StateNode->BoundGraph)
+			{
+				CollectNestedStateMachinesInGraph(
+					StateNode->BoundGraph,
+					ParentStateMachine,
+					StateNode->GetStateName(),
+					Depth,
+					OutStateMachines,
+					SeenNames);
+			}
+		}
+	}
+}
+
+/**
  * Collect state machine summaries from an AnimBlueprint.
  */
 static TArray<TSharedPtr<FJsonValue>> CollectStateMachineSummaries(UAnimBlueprint* AnimBP)
 {
 	TArray<TSharedPtr<FJsonValue>> StateMachines;
+	TSet<FString> SeenNames;
 
 	for (UEdGraph* Graph : AnimBP->FunctionGraphs)
 	{
@@ -221,46 +338,30 @@ static TArray<TSharedPtr<FJsonValue>> CollectStateMachineSummaries(UAnimBlueprin
 			UAnimGraphNode_StateMachine* SMNode = Cast<UAnimGraphNode_StateMachine>(Node);
 			if (!SMNode || !SMNode->EditorStateMachineGraph) continue;
 
-			UEdGraph* SMGraph = SMNode->EditorStateMachineGraph;
+			const FString Name = SMNode->EditorStateMachineGraph->GetName();
+			if (SeenNames.Contains(Name)) continue;
+			SeenNames.Add(Name);
 
-			int32 StateCount = 0;
-			int32 TransitionCount = 0;
-			FString EntryStateName;
+			TSharedPtr<FJsonObject> SMObj = BuildStateMachineSummary(SMNode->EditorStateMachineGraph);
+			SMObj->SetNumberField(TEXT("depth"), 0);
+			StateMachines.Add(MakeShared<FJsonValueObject>(SMObj));
 
-			for (UEdGraphNode* SMChild : SMGraph->Nodes)
+			for (UEdGraphNode* SMChild : SMNode->EditorStateMachineGraph->Nodes)
 			{
-				if (!SMChild) continue;
-
-				if (Cast<UAnimStateNode>(SMChild))
+				if (UAnimStateNode* StateNode = Cast<UAnimStateNode>(SMChild))
 				{
-					StateCount++;
-				}
-				else if (Cast<UAnimStateTransitionNode>(SMChild))
-				{
-					TransitionCount++;
-				}
-				else if (UAnimStateEntryNode* EntryNode = Cast<UAnimStateEntryNode>(SMChild))
-				{
-					for (UEdGraphPin* Pin : EntryNode->Pins)
+					if (StateNode->BoundGraph)
 					{
-						if (Pin && Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
-						{
-							UEdGraphNode* LinkedNode = Pin->LinkedTo[0]->GetOwningNode();
-							if (UAnimStateNode* DefaultState = Cast<UAnimStateNode>(LinkedNode))
-							{
-								EntryStateName = DefaultState->GetStateName();
-							}
-						}
+						CollectNestedStateMachinesInGraph(
+							StateNode->BoundGraph,
+							Name,
+							StateNode->GetStateName(),
+							1,
+							StateMachines,
+							SeenNames);
 					}
 				}
 			}
-
-			TSharedPtr<FJsonObject> SMObj = MakeShared<FJsonObject>();
-			SMObj->SetStringField(TEXT("name"), SMGraph->GetName());
-			SMObj->SetNumberField(TEXT("state_count"), StateCount);
-			SMObj->SetNumberField(TEXT("transition_count"), TransitionCount);
-			SMObj->SetStringField(TEXT("entry_state"), EntryStateName);
-			StateMachines.Add(MakeShared<FJsonValueObject>(SMObj));
 		}
 	}
 

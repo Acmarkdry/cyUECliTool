@@ -219,6 +219,15 @@ def test_animgraph_skill_loads_with_all_actions():
         assert aid in loaded_ids, f"animgraph skill is missing action '{aid}'"
 
 
+def test_animgraph_workflow_file_documents_property_bindings():
+    """animgraph.md should document property binding and ALS inspection workflow."""
+    workflow_path = _WORKFLOWS_DIR / "animgraph.md"
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "property_bindings" in content
+    assert "referenced_property_paths" in content or "Property Access" in content
+    assert ".uecli" in content
+
+
 # ---------------------------------------------------------------------------
 # Unit test: animgraph.md workflow file exists
 # ---------------------------------------------------------------------------

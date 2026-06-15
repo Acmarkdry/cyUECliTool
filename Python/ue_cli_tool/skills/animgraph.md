@@ -8,6 +8,10 @@
 
 - **节点 GUID**：每个图节点都有唯一 GUID，写入操作（连接、设置属性等）需要先通过读取操作获取 GUID。
 - **compact 模式**：`describe_topology`、`get_state_subgraph`、`get_transition_rule` 均支持 `compact: true` 参数，可省略隐藏引脚和元数据，显著减少输出体积。建议在大型图中优先使用。
+- **Property Binding**：`get_state_subgraph` / `describe_topology` 的节点 JSON 含 `property_bindings[]`（pin → path），绑定的输入引脚会标记 `is_bound: true` 且 `is_connected: true`。
+- **Property Access 转换**：`get_transition_rule` 解析 `K2Node_PropertyAccess`，输出 `property_path` / `referenced_property_paths`。
+- **嵌套状态机**：`describe_anim_blueprint_full` 递归收录嵌套状态机（含 `parent_state_machine`、`depth`）。
+- **带空格参数**：PowerShell 下状态机名含空格时，**必须**用 `.uecli` 批处理，不要直接在命令行传引号参数。
 - **编译诊断**：修改动画蓝图后务必调用 `animgraph.compile`，通过 `error_count` 和 `errors` 字段确认修改正确。
 
 ---
@@ -30,7 +34,23 @@
    → 获取某个状态内部的动画节点拓扑（含资产引用）
 
 5. animgraph.get_transition_rule
-   → 获取转换规则的条件表达式（含引用的蓝图变量）
+   → 获取转换规则的条件表达式（含引用的蓝图变量与 Property Access 路径）
+```
+
+### ALS 学习推荐命令序列
+
+```powershell
+.\ue.ps1 query health
+.\ue.ps1 run --json --file .\.cursor\tmp\als_inspect.uecli
+```
+
+`.uecli` 示例（带空格的状态机名）：
+
+```text
+describe_anim_blueprint_full AB_Als_Standing
+get_state_machine_structure AB_Als_Standing "Standing States"
+get_state_machine_structure AB_Als_Standing "Stop States"
+get_state_subgraph AB_Als_Standing "Stop States" "Plant Left Foot"
 ```
 
 ---

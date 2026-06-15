@@ -38,6 +38,12 @@ namespace AnimGraphHelpers
 	/** Identify animation asset references (AnimSequence, BlendSpace, etc.) and add to node JSON */
 	void ExtractAnimAssetReferences(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj);
 
+	/** Export AnimGraph property bindings (pin -> property path) onto a serialized node object */
+	void ExtractPropertyBindings(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj);
+
+	/** Parse K2Node_PropertyAccess path segments for transition rule graphs */
+	bool ExtractPropertyAccessNodeInfo(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj, TArray<FString>& OutReferencedPaths);
+
 	/** Create an animation graph node by type string at the given position */
 	UAnimGraphNode_Base* CreateAnimNodeByType(UEdGraph* Graph, const FString& NodeType,
 		FVector2D Position, const TSharedPtr<FJsonObject>& Params, FString& OutError);
