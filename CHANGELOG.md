@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.7
+
+- Add `describe_anim_pipeline` for cross-layer linked AnimBP chain + SaveCachedPose names per layer.
+- Add `describe_control_rig_topology` for Control Rig RigVM node/link topology.
+- Resolve `GetParent.*` property bindings to parent class fields (`resolved_property`, `resolved_cpp_type`).
+- `describe_animgraph_topology` supports `output_path` to write full JSON to disk (CLI returns summary).
+
 ## 0.6.6
 
 - `get_state_subgraph` adds `mode=semantic` with `semantic_summary` and compact `semantic_nodes[]`.

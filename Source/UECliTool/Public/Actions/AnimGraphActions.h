@@ -41,6 +41,10 @@ namespace AnimGraphHelpers
 	/** Export AnimGraph property bindings (pin -> property path) onto a serialized node object */
 	void ExtractPropertyBindings(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj);
 
+	/** Write a full JSON result object to disk; returns a summary object for CLI output */
+	bool WriteJsonResultToFile(const TSharedPtr<FJsonObject>& FullResult, const FString& OutputPath,
+		TSharedPtr<FJsonObject>& OutSummary, FString& OutError);
+
 	/** Parse K2Node_PropertyAccess path segments for transition rule graphs */
 	bool ExtractPropertyAccessNodeInfo(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj, TArray<FString>& OutReferencedPaths);
 

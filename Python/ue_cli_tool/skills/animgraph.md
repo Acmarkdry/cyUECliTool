@@ -14,7 +14,10 @@
 - **命令别名**：`describe_asset AB_Als` 自动路由到 `describe_anim_blueprint_full`；未知命令会返回 `suggestions`。
 - **Property Binding**：`get_state_subgraph` / `describe_topology` 的节点 JSON 含 `property_bindings[]`（pin → path），绑定的输入引脚会标记 `is_bound: true` 且 `is_connected: true`。
 - **Property Access 转换**：`get_transition_rule` 解析 `K2Node_PropertyAccess`，输出 `property_path` / `referenced_property_paths`。
-- **嵌套状态机**：`describe_anim_blueprint_full` 递归收录嵌套状态机（含 `parent_state_machine`、`depth`）。
+- **GetParent 绑定解析**：`property_bindings` 中 `GetParent.xxx` 路径会附加 `resolved_property`、`resolved_cpp_type`、`resolved_on_class`。
+- **管线摘要**：`describe_anim_pipeline AB_Als` 一次输出 linked 层链 + 各层 `save_cached_poses`。
+- **Control Rig**：`describe_control_rig_topology CR_Als` 读取 RigVM 节点/连线拓扑。
+- **大拓扑落盘**：`describe_topology` 支持 `output_path`，完整 JSON 写入文件，CLI 只返回摘要。
 - **带空格参数**：PowerShell 下状态机名含空格时，**必须**用 `.uecli` 批处理，或使用 `run --params '{"blueprint_name":"...","state_machine_name":"..."}'`。
 - **编译诊断**：修改动画蓝图后务必调用 `animgraph.compile`，通过 `error_count` 和 `errors` 字段确认修改正确。
 

@@ -5202,6 +5202,22 @@ _ANIMGRAPH_ACTIONS = [
 					"type": "boolean",
 					"description": "Omit hidden pins and metadata (default: false)",
 				},
+				"node_class_filter": {
+					"type": "string",
+					"description": "Filter nodes by class name substring",
+				},
+				"max_nodes": {
+					"type": "integer",
+					"description": "Pagination limit for matched nodes",
+				},
+				"offset": {
+					"type": "integer",
+					"description": "Pagination offset for matched nodes",
+				},
+				"output_path": {
+					"type": "string",
+					"description": "Write full topology JSON to this file path; CLI returns summary only",
+				},
 			},
 			"required": ["blueprint_name", "graph_name"],
 		},
@@ -6611,6 +6627,60 @@ _ANIM_ANALYSIS_ACTIONS = [
 		examples=(
 			{"blueprint_name": "AB_Als"},
 			{"blueprint_name": "AB_Als_Standing"},
+		),
+	),
+	ActionDef(
+		id="anim.describe_pipeline",
+		command="describe_anim_pipeline",
+		tags=("animation", "anim", "pipeline", "linked", "stack", "describe", "read"),
+		description=(
+			"Cross-layer animation pipeline summary from a root AnimBP: linked layer chain, "
+			"linked inputs, state machines, and SaveCachedPose names per layer."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"blueprint_name": {
+					"type": "string",
+					"description": "Root Animation Blueprint name (e.g. AB_Als)",
+				},
+			},
+			"required": ["blueprint_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"blueprint_name": "AB_Als"},
+		),
+	),
+	ActionDef(
+		id="anim.describe_control_rig_topology",
+		command="describe_control_rig_topology",
+		tags=("animation", "control", "rig", "topology", "describe", "read"),
+		description=(
+			"Describe Control Rig Blueprint RigVM graph topology: nodes, links, and pin types."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"rig_name": {
+					"type": "string",
+					"description": "Control Rig Blueprint name or path (e.g. CR_Als)",
+				},
+				"graph_name": {
+					"type": "string",
+					"description": "Optional RigVM graph name (default: root graph)",
+				},
+				"compact": {
+					"type": "boolean",
+					"description": "Omit per-node pin details",
+				},
+			},
+			"required": ["rig_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"rig_name": "CR_Als"},
+			{"rig_name": "CR_Als", "compact": True},
 		),
 	),
 	ActionDef(

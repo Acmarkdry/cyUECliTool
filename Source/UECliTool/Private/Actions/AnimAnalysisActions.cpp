@@ -34,7 +34,14 @@
 #include "AnimGraphNode_LinkedAnimGraphBase.h"
 #include "AnimGraphNode_LinkedAnimLayer.h"
 #include "AnimGraphNode_LinkedInputPose.h"
+#include "AnimGraphNode_SaveCachedPose.h"
 #include "Engine/Blueprint.h"
+
+#include "ControlRigBlueprint.h"
+#include "RigVMModel/RigVMGraph.h"
+#include "RigVMModel/RigVMNode.h"
+#include "RigVMModel/RigVMLink.h"
+#include "RigVMModel/RigVMPin.h"
 
 
 // ============================================================================
@@ -89,7 +96,7 @@ static T* FindAnimAssetByNameOrPath(const FString& AssetName)
 
 	for (const FAssetData& AssetData : AssetList)
 	{
-		if (AssetData.AssetName.ToString() == AssetName && AssetData.PackagePath.ToString().StartsWith(TEXT("/Game")))
+		if (AssetData.AssetName.ToString() == AssetName)
 		{
 			return Cast<T>(AssetData.GetAsset());
 		}
@@ -409,6 +416,48 @@ static TArray<TSharedPtr<FJsonValue>> CollectLinkedInputPoseNames(UAnimBlueprint
 	return Inputs;
 }
 
+static TArray<TSharedPtr<FJsonValue>> CollectSaveCachedPoseNames(UAnimBlueprint* AnimBP)
+{
+	TArray<TSharedPtr<FJsonValue>> CacheNames;
+	if (!AnimBP)
+	{
+		return CacheNames;
+	}
+
+	TSet<FString> SeenNames;
+	for (UEdGraph* Graph : AnimBP->FunctionGraphs)
+	{
+		if (!Graph)
+		{
+			continue;
+		}
+
+		for (UEdGraphNode* Node : Graph->Nodes)
+		{
+			const UAnimGraphNode_SaveCachedPose* SaveNode = Cast<UAnimGraphNode_SaveCachedPose>(Node);
+			if (!SaveNode)
+			{
+				continue;
+			}
+
+			FString CacheName = SaveNode->CacheName;
+			if (CacheName.IsEmpty())
+			{
+				CacheName = SaveNode->GetNodeTitle(ENodeTitleType::FullTitle).ToString();
+			}
+			if (CacheName.IsEmpty() || SeenNames.Contains(CacheName))
+			{
+				continue;
+			}
+
+			SeenNames.Add(CacheName);
+			CacheNames.Add(MakeShared<FJsonValueString>(CacheName));
+		}
+	}
+
+	return CacheNames;
+}
+
 static void AppendLinkedAnimStackLayers(
 	UAnimBlueprint* AnimBP,
 	int32 Depth,
@@ -621,6 +670,204 @@ TSharedPtr<FJsonObject> FDescribeLinkedAnimStackAction::ExecuteInternal(const TS
 	Result->SetStringField(TEXT("root_blueprint_path"), RootAnimBP->GetPathName());
 	Result->SetNumberField(TEXT("layer_count"), Layers.Num());
 	Result->SetArrayField(TEXT("layers"), Layers);
+
+	return CreateSuccessResponse(Result);
+}
+
+
+// ============================================================================
+// FDescribeAnimPipelineAction
+// ============================================================================
+
+bool FDescribeAnimPipelineAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+{
+	FString BlueprintName;
+	if (!GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, OutError))
+	{
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FDescribeAnimPipelineAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+{
+	FString BlueprintName;
+	FString Error;
+	GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, Error);
+
+	UAnimBlueprint* RootAnimBP = FindAnimBlueprintByName(BlueprintName);
+	if (!RootAnimBP)
+	{
+		return CreateErrorResponse(
+			FString::Printf(TEXT("Animation Blueprint '%s' not found"), *BlueprintName),
+			TEXT("asset_not_found"));
+	}
+
+	TArray<TSharedPtr<FJsonValue>> Layers;
+	TSet<FString> VisitedBlueprintPaths;
+	AppendLinkedAnimStackLayers(RootAnimBP, 0, TEXT(""), TEXT(""), TEXT(""), Layers, VisitedBlueprintPaths);
+
+	TArray<FString> ChainParts;
+	TArray<TSharedPtr<FJsonValue>> PipelineLayers;
+	for (const TSharedPtr<FJsonValue>& LayerValue : Layers)
+	{
+		const TSharedPtr<FJsonObject> LayerObj = LayerValue->AsObject();
+		if (!LayerObj.IsValid())
+		{
+			continue;
+		}
+
+		FString LayerName;
+		LayerObj->TryGetStringField(TEXT("blueprint_name"), LayerName);
+		if (LayerName.IsEmpty())
+		{
+			continue;
+		}
+
+		FString LinkedFrom;
+		LayerObj->TryGetStringField(TEXT("linked_from_node"), LinkedFrom);
+		FString LinkKind;
+		LayerObj->TryGetStringField(TEXT("link_kind"), LinkKind);
+
+		FString ChainEntry = LayerName;
+		if (!LinkedFrom.IsEmpty())
+		{
+			ChainEntry += FString::Printf(TEXT(" (%s via %s)"), *LinkedFrom, *LinkKind);
+		}
+		ChainParts.Add(ChainEntry);
+
+		TSharedPtr<FJsonObject> PipelineLayer = MakeShared<FJsonObject>(*LayerObj);
+		UAnimBlueprint* LayerBP = FindAnimBlueprintByName(LayerName);
+		if (LayerBP)
+		{
+			PipelineLayer->SetArrayField(TEXT("save_cached_poses"), CollectSaveCachedPoseNames(LayerBP));
+		}
+		PipelineLayers.Add(MakeShared<FJsonValueObject>(PipelineLayer));
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("root_blueprint"), RootAnimBP->GetName());
+	Result->SetStringField(TEXT("root_blueprint_path"), RootAnimBP->GetPathName());
+	Result->SetNumberField(TEXT("layer_count"), PipelineLayers.Num());
+	Result->SetStringField(TEXT("pipeline_summary"), FString::Join(ChainParts, TEXT(" -> ")));
+	Result->SetArrayField(TEXT("layers"), PipelineLayers);
+
+	return CreateSuccessResponse(Result);
+}
+
+
+// ============================================================================
+// FDescribeControlRigTopologyAction
+// ============================================================================
+
+bool FDescribeControlRigTopologyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+{
+	FString RigName;
+	if (!GetRequiredString(Params, TEXT("rig_name"), RigName, OutError))
+	{
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FDescribeControlRigTopologyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+{
+	FString RigName;
+	FString Error;
+	GetRequiredString(Params, TEXT("rig_name"), RigName, Error);
+
+	const FString GraphName = GetOptionalString(Params, TEXT("graph_name"), TEXT(""));
+	const bool bCompact = GetOptionalBool(Params, TEXT("compact"), false);
+
+	UControlRigBlueprint* RigBP = FindAnimAssetByNameOrPath<UControlRigBlueprint>(RigName);
+	if (!RigBP)
+	{
+		return CreateErrorResponse(
+			FString::Printf(TEXT("Control Rig Blueprint '%s' not found"), *RigName),
+			TEXT("asset_not_found"));
+	}
+
+	URigVMGraph* TargetGraph = nullptr;
+	if (GraphName.IsEmpty())
+	{
+		TargetGraph = RigBP->GetDefaultModel();
+	}
+	else
+	{
+		TargetGraph = RigBP->GetModel(GraphName);
+	}
+
+	if (!TargetGraph)
+	{
+		return CreateErrorResponse(
+			FString::Printf(TEXT("Control Rig graph '%s' not found"), GraphName.IsEmpty() ? TEXT("Default") : *GraphName),
+			TEXT("not_found"));
+	}
+
+	TArray<TSharedPtr<FJsonValue>> NodesArray;
+	TArray<TSharedPtr<FJsonValue>> EdgesArray;
+
+	for (URigVMNode* Node : TargetGraph->GetNodes())
+	{
+		if (!Node)
+		{
+			continue;
+		}
+
+		TSharedPtr<FJsonObject> NodeObj = MakeShared<FJsonObject>();
+		NodeObj->SetStringField(TEXT("node_name"), Node->GetName());
+		NodeObj->SetStringField(TEXT("node_title"), Node->GetNodeTitle());
+		NodeObj->SetStringField(TEXT("node_class"), Node->GetClass()->GetName());
+
+		if (!bCompact)
+		{
+			TArray<TSharedPtr<FJsonValue>> PinsArray;
+			for (URigVMPin* Pin : Node->GetPins())
+			{
+				if (!Pin)
+				{
+					continue;
+				}
+				TSharedPtr<FJsonObject> PinObj = MakeShared<FJsonObject>();
+				PinObj->SetStringField(TEXT("name"), Pin->GetDisplayName().ToString());
+				const ERigVMPinDirection PinDirection = Pin->GetDirection();
+				const bool bIsInput = PinDirection == ERigVMPinDirection::Input
+					|| PinDirection == ERigVMPinDirection::IO;
+				PinObj->SetStringField(TEXT("direction"), bIsInput ? TEXT("input") : TEXT("output"));
+				PinObj->SetStringField(TEXT("cpp_type"), Pin->GetCPPType());
+				PinsArray.Add(MakeShared<FJsonValueObject>(PinObj));
+			}
+			if (PinsArray.Num() > 0)
+			{
+				NodeObj->SetArrayField(TEXT("pins"), PinsArray);
+			}
+		}
+
+		NodesArray.Add(MakeShared<FJsonValueObject>(NodeObj));
+	}
+
+	for (URigVMLink* Link : TargetGraph->GetLinks())
+	{
+		if (!Link)
+		{
+			continue;
+		}
+
+		TSharedPtr<FJsonObject> EdgeObj = MakeShared<FJsonObject>();
+		EdgeObj->SetStringField(TEXT("source"), Link->GetSourcePin() ? Link->GetSourcePin()->GetPinPath() : TEXT(""));
+		EdgeObj->SetStringField(TEXT("target"), Link->GetTargetPin() ? Link->GetTargetPin()->GetPinPath() : TEXT(""));
+		EdgesArray.Add(MakeShared<FJsonValueObject>(EdgeObj));
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("rig_name"), RigBP->GetName());
+	Result->SetStringField(TEXT("rig_path"), RigBP->GetPathName());
+	Result->SetStringField(TEXT("graph_name"), TargetGraph->GetGraphName());
+	Result->SetBoolField(TEXT("compact"), bCompact);
+	Result->SetNumberField(TEXT("node_count"), NodesArray.Num());
+	Result->SetNumberField(TEXT("edge_count"), EdgesArray.Num());
+	Result->SetArrayField(TEXT("nodes"), NodesArray);
+	Result->SetArrayField(TEXT("edges"), EdgesArray);
 
 	return CreateSuccessResponse(Result);
 }

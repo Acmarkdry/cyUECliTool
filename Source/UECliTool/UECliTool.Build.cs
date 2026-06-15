@@ -55,6 +55,9 @@ public class UECliTool : ModuleRules
 			"MovieScene",                   // P8: MovieScene tracks, sections, bindings
 			"MovieSceneTracks",             // P8: Concrete track types (Transform, Float, etc.)
 			"LiveCoding",                   // v0.3.0: ILiveCodingModule for Live Coding actions
+			"ControlRig",                   // Control Rig blueprint types
+			"ControlRigDeveloper",          // Control Rig blueprint topology reads
+			"RigVMDeveloper",                 // RigVM graph node iteration
 		});
 
 		// Ensure proper RTTI/exceptions for crash handling

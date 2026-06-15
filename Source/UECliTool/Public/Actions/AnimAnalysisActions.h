@@ -47,6 +47,42 @@ protected:
 };
 
 /**
+ * FDescribeAnimPipelineAction
+ *
+ * Cross-layer animation pipeline summary from linked AnimBP stack.
+ *
+ * Command: describe_anim_pipeline
+ */
+class UECLITOOL_API FDescribeAnimPipelineAction : public FEditorAction
+{
+public:
+	virtual FString GetActionName() const override { return TEXT("DescribeAnimPipeline"); }
+	virtual bool RequiresSave() const override { return false; }
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+};
+
+/**
+ * FDescribeControlRigTopologyAction
+ *
+ * Control Rig RigVM graph topology (nodes, links, pin types).
+ *
+ * Command: describe_control_rig_topology
+ */
+class UECLITOOL_API FDescribeControlRigTopologyAction : public FEditorAction
+{
+public:
+	virtual FString GetActionName() const override { return TEXT("DescribeControlRigTopology"); }
+	virtual bool RequiresSave() const override { return false; }
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+};
+
+/**
  * FAnimDescribeMontageAction
  *
  * Montage structure query: sections, slot name, notifies, anim sequences.

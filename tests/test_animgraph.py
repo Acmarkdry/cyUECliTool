@@ -226,6 +226,19 @@ def test_animgraph_workflow_file_documents_property_bindings():
     assert "property_bindings" in content
     assert "referenced_property_paths" in content or "Property Access" in content
     assert ".uecli" in content
+    assert "describe_anim_pipeline" in content
+
+
+def test_anim_analysis_commands_registered():
+    """New animation analysis commands must be in the registry."""
+    registry = get_registry()
+    for command in (
+        "describe_anim_pipeline",
+        "describe_control_rig_topology",
+        "describe_linked_anim_stack",
+    ):
+        action = registry.get_by_command(command)
+        assert action is not None, f"Command '{command}' not found in registry"
 
 
 # ---------------------------------------------------------------------------

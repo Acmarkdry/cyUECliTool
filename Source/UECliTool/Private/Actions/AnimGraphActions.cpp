@@ -43,6 +43,8 @@
 #include "Animation/BlendSpace.h"
 #include "UObject/UnrealType.h"
 #include "Misc/Paths.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/JsonSerializer.h"
 
 // ============================================================================
 // AnimGraphHelpers
@@ -253,6 +255,131 @@ static void AppendPropertyBindingJson(
 	OutBindings.Add(MakeShared<FJsonValueObject>(BindObj));
 }
 
+static FProperty* ResolvePropertyPathOnStruct(UStruct* Struct, const TArray<FString>& Segments, int32 StartIndex)
+{
+	if (!Struct || Segments.Num() <= StartIndex)
+	{
+		return nullptr;
+	}
+
+	UStruct* CurrentStruct = Struct;
+	FProperty* LastProp = nullptr;
+	for (int32 Index = StartIndex; Index < Segments.Num(); ++Index)
+	{
+		FProperty* Prop = CurrentStruct->FindPropertyByName(FName(*Segments[Index]));
+		if (!Prop)
+		{
+			return LastProp;
+		}
+		LastProp = Prop;
+
+		if (const FStructProperty* StructProp = CastField<FStructProperty>(Prop))
+		{
+			CurrentStruct = StructProp->Struct;
+		}
+		else if (const FObjectProperty* ObjProp = CastField<FObjectProperty>(Prop))
+		{
+			CurrentStruct = ObjProp->PropertyClass;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return LastProp;
+}
+
+static void EnrichPropertyBindingsFromNodeContext(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& OutNodeObj)
+{
+	if (!Node || !OutNodeObj.IsValid())
+	{
+		return;
+	}
+
+	UEdGraph* Graph = Node->GetGraph();
+	if (!Graph)
+	{
+		return;
+	}
+
+	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraph(Graph);
+	UAnimBlueprint* AnimBP = Cast<UAnimBlueprint>(Blueprint);
+	if (!AnimBP || !AnimBP->ParentClass)
+	{
+		return;
+	}
+
+	const TArray<TSharedPtr<FJsonValue>>* Bindings = nullptr;
+	if (!OutNodeObj->TryGetArrayField(TEXT("property_bindings"), Bindings) || !Bindings)
+	{
+		return;
+	}
+
+	for (const TSharedPtr<FJsonValue>& BindingValue : *Bindings)
+	{
+		TSharedPtr<FJsonObject> BindObj = BindingValue->AsObject();
+		if (!BindObj.IsValid())
+		{
+			continue;
+		}
+
+		const TArray<TSharedPtr<FJsonValue>>* PathSegments = nullptr;
+		if (!BindObj->TryGetArrayField(TEXT("property_path"), PathSegments) || !PathSegments || PathSegments->Num() == 0)
+		{
+			continue;
+		}
+
+		TArray<FString> Segments;
+		for (const TSharedPtr<FJsonValue>& SegmentValue : *PathSegments)
+		{
+			Segments.Add(SegmentValue->AsString());
+		}
+		if (Segments.Num() == 0 || Segments[0] != TEXT("GetParent"))
+		{
+			continue;
+		}
+
+		FProperty* ResolvedProp = nullptr;
+		UStruct* ResolveClass = AnimBP->ParentClass;
+		UStruct* ResolvedOnClass = nullptr;
+		while (ResolveClass && !ResolvedProp)
+		{
+			ResolvedProp = ResolvePropertyPathOnStruct(ResolveClass, Segments, 1);
+			if (ResolvedProp)
+			{
+				ResolvedOnClass = ResolveClass;
+			}
+			else if (UClass* AsClass = Cast<UClass>(ResolveClass))
+			{
+				ResolveClass = AsClass->GetSuperClass();
+			}
+			else
+			{
+				break;
+			}
+		}
+		if (!ResolvedProp)
+		{
+			continue;
+		}
+
+		BindObj->SetStringField(TEXT("resolved_property"), ResolvedProp->GetName());
+		BindObj->SetStringField(TEXT("resolved_cpp_type"), ResolvedProp->GetCPPType());
+		if (ResolvedOnClass)
+		{
+			BindObj->SetStringField(TEXT("resolved_on_class"), ResolvedOnClass->GetName());
+		}
+
+		if (const FEnumProperty* EnumProp = CastField<FEnumProperty>(ResolvedProp))
+		{
+			if (const UEnum* Enum = EnumProp->GetEnum())
+			{
+				BindObj->SetStringField(TEXT("resolved_enum_type"), Enum->GetName());
+			}
+		}
+	}
+}
+
 static void CollectAnimNodePropertyBindings(
 	const UAnimGraphNode_Base* AnimNode,
 	TArray<TSharedPtr<FJsonValue>>& OutBindings)
@@ -330,7 +457,66 @@ void ExtractPropertyBindings(const UEdGraphNode* Node, TSharedPtr<FJsonObject>& 
 	if (BindingsArray.Num() > 0)
 	{
 		OutNodeObj->SetArrayField(TEXT("property_bindings"), BindingsArray);
+		EnrichPropertyBindingsFromNodeContext(Node, OutNodeObj);
 	}
+}
+
+bool WriteJsonResultToFile(
+	const TSharedPtr<FJsonObject>& FullResult,
+	const FString& OutputPath,
+	TSharedPtr<FJsonObject>& OutSummary,
+	FString& OutError)
+{
+	if (!FullResult.IsValid())
+	{
+		OutError = TEXT("Result object is null");
+		return false;
+	}
+
+	FString JsonString;
+	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer =
+		TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&JsonString);
+	if (!FJsonSerializer::Serialize(FullResult.ToSharedRef(), Writer))
+	{
+		OutError = TEXT("JSON serialization failed");
+		return false;
+	}
+
+	const FString AbsolutePath = FPaths::ConvertRelativePathToFull(OutputPath);
+	if (!FFileHelper::SaveStringToFile(JsonString, *AbsolutePath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+	{
+		OutError = FString::Printf(TEXT("Failed to write file: %s"), *AbsolutePath);
+		return false;
+	}
+
+	OutSummary = MakeShared<FJsonObject>();
+	OutSummary->SetStringField(TEXT("output_path"), AbsolutePath);
+	OutSummary->SetBoolField(TEXT("file_written"), true);
+	OutSummary->SetNumberField(TEXT("json_bytes"), JsonString.Len());
+
+	for (const auto& Pair : FullResult->Values)
+	{
+		if (Pair.Key == TEXT("nodes") || Pair.Key == TEXT("edges") || Pair.Key == TEXT("semantic_nodes"))
+		{
+			continue;
+		}
+		OutSummary->SetField(Pair.Key, Pair.Value);
+	}
+
+	if (FullResult->HasField(TEXT("node_count")))
+	{
+		OutSummary->SetNumberField(TEXT("node_count"), FullResult->GetNumberField(TEXT("node_count")));
+	}
+	if (FullResult->HasField(TEXT("edge_count")))
+	{
+		OutSummary->SetNumberField(TEXT("edge_count"), FullResult->GetNumberField(TEXT("edge_count")));
+	}
+	if (FullResult->HasField(TEXT("total_matched_nodes")))
+	{
+		OutSummary->SetNumberField(TEXT("total_matched_nodes"), FullResult->GetNumberField(TEXT("total_matched_nodes")));
+	}
+
+	return true;
 }
 
 bool ExtractPropertyAccessNodeInfo(
@@ -1093,6 +1279,18 @@ TSharedPtr<FJsonObject> FDescribeAnimGraphTopologyAction::ExecuteInternal(const 
 	Result->SetNumberField(TEXT("edge_count"), EdgesArray.Num());
 	Result->SetArrayField(TEXT("nodes"), NodesArray);
 	Result->SetArrayField(TEXT("edges"), EdgesArray);
+
+	const FString OutputPath = GetOptionalString(Params, TEXT("output_path"), TEXT(""));
+	if (!OutputPath.IsEmpty())
+	{
+		TSharedPtr<FJsonObject> Summary;
+		FString WriteError;
+		if (!AnimGraphHelpers::WriteJsonResultToFile(Result, OutputPath, Summary, WriteError))
+		{
+			return CreateErrorResponse(WriteError, TEXT("io_error"));
+		}
+		return CreateSuccessResponse(Summary);
+	}
 
 	return CreateSuccessResponse(Result);
 }
