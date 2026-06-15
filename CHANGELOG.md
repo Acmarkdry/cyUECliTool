@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2
+
+- Add `describe_linked_anim_stack` to traverse linked AnimBP layers (linked inputs,
+  child blueprint paths, state machines, depth/parent metadata).
+
 ## 0.6.1
 
 - Export AnimGraph `property_bindings[]` from `get_state_subgraph` and

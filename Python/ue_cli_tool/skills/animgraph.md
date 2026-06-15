@@ -47,7 +47,8 @@
 `.uecli` 示例（带空格的状态机名）：
 
 ```text
-describe_anim_blueprint_full AB_Als_Standing
+describe_anim_blueprint_full AB_Als
+describe_linked_anim_stack AB_Als
 get_state_machine_structure AB_Als_Standing "Standing States"
 get_state_machine_structure AB_Als_Standing "Stop States"
 get_state_subgraph AB_Als_Standing "Stop States" "Plant Left Foot"

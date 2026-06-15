@@ -6554,6 +6554,30 @@ _ANIM_ANALYSIS_ACTIONS = [
 		),
 	),
 	ActionDef(
+		id="anim.describe_linked_stack",
+		command="describe_linked_anim_stack",
+		tags=("animation", "anim", "blueprint", "linked", "stack", "describe", "read"),
+		description=(
+			"Describe the linked Animation Blueprint stack from a root AnimBP: child linked "
+			"instances, linked input pose names, and state machines per layer (depth, parent)."
+		),
+		input_schema={
+			"type": "object",
+			"properties": {
+				"blueprint_name": {
+					"type": "string",
+					"description": "Root Animation Blueprint name (e.g. AB_Als)",
+				},
+			},
+			"required": ["blueprint_name"],
+		},
+		capabilities=("read",),
+		examples=(
+			{"blueprint_name": "AB_Als"},
+			{"blueprint_name": "AB_Als_Standing"},
+		),
+	),
+	ActionDef(
 		id="anim.describe_montage",
 		command="anim_describe_montage",
 		tags=("animation", "anim", "montage", "describe", "sections", "notifies", "read"),

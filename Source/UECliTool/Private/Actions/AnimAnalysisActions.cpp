@@ -30,6 +30,11 @@
 #include "AnimStateEntryNode.h"
 #include "AnimStateTransitionNode.h"
 #include "AnimationStateMachineGraph.h"
+#include "AnimGraphNode_LinkedAnimGraph.h"
+#include "AnimGraphNode_LinkedAnimGraphBase.h"
+#include "AnimGraphNode_LinkedAnimLayer.h"
+#include "AnimGraphNode_LinkedInputPose.h"
+#include "Engine/Blueprint.h"
 
 
 // ============================================================================
@@ -368,6 +373,121 @@ static TArray<TSharedPtr<FJsonValue>> CollectStateMachineSummaries(UAnimBlueprin
 	return StateMachines;
 }
 
+static TArray<TSharedPtr<FJsonValue>> CollectLinkedInputPoseNames(UAnimBlueprint* AnimBP)
+{
+	TArray<TSharedPtr<FJsonValue>> Inputs;
+	if (!AnimBP)
+	{
+		return Inputs;
+	}
+
+	TSet<FString> SeenNames;
+	for (UEdGraph* Graph : AnimBP->FunctionGraphs)
+	{
+		if (!Graph) continue;
+
+		for (UEdGraphNode* Node : Graph->Nodes)
+		{
+			UAnimGraphNode_LinkedInputPose* InputNode = Cast<UAnimGraphNode_LinkedInputPose>(Node);
+			if (!InputNode) continue;
+
+			FString InputName = InputNode->Node.Name.ToString();
+			if (InputName.IsEmpty())
+			{
+				InputName = InputNode->GetNodeTitle(ENodeTitleType::FullTitle).ToString();
+			}
+			if (InputName.IsEmpty() || SeenNames.Contains(InputName))
+			{
+				continue;
+			}
+
+			SeenNames.Add(InputName);
+			Inputs.Add(MakeShared<FJsonValueString>(InputName));
+		}
+	}
+
+	return Inputs;
+}
+
+static void AppendLinkedAnimStackLayers(
+	UAnimBlueprint* AnimBP,
+	int32 Depth,
+	const FString& ParentBlueprint,
+	const FString& LinkedFromNode,
+	const FString& LinkKind,
+	TArray<TSharedPtr<FJsonValue>>& OutLayers,
+	TSet<FString>& VisitedBlueprintPaths)
+{
+	if (!AnimBP)
+	{
+		return;
+	}
+
+	const FString BlueprintPath = AnimBP->GetPathName();
+	if (VisitedBlueprintPaths.Contains(BlueprintPath))
+	{
+		return;
+	}
+	VisitedBlueprintPaths.Add(BlueprintPath);
+
+	TSharedPtr<FJsonObject> LayerObj = MakeShared<FJsonObject>();
+	LayerObj->SetStringField(TEXT("blueprint_name"), AnimBP->GetName());
+	LayerObj->SetStringField(TEXT("blueprint_path"), BlueprintPath);
+	LayerObj->SetNumberField(TEXT("depth"), Depth);
+
+	if (AnimBP->ParentClass)
+	{
+		LayerObj->SetStringField(TEXT("parent_class"), AnimBP->ParentClass->GetName());
+	}
+	if (!ParentBlueprint.IsEmpty())
+	{
+		LayerObj->SetStringField(TEXT("parent_blueprint"), ParentBlueprint);
+	}
+	if (!LinkedFromNode.IsEmpty())
+	{
+		LayerObj->SetStringField(TEXT("linked_from_node"), LinkedFromNode);
+	}
+	if (!LinkKind.IsEmpty())
+	{
+		LayerObj->SetStringField(TEXT("link_kind"), LinkKind);
+	}
+
+	LayerObj->SetArrayField(TEXT("linked_inputs"), CollectLinkedInputPoseNames(AnimBP));
+	LayerObj->SetArrayField(TEXT("state_machines"), CollectStateMachineSummaries(AnimBP));
+	OutLayers.Add(MakeShared<FJsonValueObject>(LayerObj));
+
+	for (UEdGraph* Graph : AnimBP->FunctionGraphs)
+	{
+		if (!Graph) continue;
+
+		for (UEdGraphNode* Node : Graph->Nodes)
+		{
+			UAnimGraphNode_LinkedAnimGraphBase* LinkedNode = Cast<UAnimGraphNode_LinkedAnimGraphBase>(Node);
+			if (!LinkedNode) continue;
+
+			UClass* InstanceClass = LinkedNode->GetTargetClass();
+			if (!InstanceClass) continue;
+
+			UAnimBlueprint* ChildBP = Cast<UAnimBlueprint>(UBlueprint::GetBlueprintFromClass(InstanceClass));
+			if (!ChildBP) continue;
+
+			const FString ChildLinkKind = LinkedNode->IsA<UAnimGraphNode_LinkedAnimLayer>()
+				? TEXT("LinkedAnimLayer")
+				: TEXT("LinkedAnimGraph");
+			const FString NodeTitle = LinkedNode->GetNodeTitle(ENodeTitleType::FullTitle).ToString();
+
+			AppendLinkedAnimStackLayers(
+				ChildBP,
+				Depth + 1,
+				AnimBP->GetName(),
+				NodeTitle,
+				ChildLinkKind,
+				OutLayers,
+				VisitedBlueprintPaths);
+		}
+	}
+}
+
 
 // ============================================================================
 // FDescribeAnimBlueprintFullAction
@@ -459,6 +579,48 @@ TSharedPtr<FJsonObject> FDescribeAnimBlueprintFullAction::ExecuteInternal(const 
 	EventGraphSummary->SetNumberField(TEXT("node_count"), EventGraphNodeCount);
 	EventGraphSummary->SetArrayField(TEXT("event_nodes"), EventNodes);
 	Result->SetObjectField(TEXT("event_graph_summary"), EventGraphSummary);
+
+	return CreateSuccessResponse(Result);
+}
+
+
+// ============================================================================
+// FDescribeLinkedAnimStackAction
+// ============================================================================
+
+bool FDescribeLinkedAnimStackAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+{
+	FString BlueprintName;
+	if (!GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, OutError))
+	{
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FDescribeLinkedAnimStackAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+{
+	FString BlueprintName;
+	FString Error;
+	GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, Error);
+
+	UAnimBlueprint* RootAnimBP = FindAnimBlueprintByName(BlueprintName);
+	if (!RootAnimBP)
+	{
+		return CreateErrorResponse(
+			FString::Printf(TEXT("Animation Blueprint '%s' not found"), *BlueprintName),
+			TEXT("asset_not_found"));
+	}
+
+	TArray<TSharedPtr<FJsonValue>> Layers;
+	TSet<FString> VisitedBlueprintPaths;
+	AppendLinkedAnimStackLayers(RootAnimBP, 0, TEXT(""), TEXT(""), TEXT(""), Layers, VisitedBlueprintPaths);
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("root_blueprint"), RootAnimBP->GetName());
+	Result->SetStringField(TEXT("root_blueprint_path"), RootAnimBP->GetPathName());
+	Result->SetNumberField(TEXT("layer_count"), Layers.Num());
+	Result->SetArrayField(TEXT("layers"), Layers);
 
 	return CreateSuccessResponse(Result);
 }

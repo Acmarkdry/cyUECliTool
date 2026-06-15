@@ -489,6 +489,7 @@ void UMCPBridge::RegisterActions()
 	// v0.4.0: Animation Analysis Actions
 	// =========================================================================
 	ActionHandlers.Add(TEXT("describe_anim_blueprint_full"),   MakeShared<FDescribeAnimBlueprintFullAction>());
+	ActionHandlers.Add(TEXT("describe_linked_anim_stack"),   MakeShared<FDescribeLinkedAnimStackAction>());
 	ActionHandlers.Add(TEXT("anim_describe_montage"),          MakeShared<FAnimDescribeMontageAction>());
 	ActionHandlers.Add(TEXT("anim_describe_blendspace"),       MakeShared<FAnimDescribeBlendSpaceAction>());
 	ActionHandlers.Add(TEXT("anim_list_notifies"),             MakeShared<FAnimListNotifiesAction>());

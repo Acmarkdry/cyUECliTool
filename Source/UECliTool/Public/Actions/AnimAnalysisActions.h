@@ -28,6 +28,25 @@ protected:
 };
 
 /**
+ * FDescribeLinkedAnimStackAction
+ *
+ * Describes the linked Animation Blueprint stack: root BP, linked child BPs,
+ * linked input poses, and state machines per layer.
+ *
+ * Command: describe_linked_anim_stack
+ */
+class UECLITOOL_API FDescribeLinkedAnimStackAction : public FEditorAction
+{
+public:
+	virtual FString GetActionName() const override { return TEXT("DescribeLinkedAnimStack"); }
+	virtual bool RequiresSave() const override { return false; }
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+};
+
+/**
  * FAnimDescribeMontageAction
  *
  * Montage structure query: sections, slot name, notifies, anim sequences.
